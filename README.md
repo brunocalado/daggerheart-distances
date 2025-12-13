@@ -2,6 +2,13 @@
 
 A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It automatically displays distance rings (Melee, Very Close, Close, Far) around tokens and calculates distances between characters instantly, helping players and GMs visualize combat ranges without needing to measure manually.
 
+<video src="https://github.com/user-attachments/assets/c6e6a905-9cd4-4666-b742-9719f91a0a7b" 
+       controls 
+       width="720"
+       autoplay 
+       loop 
+       muted></video>
+
 ## 🌟 Key Features
 
 ### 📏 For Everyone (Players & GM)
@@ -28,23 +35,11 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 
 * **Immersive Effects:** Enable animated gradient fills that pulse gently, or keep it simple with static colors.
 
-## 📸 How it Works
-
-| 
-
-| **Range Rings** | 
-| *Visual rings show exactly who is in range.* | 
-| <p align="center">*(Image Placeholder: Token with colored rings around it)*</p> | 
-
-| **Distance on Hover** | 
-| *Hover over an enemy to see the distance instantly.* | 
-| <p align="center">*(Image Placeholder: Mouse hovering an enemy showing "Very Close (15')")*</p> | 
-
 ## 🚀 Installation
 
 Install via the Foundry VTT Module browser or use this manifest link:
 
-* *(Manifest link will go here once released)*
+* *https://raw.githubusercontent.com/brunocalado/daggerheart-fear-tracker/main/module.json*
 
 ## ⚙️ How to Use
 
@@ -52,7 +47,7 @@ Install via the Foundry VTT Module browser or use this manifest link:
 
 You have two easy ways to show or hide the range rings around a token:
 
-1. **Token HUD:** Right-click a token to open the HUD, then click the **Target/Circle** icon (<i class="fas fa-circle-dot"></i>).
+1. **Token HUD:** Right-click a token to open the HUD, then click the **Circle** icon (<i class="fas fa-circle-dot"></i>).
 
 2. **Keyboard Shortcut:** Select a token and press **`R`** (default) to toggle the rings on/off instantly.
 
@@ -80,10 +75,12 @@ Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
 
   * *None:* Only the outer lines are visible.
 
+## 📜 Changelog
+
+You can read the full history of changes in the [CHANGELOG](CHANGELOG.md).
+
 ## ⚖️ Credits and License
 
-* **Code License:** MIT License.
-
-* **System:** Designed for Daggerheart.
+* **Code License:** [LICENSE](LICENSE).
 
 **Disclaimer:** This module is an independent creation and is not affiliated with Darrington Press.

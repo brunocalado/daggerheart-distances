@@ -1,8 +1,8 @@
 {
   "id": "daggerheart-distances",
   "title": "Daggerheart: Distances",
-  "description": "Displays distances around the token.",
-  "version": "0.0.1",
+  "description": "Visualizes Daggerheart combat ranges with customizable rings and hover distance calculations.",
+  "version": "0.0.2",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
@@ -21,8 +21,7 @@
       "src": "styles/styles.css"
     }
   ],
-  "url": "",
-  "manifest": "",
-  "download": "",
-  "flags": {}
+  "url": "https://github.com/brunocalado/daggerheart-distances",
+  "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json",
+  "download": "https://codeload.github.com/brunocalado/daggerheart-distances/zip/main"
 }
