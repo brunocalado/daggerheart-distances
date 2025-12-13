@@ -51,7 +51,7 @@ You have two easy ways to show or hide the range rings around a token:
 
 2. **Keyboard Shortcut:** Select a token and press **`R`** (default) to toggle the rings on/off instantly.
 
-<p align="center"><img width="400" src="docs/preview.webp"></p>
+<p align="center"><img width="600" src="docs/preview.webp"></p>
 
 ### Configuration
 
@@ -66,5 +66,7 @@ You can read the full history of changes in the [CHANGELOG](CHANGELOG.md).
 ## ⚖️ Credits and License
 
 * **Code License:** [LICENSE](LICENSE).
+
+* This module is a fork from [this](https://github.com/fsergler/foundry_combat_distances) 
 
 **Disclaimer:** This module is an independent creation and is not affiliated with Darrington Press.
