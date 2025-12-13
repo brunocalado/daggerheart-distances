@@ -89,7 +89,7 @@
     font-size: 18px;
 }
 
-/* Estilos de Cores internas (Amarelo e Cinza) */
+/* Internal Color Styles (Yellow and Gray) */
 .range-label .category,
 .combat-distance-hover-label .category {
     color: #ffcc00;
@@ -106,7 +106,7 @@
     line-height: 1;
 }
 
-/* Range Label (Os textos fixos nos anéis) */
+/* Range Label (Fixed text on rings) */
 .range-label {
     position: absolute;
     top: -25px; 
@@ -134,7 +134,7 @@
     pointer-events: none;
 }
 
-/* Hover Distance Label (O texto flutuante ao passar o mouse) */
+/* Hover Distance Label (Floating text on mouse hover) */
 .combat-distance-hover-label {
     position: absolute;
     transform: translate(-50%, -100%); 

@@ -2,10 +2,10 @@ class CombatDistances {
     static ID = 'daggerheart-distances';
     static _tickerFunc = null; 
     
-    // Armazenamento local de quais tokens estão ativos APENAS para este cliente
+    // Local storage of which tokens are active ONLY for this client
     static _activeTokens = new Set();
 
-    // Configurações de Paletas de Cores
+    // Color Palette Configurations
     static PALETTES = {
         "default": {
             label: "Option 1 (Traffic Light)",
@@ -28,19 +28,19 @@ class CombatDistances {
         "option3": {
             label: "Option 3 (Neon Cyberpunk)",
             colors: {
-                ring1: "#ff0055", // Rosa Neon
-                ring2: "#ffcc00", // Âmbar elétrico
-                ring3: "#00ff99", // Verde Matrix
-                ring4: "#00ccff"  // Azul Laser
+                ring1: "#ff0055", // Neon Pink
+                ring2: "#ffcc00", // Electric Amber
+                ring3: "#00ff99", // Matrix Green
+                ring4: "#00ccff"  // Laser Blue
             }
         },
         "option4": {
             label: "Option 4 (Warm Sunset)",
             colors: {
-                ring1: "#785ef0", // Roxo intenso
-                ring2: "#dc267f", // Fúcsia
-                ring3: "#fe6100", // Laranja queimado
-                ring4: "#ffb000"  // Dourado/Amarelo
+                ring1: "#785ef0", // Intense Purple
+                ring2: "#dc267f", // Fuchsia
+                ring3: "#fe6100", // Burnt Orange
+                ring4: "#ffb000"  // Gold/Yellow
             }
         }
     };
@@ -71,28 +71,28 @@ class CombatDistances {
         this.registerSettings();
         this.registerKeybindings();
 
-        // Hooks principais de Lógica de Token
+        // Main Token Logic Hooks
         Hooks.on('renderTokenHUD', this.onRenderTokenHUD.bind(this));
         Hooks.on('deleteToken', this.onDeleteToken.bind(this));
         Hooks.on('hoverToken', this.onHoverToken.bind(this));
         Hooks.on('updateToken', this.onUpdateToken.bind(this)); 
 
-        // Hooks de Ciclo de Vida do Canvas
+        // Canvas Lifecycle Hooks
         Hooks.on('canvasReady', this.startTicker.bind(this));
         Hooks.on('canvasTearDown', this.stopTicker.bind(this));
         
-        // Fallback: garante atualização no Pan mesmo se o ticker falhar um frame
+        // Fallback: ensures update on Pan even if the ticker misses a frame
         Hooks.on('canvasPan', this.onCanvasPan.bind(this));
 
-        // API Global para Macros
+        // Global API for Macros
         window.DHDistances = this;
     }
 
-    // --- API Pública ---
+    // --- Public API ---
 
     /**
-     * Alterna os anéis para os tokens selecionados.
-     * Pode ser chamado via macro: DHDistances.Toggle()
+     * Toggles the rings for the selected tokens.
+     * Can be called via macro: DHDistances.Toggle()
      */
     static Toggle() {
         const tokens = canvas.tokens.controlled;
@@ -109,7 +109,7 @@ class CombatDistances {
             }
         });
 
-        // Atualiza o HUD visualmente se ele estiver aberto para um dos tokens alterados
+        // Visually update the HUD if it is open for one of the changed tokens
         if (canvas.tokens.hud.rendered && tokens.some(t => t.id === canvas.tokens.hud.object?.id)) {
             canvas.tokens.hud.render();
         }
@@ -202,7 +202,7 @@ class CombatDistances {
                 { key: "KeyR" }
             ],
             onDown: () => {
-                this.Toggle(); // Agora usa o método centralizado
+                this.Toggle();
                 return true;
             },
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
@@ -228,7 +228,7 @@ class CombatDistances {
         const container = document.getElementById('combat-distances-container');
         if (container) container.innerHTML = '';
         
-        // Opcional: Limpar o Set ao mudar de cena se desejar resetar tudo
+        // Optional: Clear the Set when changing scenes if you want to reset everything
         // this._activeTokens.clear();
     }
 
@@ -263,7 +263,7 @@ class CombatDistances {
         }
     }
 
-    // --- Helpers de Coordenadas ---
+    // --- Coordinate Helpers ---
 
     static getWorldToScreen(point) {
         if (!point || typeof point.x !== 'number' || typeof point.y !== 'number') return {x: 0, y: 0};
@@ -406,7 +406,7 @@ class CombatDistances {
             this.updateRingPositionAndSize(ring, token, rangeData.distance);
         });
 
-        // MODIFICADO: Usa Set local ao invés de flag
+        // Tracks token in local Set
         this._activeTokens.add(token.id);
     }
 
@@ -449,14 +449,14 @@ class CombatDistances {
         const token = canvas.tokens.get(tokenData._id);
         if (!token) return;
         
-        // Verifica o Set local
+        // Check local Set
         if (this.hasRings(token.id)) {
             button.addClass('active');
         }
 
         button.click(async (event) => {
             event.preventDefault();
-            this.Toggle(); // Agora usa a função centralizada
+            this.Toggle();
         });
 
         $(html).find('div.left').append(button);
@@ -466,24 +466,24 @@ class CombatDistances {
         const rings = document.querySelectorAll(`.range-ring[data-token-id="${tokenId}"]`);
         rings.forEach(ring => ring.remove());
         
-        // MODIFICADO: Remove do Set local
+        // Remove from local Set
         this._activeTokens.delete(tokenId);
     }
 
     static hasRings(tokenId) {
-        // MODIFICADO: Verifica apenas o Set local
+        // Check against local Set
         return this._activeTokens.has(tokenId);
     }
 
     static onUpdateToken(tokenDocument, changes) {
-        // O Ticker lida com a posição.
-        // Apenas garantimos que se o ID ainda está no Set, ele continua sendo processado.
+        // Ticker handles position updates.
+        // We only need to ensure that if the ID is still in the Set, it continues to be processed.
     }
 
     static onDeleteToken(tokenDocument) {
         this.removeRings(tokenDocument.id);
         this.removeHoverLabel(tokenDocument.id);
-        // Garantia extra de limpeza
+        // Extra cleanup guarantee
         this._activeTokens.delete(tokenDocument.id);
     }
 }
