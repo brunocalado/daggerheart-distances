@@ -45,13 +45,15 @@ Install via the Foundry VTT Module browser or use this manifest link:
 
 ### Toggling Rings
 
-You have two easy ways to show or hide the range rings around a token:
+You have three easy ways to show or hide the range rings around a token:
 
 1. **Token HUD:** Right-click a token to open the HUD, then click the **Circle** icon (<i class="fas fa-circle-dot"></i>).
 
 2. **Keyboard Shortcut:** Select a token and press **`R`** (default) to toggle the rings on/off instantly.
 
 <p align="center"><img width="600" src="docs/preview.webp"></p>
+
+3. You can also use a macro `DHDistances.Toggle()`;
 
 ### Configuration
 

@@ -1,7 +1,10 @@
 class CombatDistances {
     static ID = 'daggerheart-distances';
-    static _tickerFunc = null; // Armazena a referência da função para poder remover depois
+    static _tickerFunc = null; 
     
+    // Armazenamento local de quais tokens estão ativos APENAS para este cliente
+    static _activeTokens = new Set();
+
     // Configurações de Paletas de Cores
     static PALETTES = {
         "default": {
@@ -72,14 +75,44 @@ class CombatDistances {
         Hooks.on('renderTokenHUD', this.onRenderTokenHUD.bind(this));
         Hooks.on('deleteToken', this.onDeleteToken.bind(this));
         Hooks.on('hoverToken', this.onHoverToken.bind(this));
-        Hooks.on('updateToken', this.onUpdateToken.bind(this)); // Reintroduzido para garantir dados
+        Hooks.on('updateToken', this.onUpdateToken.bind(this)); 
 
-        // Hooks de Ciclo de Vida do Canvas (CRÍTICO PARA O TICKER)
+        // Hooks de Ciclo de Vida do Canvas
         Hooks.on('canvasReady', this.startTicker.bind(this));
         Hooks.on('canvasTearDown', this.stopTicker.bind(this));
         
         // Fallback: garante atualização no Pan mesmo se o ticker falhar um frame
         Hooks.on('canvasPan', this.onCanvasPan.bind(this));
+
+        // API Global para Macros
+        window.DHDistances = this;
+    }
+
+    // --- API Pública ---
+
+    /**
+     * Alterna os anéis para os tokens selecionados.
+     * Pode ser chamado via macro: DHDistances.Toggle()
+     */
+    static Toggle() {
+        const tokens = canvas.tokens.controlled;
+        if (tokens.length === 0) {
+            ui.notifications.warn("Daggerheart Distances: Select a token first.");
+            return;
+        }
+
+        tokens.forEach(token => {
+            if (this.hasRings(token.id)) {
+                this.removeRings(token.id);
+            } else {
+                this.createRings(token);
+            }
+        });
+
+        // Atualiza o HUD visualmente se ele estiver aberto para um dos tokens alterados
+        if (canvas.tokens.hud.rendered && tokens.some(t => t.id === canvas.tokens.hud.object?.id)) {
+            canvas.tokens.hud.render();
+        }
     }
 
     static registerSettings() {
@@ -169,38 +202,21 @@ class CombatDistances {
                 { key: "KeyR" }
             ],
             onDown: () => {
-                const tokens = canvas.tokens.controlled;
-                if (tokens.length === 0) return false;
-
-                tokens.forEach(token => {
-                    if (this.hasRings(token.id)) {
-                        this.removeRings(token.id);
-                    } else {
-                        this.createRings(token);
-                    }
-                });
-
-                // Updates HUD if active for one of the tokens
-                if (canvas.tokens.hud.rendered && tokens.some(t => t.id === canvas.tokens.hud.object?.id)) {
-                    canvas.tokens.hud.render();
-                }
-
+                this.Toggle(); // Agora usa o método centralizado
                 return true;
             },
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
     }
 
-    // --- Ticker Management (Correção de "Deslizamento") ---
+    // --- Ticker Management ---
 
     static startTicker() {
-        // Garante que não adicionamos duplicado
         this.stopTicker(); 
         
         this._tickerFunc = this.onTicker.bind(this);
         canvas.app.ticker.add(this._tickerFunc);
         
-        // Força um refresh ao iniciar a cena
         this.refreshAll();
     }
 
@@ -209,23 +225,21 @@ class CombatDistances {
             canvas.app.ticker.remove(this._tickerFunc);
             this._tickerFunc = null;
         }
-        // Limpa elementos visuais ao sair da cena
         const container = document.getElementById('combat-distances-container');
         if (container) container.innerHTML = '';
+        
+        // Opcional: Limpar o Set ao mudar de cena se desejar resetar tudo
+        // this._activeTokens.clear();
     }
 
-    // Loop executado a cada frame (60fps)
     static onTicker() {
-        // Se o canvas não estiver pronto, aborta
         if (!canvas || !canvas.ready || !canvas.tokens) return;
 
         const rings = document.getElementsByClassName('range-ring');
         const hoverLabels = document.getElementsByClassName('combat-distance-hover-label');
 
-        // Otimização: Se não tem nada na tela, não faz cálculos
         if (rings.length === 0 && hoverLabels.length === 0) return;
 
-        // Atualiza Anéis
         for (let ring of rings) {
             const tokenId = ring.dataset.tokenId;
             const token = canvas.tokens.get(tokenId);
@@ -238,7 +252,6 @@ class CombatDistances {
             }
         }
 
-        // Atualiza Hover Labels
         for (let label of hoverLabels) {
             const tokenId = label.dataset.hoverTokenId;
             const token = canvas.tokens.get(tokenId);
@@ -260,7 +273,6 @@ class CombatDistances {
     // --- Event Handlers ---
 
     static onCanvasPan(canvas, position) {
-        // Força atualização imediata ao pan/zoom, caso o ticker perca um frame
         this.onTicker();
     }
 
@@ -394,19 +406,15 @@ class CombatDistances {
             this.updateRingPositionAndSize(ring, token, rangeData.distance);
         });
 
-        token.document.setFlag(this.ID, 'hasRings', true);
+        // MODIFICADO: Usa Set local ao invés de flag
+        this._activeTokens.add(token.id);
     }
 
     static updateRingPositionAndSize(ring, token, baseDistance) {
-        // Cálculo Robusto de Posição
         const center = token.center;
         const screenPos = this.getWorldToScreen(center);
-
-        // Cálculo Robusto de Tamanho (Escala)
         const gridDist = baseDistance / canvas.scene.grid.distance;
         const worldDiameter = gridDist * 2 * canvas.grid.size;
-        
-        // A escala deve considerar o zoom atual do stage
         const screenDiameter = worldDiameter * canvas.stage.scale.x;
 
         ring.style.width = `${screenDiameter}px`;
@@ -441,53 +449,42 @@ class CombatDistances {
         const token = canvas.tokens.get(tokenData._id);
         if (!token) return;
         
+        // Verifica o Set local
         if (this.hasRings(token.id)) {
             button.addClass('active');
         }
 
         button.click(async (event) => {
             event.preventDefault();
-            
-            if (this.hasRings(token.id)) {
-                this.removeRings(token.id);
-                button.removeClass('active');
-            } else {
-                this.createRings(token);
-                button.addClass('active');
-            }
+            this.Toggle(); // Agora usa a função centralizada
         });
 
         $(html).find('div.left').append(button);
     }
 
     static removeRings(tokenId) {
-        const token = canvas.tokens.get(tokenId);
         const rings = document.querySelectorAll(`.range-ring[data-token-id="${tokenId}"]`);
         rings.forEach(ring => ring.remove());
         
-        if (token) {
-            token.document.setFlag(this.ID, 'hasRings', false);
-        }
+        // MODIFICADO: Remove do Set local
+        this._activeTokens.delete(tokenId);
     }
 
     static hasRings(tokenId) {
-        const token = canvas.tokens.get(tokenId);
-        return token?.document?.getFlag(this.ID, 'hasRings') ?? false;
+        // MODIFICADO: Verifica apenas o Set local
+        return this._activeTokens.has(tokenId);
     }
 
     static onUpdateToken(tokenDocument, changes) {
-        // Redundância: garante que se o token mudar, a gente atualiza
-        const token = canvas.tokens.get(tokenDocument.id);
-        if (token && this.hasRings(token.id)) {
-            // Não precisa recriar, o ticker vai pegar a nova posição no próximo frame
-            // Mas se mudar o tamanho do grid ou algo estrutural, createRings seria melhor.
-            // Para movimento simples, o ticker cuida.
-        }
+        // O Ticker lida com a posição.
+        // Apenas garantimos que se o ID ainda está no Set, ele continua sendo processado.
     }
 
     static onDeleteToken(tokenDocument) {
         this.removeRings(tokenDocument.id);
         this.removeHoverLabel(tokenDocument.id);
+        // Garantia extra de limpeza
+        this._activeTokens.delete(tokenDocument.id);
     }
 }
 
