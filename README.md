@@ -51,29 +51,13 @@ You have two easy ways to show or hide the range rings around a token:
 
 2. **Keyboard Shortcut:** Select a token and press **`R`** (default) to toggle the rings on/off instantly.
 
+<p align="center"><img width="400" src="docs/preview.webp"></p>
+
 ### Configuration
 
 Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
 
-* **Text Size:** Make the range labels (e.g., "Very Close") smaller or larger.
-
-* **Color Palette:** Change the color theme of the rings.
-
-  * *Default:* Red/Orange/Yellow/Green style.
-
-  * *Neon:* High contrast cyberpunk colors.
-
-* **Line Style:** Change between Solid, Dotted, or Dashed lines.
-
-* **Line Thickness:** Make the rings subtle (2px) or bold (12px).
-
-* **Gradient Fill Style:**
-
-  * *Animated:* Rings have a pulsing color fill for a magic/tech effect.
-
-  * *Static:* A solid, transparent color fill.
-
-  * *None:* Only the outer lines are visible.
+<p align="center"><img width="400" src="docs/settings.webp"></p>
 
 ## 📜 Changelog
 
