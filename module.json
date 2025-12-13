@@ -1,0 +1,32 @@
+{
+  "id": "daggerheart-distances",
+  "title": "Daggerheart: Distances",
+  "description": "Displays distances around the token.",
+  "version": "0.0.1",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "authors": [
+    {
+      "name": "fsergler",
+      "flags": {}
+    },
+    {
+      "name": "Mestre Digital",
+      "flags": {}
+    }    
+  ],
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    {
+      "src": "styles/styles.css"
+    }
+  ],
+  "url": "",
+  "manifest": "",
+  "download": "",
+  "flags": {}
+}
