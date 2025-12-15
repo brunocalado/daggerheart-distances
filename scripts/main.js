@@ -186,10 +186,11 @@ class CombatDistances {
             type: String,
             choices: {
                 "static": "Static",
-                "animated": "Animated",
+                "animated-normal": "Animated - Normal",
+                "animated-light": "Animated - Light",
                 "none": "None"
             },
-            default: "animated",
+            default: "animated-light",
             onChange: () => this.refreshAll()
         });
     }

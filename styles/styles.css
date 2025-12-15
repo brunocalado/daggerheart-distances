@@ -37,8 +37,8 @@
     );
 }
 
-/* Animated Fill Style */
-.range-ring.animated {
+/* Animated Normal Fill Style (Original Behavior) */
+.range-ring.animated-normal {
     --gradient-stop: 60%;
     animation: pulseGradient 2s infinite alternate ease-in-out;
     background: radial-gradient(circle, 
@@ -48,9 +48,27 @@
     );
 }
 
+/* Animated Light Fill Style (Subtle) */
+.range-ring.animated-light {
+    --gradient-stop: 60%;
+    animation: pulseGradientLight 2s infinite alternate ease-in-out;
+    background: radial-gradient(circle, 
+        rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) 0%, 
+        rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) var(--gradient-stop), 
+        rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0.25) 100%
+    );
+}
+
+/* Original Animation Keyframes */
 @keyframes pulseGradient {
     0% { --gradient-stop: 60%; }
     100% { --gradient-stop: 50%; }
+}
+
+/* Light Animation Keyframes */
+@keyframes pulseGradientLight {
+    0% { --gradient-stop: 70%; }
+    100% { --gradient-stop: 60%; }
 }
 
 /* HUD Button Styles */
