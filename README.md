@@ -81,6 +81,21 @@ Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
 ### 🤖 [daggerheart-fear-macros](https://github.com/brunocalado/daggerheart-fear-macros)
 > Automatically executes macros when the Daggerheart system Fear resource is changed.
 
+### 🤖 [daggerheart-fear-macros](https://github.com/brunocalado/daggerheart-fear-macros)
+> Automatically executes macros when the Daggerheart system Fear resource is changed.
+
+### 🤖 [daggerheart-fear-macros](https://github.com/brunocalado/daggerheart-fear-macros)
+> Automatically executes macros when the Daggerheart system Fear resource is changed.
+
+## 🗺️ Adventures
+
+### 💣 [suicide-squad-daggerheart-adventure](https://github.com/brunocalado/suicide-squad-daggerheart-adventure)
+> Torn from your past lives, you are a squad of criminals forced to serve a ruthless master. A deadly curse ensures your obedience, turning you into disposable pawns for an impossible mission. You are tasked with hunting a target of unimaginable importance in a land on the brink of war. Operating in the shadows where every step is watched, you must fight for survival and decide whether to obey your orders or risk everything to change your fate.
+
+### ✨ [i-wish-daggerheart-adventure](https://github.com/brunocalado/i-wish-daggerheart-adventure)
+> A wealthy merchant has been cursed and is doomed to die within a few weeks. The only hope of breaking the curse lies in a legendary artifact said to rest deep within a mountain. With time running out, the merchant is organizing one final expedition to retrieve the item—or die trying. He has summoned a group of remarkable individuals to undertake this perilous mission.
+
+
 ## 📜 Changelog
 
 You can read the full history of changes in the [CHANGELOG](CHANGELOG.md).
