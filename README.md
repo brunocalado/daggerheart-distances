@@ -39,7 +39,7 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 
 Install via the Foundry VTT Module browser or use this manifest link:
 
-* *https://raw.githubusercontent.com/brunocalado/daggerheart-fear-tracker/main/module.json*
+* *https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json*
 
 ## ⚙️ How to Use
 
