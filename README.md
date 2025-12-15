@@ -61,6 +61,26 @@ Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
 
 <p align="center"><img width="400" src="docs/settings.webp"></p>
 
+# 🗡️ My Daggerheart Modules
+
+### 📦 [daggerheart-extra-content](https://github.com/brunocalado/daggerheart-extra-content)
+> Resources for Daggerheart
+
+### 📏 [daggerheart-distances](https://github.com/brunocalado/daggerheart-distances)
+> Visualizes Daggerheart combat ranges with customizable rings and hover distance calculations.
+
+### 🛒 [daggerheart-store](https://github.com/brunocalado/daggerheart-store)
+> A dynamic, interactive, and fully configurable store for the Daggerheart system in Foundry VTT. Allow your players to purchase weapons, armor, potions, and miscellaneous items directly from an elegant visual interface, while the GM maintains full control over prices and what is displayed.
+
+### 😱 [daggerheart-fear-tracker](https://github.com/brunocalado/daggerheart-fear-tracker)
+> Adds an animated slider bar with configurable fear tokens to the UI. Includes sync with Daggerheart system resources.
+
+### 💀 [daggerheart-death-moves](https://github.com/brunocalado/daggerheart-death-moves)
+> Enhances the Death Move moment with immersive audio, visual effects, and a dramatic interface for choosing between Avoid Death, Blaze of Glory, or Risk it All.
+
+### 🤖 [daggerheart-fear-macros](https://github.com/brunocalado/daggerheart-fear-macros)
+> Automatically executes macros when the Daggerheart system Fear resource is changed.
+
 ## 📜 Changelog
 
 You can read the full history of changes in the [CHANGELOG](CHANGELOG.md).
