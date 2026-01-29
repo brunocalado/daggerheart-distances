@@ -1,3 +1,7 @@
+# 0.0.7
+- Target Highlighting: Valid targets within range rings now glow with the ring's color.
+- Ghost Preview: Range rings now follow the token preview while dragging to test positions.
+
 # 0.0.6
 Features & Improvements
 Smart Distance Detection: Major overhaul to distance calculation. The system now uses an "Edge-to-Edge" method that accurately accounts for token size.

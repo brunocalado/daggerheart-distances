@@ -173,3 +173,31 @@
     z-index: 2000; 
     margin-top: -10px; 
 }
+
+/* NEW: Target Highlight Ring */
+.dhd-highlight-ring {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    z-index: 100;
+
+    /* Highlight Variables */
+    --hl-r: 255;
+    --hl-g: 255;
+    --hl-b: 255;
+
+    /* Visual Style: Outer Glow + Border */
+    box-shadow: 0 0 15px 5px rgba(var(--hl-r), var(--hl-g), var(--hl-b), 0.6),
+                inset 0 0 10px 0 rgba(var(--hl-r), var(--hl-g), var(--hl-b), 0.3);
+    border: 2px solid rgba(var(--hl-r), var(--hl-g), var(--hl-b), 0.8);
+    
+    /* Optional: Subtle pulse for the highlight */
+    animation: highlightPulse 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes highlightPulse {
+    0% { opacity: 0.8; }
+    100% { opacity: 1.0; box-shadow: 0 0 20px 8px rgba(var(--hl-r), var(--hl-g), var(--hl-b), 0.7); }
+}

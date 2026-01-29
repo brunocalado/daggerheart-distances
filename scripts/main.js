@@ -97,7 +97,6 @@ class CombatDistances {
             return choices;
         }, {});
 
-        // --- UPDATED SETTING: Coverage Threshold (Default 0.10) ---
         game.settings.register(this.ID, 'coverageThreshold', {
             name: 'Grid Coverage Threshold',
             hint: 'How much of the token must be inside the range to count? (0.01 = just touching, 0.5 = 50% coverage).',
@@ -105,8 +104,8 @@ class CombatDistances {
             config: true,
             type: Number,
             range: { min: 0.01, max: 1.0, step: 0.01 },
-            default: 0.10, // Default updated to 0.10
-            onChange: () => { /* affects next calculation */ }
+            default: 0.10,
+            onChange: () => { }
         });
 
         game.settings.register(this.ID, 'calculationMode', {
@@ -183,6 +182,20 @@ class CombatDistances {
             default: "animated-light",
             onChange: () => this.refreshAll()
         });
+
+        // --- MOVED TO LAST: Target Highlighting ---
+        game.settings.register(this.ID, 'targetHighlighting', {
+            name: 'Target Highlighting',
+            hint: 'Highlight tokens that are inside your range rings with the corresponding color.',
+            scope: 'client',
+            config: true,
+            type: Boolean,
+            default: true,
+            onChange: () => {
+                const highlights = document.querySelectorAll('.dhd-highlight-ring');
+                highlights.forEach(h => h.remove());
+            }
+        });
     }
 
     static registerKeybindings() {
@@ -219,17 +232,66 @@ class CombatDistances {
         const rings = document.getElementsByClassName('dhd-range-ring');
         const hoverLabels = document.getElementsByClassName('dhd-hover-label');
 
+        if (rings.length === 0) {
+            const highlights = document.getElementsByClassName('dhd-highlight-ring');
+            while(highlights.length > 0){
+                highlights[0].remove();
+            }
+        }
+
         if (rings.length === 0 && hoverLabels.length === 0) return;
+
+        const doHighlight = game.settings.get(this.ID, 'targetHighlighting');
+        
+        const tokensHighlightedThisFrame = new Set();
+        const processedSourceIds = new Set();
 
         for (let ring of rings) {
             const tokenId = ring.dataset.tokenId;
             const token = canvas.tokens.get(tokenId);
+            
+            // --- GHOST MOVEMENT PREVIEW FIX ---
+            let effectiveCenter = token ? token.center : {x:0, y:0};
+            let sourceElevation = token ? (token.document.elevation || 0) : 0;
+            let isDragging = false;
+            
+            if (token) {
+                // 1. Try standard property
+                let preview = token.preview;
+
+                // 2. Fallback: Look in canvas.tokens.preview container
+                if (!preview && canvas.tokens.preview?.children) {
+                    preview = canvas.tokens.preview.children.find(c => c._original?.id === tokenId);
+                }
+
+                if (preview) {
+                    effectiveCenter = preview.center;
+                    // Use preview elevation if available (for modules that change height during drag)
+                    sourceElevation = preview.document.elevation !== undefined ? preview.document.elevation : sourceElevation;
+                    isDragging = true;
+                }
+            }
+
             const dist = parseFloat(ring.dataset.rangeDistance);
             
-            if (token && dist && token.visible) {
-                this.updateRingPositionAndSize(ring, token, dist);
+            // Allow display if dragging, even if original is hidden (common in Foundry)
+            // Or if token is normally visible
+            if (token && dist && (token.visible || isDragging)) {
+                this.updateRingPositionAndSize(ring, token, dist, effectiveCenter);
+                
+                if (doHighlight && !processedSourceIds.has(tokenId)) {
+                    this.updateTargetHighlights(token, effectiveCenter, tokensHighlightedThisFrame, sourceElevation);
+                    processedSourceIds.add(tokenId);
+                }
             } else {
                 ring.style.display = 'none'; 
+            }
+        }
+
+        const existingHighlights = document.getElementsByClassName('dhd-highlight-ring');
+        for (let hl of existingHighlights) {
+            if (!tokensHighlightedThisFrame.has(hl.dataset.targetId)) {
+                hl.remove();
             }
         }
 
@@ -244,6 +306,107 @@ class CombatDistances {
         }
     }
 
+    /**
+     * Logic to highlight targets inside rings
+     */
+    static updateTargetHighlights(sourceToken, sourceCenter, activeSet, sourceElevationOverride = null) {
+        const potentialTargets = canvas.tokens.placeables;
+        const ranges = this.DEFAULTS.ranges;
+        const threshold = game.settings.get(this.ID, 'coverageThreshold');
+        let calcMode = game.settings.get(this.ID, 'calculationMode');
+        
+        if (this._activeTokens.has(sourceToken.id)) {
+            const activeData = this._activeTokens.get(sourceToken.id);
+            if (activeData && activeData.mode) calcMode = activeData.mode;
+        }
+        const use3D = (calcMode !== 'flat');
+        const paletteKey = game.settings.get(this.ID, 'colorPalette');
+        const currentPalette = this.PALETTES[paletteKey] || this.PALETTES['default'];
+
+        const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
+        const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
+        const lineBufferPx = 2;
+
+        const sourceElevation = sourceElevationOverride !== null ? sourceElevationOverride : (sourceToken.document.elevation || 0);
+
+        for (const target of potentialTargets) {
+            if (target.id === sourceToken.id) continue;
+            if (!target.visible) continue;
+
+            const targetPoints = this.getTokenSamplePoints(target);
+            
+            const targetElevation = target.document.elevation || 0;
+            const verticalDistance = Math.abs(sourceElevation - targetElevation);
+            const verticalDistancePx = verticalDistance * (canvas.scene.grid.size / canvas.scene.grid.distance);
+
+            let matchedRangeKey = null;
+
+            // Sort ranges by distance, check smallest first.
+            const rangesWithKeys = Object.entries(ranges).map(([k, v]) => ({key: k, ...v}))
+                .sort((a,b) => a.distance - b.distance);
+
+            for (const range of rangesWithKeys) {
+                const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
+                const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
+
+                let pointsInside = 0;
+                for (let pTarget of targetPoints) {
+                    let distPx = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
+                    if (use3D && verticalDistancePx > 0) {
+                        distPx = Math.sqrt(Math.pow(distPx, 2) + Math.pow(verticalDistancePx, 2));
+                    }
+                    if (distPx <= visualRingRadiusPx) pointsInside++;
+                }
+
+                if ((pointsInside / targetPoints.length) >= threshold) {
+                    matchedRangeKey = range.key;
+                    break; 
+                }
+            }
+
+            if (matchedRangeKey) {
+                const color = currentPalette.colors[matchedRangeKey] || '#ffffff';
+                this.drawHighlight(target, color);
+                activeSet.add(target.id);
+            }
+        }
+    }
+
+    static drawHighlight(token, colorStr) {
+        let hl = document.querySelector(`.dhd-highlight-ring[data-target-id="${token.id}"]`);
+        const container = this.getContainer();
+        
+        if (!hl) {
+            hl = document.createElement('div');
+            hl.classList.add('dhd-highlight-ring');
+            hl.dataset.targetId = token.id;
+            container.appendChild(hl);
+        }
+
+        let r=0, g=0, b=0;
+        if (colorStr.startsWith('#')) {
+            r = parseInt(colorStr.slice(1, 3), 16);
+            g = parseInt(colorStr.slice(3, 5), 16);
+            b = parseInt(colorStr.slice(5, 7), 16);
+        }
+
+        hl.style.setProperty('--hl-r', r);
+        hl.style.setProperty('--hl-g', g);
+        hl.style.setProperty('--hl-b', b);
+        
+        const screenPos = this.getWorldToScreen(token.center);
+        const tokenW = token.document.width * canvas.grid.size * canvas.stage.scale.x;
+        const tokenH = token.document.height * canvas.grid.size * canvas.stage.scale.y;
+        const size = Math.max(tokenW, tokenH); 
+
+        hl.style.width = `${size}px`;
+        hl.style.height = `${size}px`;
+        hl.style.left = `${screenPos.x}px`;
+        hl.style.top = `${screenPos.y}px`;
+        
+        hl.style.display = '';
+    }
+
     // --- Coordinate Helpers ---
 
     static getWorldToScreen(point) {
@@ -255,16 +418,12 @@ class CombatDistances {
         return Number.isInteger(value) ? value : value.toFixed(1);
     }
 
-    /**
-     * Generates a dense grid of sample points for precise coverage detection.
-     * Divides each grid square into a 4x4 subgrid (16 points per square).
-     */
     static getTokenSamplePoints(token) {
         if (!token) return [];
         const grid = canvas.scene.grid.size;
         const resolution = 4; // 4x4 sample points per grid square
         const step = grid / resolution;
-        const offset = step / 2; // Center the sample point in its sub-cell
+        const offset = step / 2;
 
         const startX = token.document.x; 
         const startY = token.document.y; 
@@ -272,16 +431,10 @@ class CombatDistances {
         const heightSquares = token.document.height; 
         
         const points = [];
-        
-        // Iterate through every grid square the token occupies
         for (let gx = 0; gx < widthSquares; gx++) {
             for (let gy = 0; gy < heightSquares; gy++) {
-                
-                // Base pixel coordinates of this grid square
                 const cellX = startX + (gx * grid);
                 const cellY = startY + (gy * grid);
-
-                // Generate sub-points inside this square
                 for (let sx = 0; sx < resolution; sx++) {
                     for (let sy = 0; sy < resolution; sy++) {
                         points.push({
@@ -313,9 +466,25 @@ class CombatDistances {
         const sourceToken = controlled[0];
         if (sourceToken.id === token.id) return;
 
+        // --- GHOST MOVEMENT SUPPORT FOR HOVER ---
+        let sourceCenter = sourceToken.center;
+        
+        // 1. Try standard preview
+        let preview = sourceToken.preview;
+        // 2. Fallback
+        if (!preview && canvas.tokens.preview?.children) {
+            preview = canvas.tokens.preview.children.find(c => c._original?.id === sourceToken.id);
+        }
+
+        let sourceElevation = sourceToken.document.elevation || 0;
+
+        if (preview) {
+            sourceCenter = preview.center;
+            sourceElevation = preview.document.elevation !== undefined ? preview.document.elevation : sourceElevation;
+        }
+
         // --- Setup ---
         const threshold = game.settings.get(this.ID, 'coverageThreshold'); 
-        
         let calcMode = game.settings.get(this.ID, 'calculationMode');
         if (this._activeTokens.has(sourceToken.id)) {
             const activeData = this._activeTokens.get(sourceToken.id);
@@ -325,7 +494,7 @@ class CombatDistances {
         }
         const use3D = (calcMode !== 'flat');
 
-        const sourceElevation = sourceToken.document.elevation || 0;
+        // const sourceElevation = sourceToken.document.elevation || 0; // REPLACED BY ABOVE LOGIC
         const targetElevation = token.document.elevation || 0;
         const verticalDistance = Math.abs(sourceElevation - targetElevation);
         const verticalDistancePx = verticalDistance * (canvas.scene.grid.size / canvas.scene.grid.distance);
@@ -335,42 +504,27 @@ class CombatDistances {
         let matchedLabel = "Very Far";
 
         // --- HIGH RESOLUTION VISUAL COVERAGE LOGIC (EDGE TO EDGE) ---
-        
-        // 1. Source Geometry (Visual Radius)
-        // We calculate the source offset based on its largest dimension to approximate the "Edge" of the source.
         const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
         const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
-        const sourceCenter = sourceToken.center;
-
-        // 2. Get Target Sample Points (16 per square for high precision)
-        const targetPoints = this.getTokenSamplePoints(token);
-
-        // 3. Check ranges sorted Small -> Large
-        const sortedRanges = Object.values(this.DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
         
+        const targetPoints = this.getTokenSamplePoints(token);
+        const sortedRanges = Object.values(this.DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
         const lineBufferPx = 2; 
 
         for (const range of sortedRanges) {
             const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
-            // The visual ring starts at Source Edge (Source Radius) + Range
             const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
 
             let pointsInside = 0;
-
             for (let pTarget of targetPoints) {
                 let distPx = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
-
                 if (use3D && verticalDistancePx > 0) {
                     distPx = Math.sqrt(Math.pow(distPx, 2) + Math.pow(verticalDistancePx, 2));
                 }
-
-                if (distPx <= visualRingRadiusPx) {
-                    pointsInside++;
-                }
+                if (distPx <= visualRingRadiusPx) pointsInside++;
             }
 
             const ratio = pointsInside / targetPoints.length;
-            
             if (ratio >= threshold) {
                 matchedLabel = range.label;
                 break;
@@ -519,7 +673,7 @@ class CombatDistances {
             ring.appendChild(label);
             container.appendChild(ring);
             
-            this.updateRingPositionAndSize(ring, token, rangeData.distance);
+            this.updateRingPositionAndSize(ring, token, rangeData.distance, token.center);
         });
 
         let storedMode = null;
@@ -535,14 +689,14 @@ class CombatDistances {
     }
 
     /**
-     * Updates ring visual size.
-     * UPDATED: Now assumes Edge to Edge (Visual) measurement unconditionally.
+     * Updates ring visual size and position.
+     * UPDATED: Accepts 'customCenter' for Ghost Movement support.
      */
-    static updateRingPositionAndSize(ring, token, baseDistance) {
-        const center = token.center;
+    static updateRingPositionAndSize(ring, token, baseDistance, customCenter = null) {
+        const center = customCenter || token.center;
         const screenPos = this.getWorldToScreen(center);
         
-        // Edge to Edge logic is now default:
+        // Edge to Edge logic is default:
         // Diameter offset = Max Dimension (Width or Height)
         const diameterOffset = Math.max(token.document.width, token.document.height) * canvas.scene.grid.distance;
 
@@ -595,6 +749,12 @@ class CombatDistances {
     static removeRings(tokenId) {
         const rings = document.querySelectorAll(`.dhd-range-ring[data-token-id="${tokenId}"]`);
         rings.forEach(ring => ring.remove());
+        
+        const highlights = document.getElementsByClassName('dhd-highlight-ring');
+        while(highlights.length > 0) {
+            highlights[0].remove();
+        }
+
         this._activeTokens.delete(tokenId);
     }
 
