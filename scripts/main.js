@@ -1,9 +1,13 @@
 class CombatDistances {
     static ID = 'daggerheart-distances';
+    static MASS_ID = 'dhd-mass-center'; // ID constante para o ponto central
     static _tickerFunc = null; 
     
     // Key: Token ID, Value: { mode: string|null }
     static _activeTokens = new Map();
+    
+    // Armazena o "Token Virtual" para medição em massa
+    static _massToken = null;
 
     static PALETTES = {
         "default": {
@@ -70,6 +74,67 @@ class CombatDistances {
     }
 
     // --- Public API ---
+
+    /**
+     * Calculates the center of the Bounding Box of selected tokens and creates rings from there.
+     */
+    static MassMeasurement(options = {}) {
+        const tokens = canvas.tokens.controlled;
+        if (tokens.length === 0) {
+            ui.notifications.warn("Daggerheart Distances: Select tokens to measure from.");
+            return;
+        }
+
+        // Feature: If only 1 token is selected, treat as normal Toggle
+        if (tokens.length === 1) {
+            return this.Toggle(options);
+        }
+
+        // Toggle logic: If mass rings exist, remove them.
+        if (this.hasRings(this.MASS_ID)) {
+            this.removeRings(this.MASS_ID);
+            return;
+        }
+
+        // Calculate Bounding Box Center
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+        let sumEl = 0;
+        
+        tokens.forEach(t => {
+            const x = t.center.x;
+            const y = t.center.y;
+            
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+            
+            sumEl += (t.document.elevation || 0);
+        });
+
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+        const avgElevation = sumEl / tokens.length;
+
+        // Create a "Mock Token" object
+        this._massToken = {
+            id: this.MASS_ID,
+            center: { x: centerX, y: centerY },
+            document: { 
+                x: centerX, 
+                y: centerY,
+                elevation: avgElevation,
+                width: 0, 
+                height: 0 
+            },
+            visible: true
+        };
+
+        this.createRings(this._massToken, options);
+    }
 
     static Toggle(options = {}) {
         const tokens = canvas.tokens.controlled;
@@ -206,6 +271,18 @@ class CombatDistances {
             onDown: () => { this.Toggle(); return true; },
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
+
+        // --- NEW SHORTCUT: Mass Measurement (M) ---
+        game.keybindings.register(this.ID, "massMeasurement", {
+            name: "Mass Measurement",
+            hint: "Toggle mass measurement from the center of selected tokens. Default: M",
+            editable: [{ key: "KeyM" }],
+            onDown: () => { 
+                this.MassMeasurement(); 
+                return true; 
+            },
+            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+        });
     }
 
     // --- Ticker Management ---
@@ -248,25 +325,27 @@ class CombatDistances {
 
         for (let ring of rings) {
             const tokenId = ring.dataset.tokenId;
-            const token = canvas.tokens.get(tokenId);
+            
+            // --- MODIFIED: Handle Virtual Mass Token ---
+            let token = null;
+            if (tokenId === this.MASS_ID) {
+                token = this._massToken;
+            } else {
+                token = canvas.tokens.get(tokenId);
+            }
             
             // --- GHOST MOVEMENT PREVIEW FIX ---
             let effectiveCenter = token ? token.center : {x:0, y:0};
             let sourceElevation = token ? (token.document.elevation || 0) : 0;
             let isDragging = false;
             
-            if (token) {
-                // 1. Try standard property
+            if (token && tokenId !== this.MASS_ID) { 
                 let preview = token.preview;
-
-                // 2. Fallback: Look in canvas.tokens.preview container
                 if (!preview && canvas.tokens.preview?.children) {
                     preview = canvas.tokens.preview.children.find(c => c._original?.id === tokenId);
                 }
-
                 if (preview) {
                     effectiveCenter = preview.center;
-                    // Use preview elevation if available (for modules that change height during drag)
                     sourceElevation = preview.document.elevation !== undefined ? preview.document.elevation : sourceElevation;
                     isDragging = true;
                 }
@@ -274,7 +353,7 @@ class CombatDistances {
 
             const dist = parseFloat(ring.dataset.rangeDistance);
             
-            // Allow display if dragging, even if original is hidden (common in Foundry)
+            // Allow display if dragging, even if original is hidden
             // Or if token is normally visible
             if (token && dist && (token.visible || isDragging)) {
                 this.updateRingPositionAndSize(ring, token, dist, effectiveCenter);
@@ -297,7 +376,8 @@ class CombatDistances {
 
         for (let label of hoverLabels) {
             const tokenId = label.dataset.hoverTokenId;
-            const token = canvas.tokens.get(tokenId);
+            let token = (tokenId === this.MASS_ID) ? this._massToken : canvas.tokens.get(tokenId);
+            
             if (token && token.visible) {
                 this.updateHoverLabelPosition(label, token);
             } else {
@@ -323,7 +403,11 @@ class CombatDistances {
         const paletteKey = game.settings.get(this.ID, 'colorPalette');
         const currentPalette = this.PALETTES[paletteKey] || this.PALETTES['default'];
 
-        const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
+        // Safety for Mass Token (width 0)
+        const sW = sourceToken.document.width || 0;
+        const sH = sourceToken.document.height || 0;
+        const sourceDimSquares = Math.max(sW, sH);
+        
         const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
         const lineBufferPx = 2;
 
@@ -341,7 +425,6 @@ class CombatDistances {
 
             let matchedRangeKey = null;
 
-            // Sort ranges by distance, check smallest first.
             const rangesWithKeys = Object.entries(ranges).map(([k, v]) => ({key: k, ...v}))
                 .sort((a,b) => a.distance - b.distance);
 
@@ -494,7 +577,6 @@ class CombatDistances {
         }
         const use3D = (calcMode !== 'flat');
 
-        // const sourceElevation = sourceToken.document.elevation || 0; // REPLACED BY ABOVE LOGIC
         const targetElevation = token.document.elevation || 0;
         const verticalDistance = Math.abs(sourceElevation - targetElevation);
         const verticalDistancePx = verticalDistance * (canvas.scene.grid.size / canvas.scene.grid.distance);
@@ -626,6 +708,11 @@ class CombatDistances {
     static createRings(token, options = {}) {
         this.removeRings(token.id);
         
+        // --- FIX: Restore Mass Token after cleaning ---
+        if (token.id === this.MASS_ID) {
+            this._massToken = token;
+        }
+        
         const currentRanges = this.ranges;
         const lineStyle = game.settings.get(this.ID, 'lineStyle');
         const lineThickness = game.settings.get(this.ID, 'lineThickness');
@@ -698,7 +785,10 @@ class CombatDistances {
         
         // Edge to Edge logic is default:
         // Diameter offset = Max Dimension (Width or Height)
-        const diameterOffset = Math.max(token.document.width, token.document.height) * canvas.scene.grid.distance;
+        // Ensure token.document exists and handles mass token (width 0)
+        const tW = (token.document && token.document.width) || 0;
+        const tH = (token.document && token.document.height) || 0;
+        const diameterOffset = Math.max(tW, tH) * canvas.scene.grid.distance;
 
         const gridDist = (baseDistance * 2 + diameterOffset) / canvas.scene.grid.distance;
         const worldDiameter = gridDist * canvas.grid.size;
@@ -756,6 +846,11 @@ class CombatDistances {
         }
 
         this._activeTokens.delete(tokenId);
+        
+        // Clean up mass token if it was removed
+        if (tokenId === this.MASS_ID) {
+            this._massToken = null;
+        }
     }
 
     static hasRings(tokenId) {

@@ -1,6 +1,7 @@
 # 0.0.7
 - Target Highlighting: Valid targets within range rings now glow with the ring's color.
 - Ghost Preview: Range rings now follow the token preview while dragging to test positions.
+- Mass Measurement: Select multiple tokens and use the macro DHDistances.MassMeasurement() to generate distance rings from the center of the group (bounding box center).
 
 # 0.0.6
 Features & Improvements

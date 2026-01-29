@@ -35,6 +35,13 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 **The system accounts for token size when calculating range.**
 <p align="center"><img width="700" src="docs/sizes.webp"></p>
 
+* **Mass Measurement:** Select multiple tokens and use the macro `DHDistances.MassMeasurement();` to generate distance rings from the center of the group.
+<p align="center"><img width="700" src="docs/massmeasurement.webp"></p>
+
+* **Target Highlighting:** Valid targets within range rings now glow with the ring's color.
+<p align="center"><img width="700" src="docs/highlighting.webp"></p>
+
+* **Ghost Preview:** Range rings now follow the token preview while dragging to test positions.
 
 ### 🎨 Customization
 
@@ -44,25 +51,19 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 
 * **Immersive Effects:** Enable animated gradient fills that pulse gently, or keep it simple with static colors.
 
-## 🚀 Installation
-
-Install via the Foundry VTT Module browser or use this manifest link:
-
-* *https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json*
-
 ## ⚙️ How to Use
 
 ### Toggling Rings
 
-You have three easy ways to show or hide the range rings around a token:
+<p align="center"><img width="600" src="docs/preview.webp"></p>
+
+You have many easy ways to show or hide the range rings around a token:
 
 1. **Token HUD:** Right-click a token to open the HUD, then click the **Circle** icon (<i class="fas fa-circle-dot"></i>).
 
-2. **Keyboard Shortcut:** Select a token and press **`R`** (default) to toggle the rings on/off instantly.
+2. **Keyboard Shortcut:** Select a token and press **`R`** to toggle the rings on/off instantly. You can use **`M`** for Mass Measurement.
 
-<p align="center"><img width="600" src="docs/preview.webp"></p>
-
-3. You can also use the macro `DHDistances.Toggle();`. This works for multiple selected tokens.
+3. You can also use the macro `DHDistances.Toggle();`. This works for multiple selected tokens. Use `DHDistances.MassMeasurement();` for Mass Measurement.
 
 ```js
 DHDistances.Toggle({mode: '2d'}); // Calculates distance ignoring elevation.
@@ -81,6 +82,12 @@ DHDistances.Toggle({mode: 'both'}); // Shows both 3D and 2D distances.
 Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
 
 <p align="center"><img width="600" src="docs/settings.webp"></p>
+
+## 🚀 Installation
+
+Install via the Foundry VTT Module browser or use this manifest link:
+
+* *https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json*
 
 ## 📜 Changelog
 
