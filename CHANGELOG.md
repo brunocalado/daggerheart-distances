@@ -1,8 +1,15 @@
 # 0.0.6
-- heavy improvement to distance detection. It takes token size into account. You can set a threshold of detection.
-- new palettes
-- It cares about height now.
-- You can use:
+Features & Improvements
+Smart Distance Detection: Major overhaul to distance calculation. The system now uses an "Edge-to-Edge" method that accurately accounts for token size.
+
+Coverage Threshold: Added a new setting to define the specific percentage of a token that must be inside a ring to count as "in range" (e.g., 10% coverage).
+
+Elevation Support: Distance calculations now account for token elevation/height (3D distance).
+
+New Palettes: Added two new color themes: Synthwave and True Fire.
+
+Macro Updates
+The Toggle function now supports specific calculation modes:
 ```js
 DHDistances.Toggle({mode: '2d'}); // Calculates distance ignoring elevation.
 ```

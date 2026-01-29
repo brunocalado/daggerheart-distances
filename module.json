@@ -30,6 +30,22 @@
       "src": "styles/styles.css"
     }
   ],
+  
+  "packs": [
+    {
+      "label": "Distances Macros",
+      "type": "Macro",
+      "name": "macros",
+      "path": "packs/macros",
+      "system": "daggerheart",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      },
+      "flags": {}
+    }    
+  ],  
+  
   "url": "https://github.com/brunocalado/daggerheart-distances",
   "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json",
   "download": "https://codeload.github.com/brunocalado/daggerheart-distances/zip/main"
