@@ -27,6 +27,15 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 
 * **Easy Toggle:** Turn the rings on or off quickly using a button in the Token HUD or a keyboard shortcut.
 
+* **Smart Edge Detection:** Accurate for tokens of all sizes! The system measures distance from edge-to-edge rather than center-to-center. It also checks visual coverage: a token is only considered "in range" if a specific percentage of its body (configurable) is physically inside the ring, ensuring that what you see matches the rules.
+
+**Set how much of a token must be inside the circle to be considered in range.**
+<p align="center"><img width="700" src="docs/threshold.webp"></p>
+
+**The system accounts for token size when calculating range.**
+<p align="center"><img width="700" src="docs/sizes.webp"></p>
+
+
 ### 🎨 Customization
 
 * **Beautiful Themes:** Choose from pre-made color palettes like "Traffic Light", "Neon Cyberpunk", or "Warm Sunset".
@@ -53,7 +62,19 @@ You have three easy ways to show or hide the range rings around a token:
 
 <p align="center"><img width="600" src="docs/preview.webp"></p>
 
-3. You can also use a macro `DHDistances.Toggle()`;
+3. You can also use the macro `DHDistances.Toggle();`. This works for multiple selected tokens.
+
+```js
+DHDistances.Toggle({mode: '2d'}); // Calculates distance ignoring elevation.
+```
+
+```js
+DHDistances.Toggle({mode: '3d'}); // Calculates distance accounting for elevation.
+```
+
+```js
+DHDistances.Toggle({mode: 'both'}); // Shows both 3D and 2D distances.
+```
 
 ### Configuration
 

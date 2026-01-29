@@ -1,4 +1,6 @@
 # 0.0.6
+- heavy improvement to distance detection. It takes token size into account. You can set a threshold of detection.
+- new palettes
 - It cares about height now.
 - You can use:
 ```js

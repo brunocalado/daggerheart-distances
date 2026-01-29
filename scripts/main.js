@@ -2,69 +2,54 @@ class CombatDistances {
     static ID = 'daggerheart-distances';
     static _tickerFunc = null; 
     
-    // Changed from Set to Map to store configuration per token
     // Key: Token ID, Value: { mode: string|null }
     static _activeTokens = new Map();
 
-    // Color Palette Configurations
     static PALETTES = {
         "default": {
-            label: "Option 1 (Traffic Light)",
+            label: "Traffic Light",
             colors: {
-                ring1: "#ff0000", // Red
-                ring2: "#ffa500", // Orange
-                ring3: "#ffff00", // Yellow
-                ring4: "#90ee90"  // Light green
+                ring1: "#ff0000",
+                ring2: "#ffa500",
+                ring3: "#ffff00",
+                ring4: "#90ee90"
             }
         },
         "option2": {
-            label: "Option 2 (Inverse Traffic Light)",
+            label: "Inverse Traffic Light",
             colors: {
-                ring1: "#90ee90", // Light green
-                ring2: "#ffff00", // Yellow
-                ring3: "#ffa500", // Orange
-                ring4: "#ff0000"  // Red
+                ring1: "#90ee90",
+                ring2: "#ffff00",
+                ring3: "#ffa500",
+                ring4: "#ff0000"
             }
         },
         "option3": {
-            label: "Option 3 (Neon Cyberpunk)",
+            label: "Synthwave",
             colors: {
-                ring1: "#ff0055", // Neon Pink
-                ring2: "#ffcc00", // Electric Amber
-                ring3: "#00ff99", // Matrix Green
-                ring4: "#00ccff"  // Laser Blue
+                ring1: "#ff00ff", // Magenta
+                ring2: "#bd00ff", // Electric Purple
+                ring3: "#00aaff", // Dodger Blue
+                ring4: "#00ffff"  // Cyan
             }
         },
         "option4": {
-            label: "Option 4 (Warm Sunset)",
+            label: "True Fire",
             colors: {
-                ring1: "#785ef0", // Intense Purple
-                ring2: "#dc267f", // Fuchsia
-                ring3: "#fe6100", // Burnt Orange
-                ring4: "#ffb000"  // Gold/Yellow
+                ring1: "#ff0000", // Pure Red
+                ring2: "#ff4500", // Orange Red
+                ring3: "#ffa500", // Orange
+                ring4: "#ffcc00"  // Golden Yellow
             }
         }
     };
 
-    // Static Configuration
     static DEFAULTS = {
         ranges: {
-            ring1: {
-                distance: 5,
-                label: "Melee"
-            },
-            ring2: {
-                distance: 15,
-                label: "Very Close"
-            },
-            ring3: {
-                distance: 30,
-                label: "Close"
-            },
-            ring4: {
-                distance: 60,
-                label: "Far"
-            }
+            ring1: { distance: 5, label: "Melee" },
+            ring2: { distance: 15, label: "Very Close" },
+            ring3: { distance: 30, label: "Close" },
+            ring4: { distance: 60, label: "Far" }
         }
     };
 
@@ -72,30 +57,20 @@ class CombatDistances {
         this.registerSettings();
         this.registerKeybindings();
 
-        // Main Token Logic Hooks
         Hooks.on('renderTokenHUD', this.onRenderTokenHUD.bind(this));
         Hooks.on('deleteToken', this.onDeleteToken.bind(this));
         Hooks.on('hoverToken', this.onHoverToken.bind(this));
         Hooks.on('updateToken', this.onUpdateToken.bind(this)); 
 
-        // Canvas Lifecycle Hooks
         Hooks.on('canvasReady', this.startTicker.bind(this));
         Hooks.on('canvasTearDown', this.stopTicker.bind(this));
-        
-        // Fallback: ensures update on Pan even if the ticker misses a frame
         Hooks.on('canvasPan', this.onCanvasPan.bind(this));
 
-        // Global API for Macros
         window.DHDistances = this;
     }
 
     // --- Public API ---
 
-    /**
-     * Toggles the rings for the selected tokens.
-     * Can be called via macro: DHDistances.Toggle() or DHDistances.Toggle({mode: '2d'})
-     * Options: { mode: '3d' | '2d' | 'both' }
-     */
     static Toggle(options = {}) {
         const tokens = canvas.tokens.controlled;
         if (tokens.length === 0) {
@@ -111,7 +86,6 @@ class CombatDistances {
             }
         });
 
-        // Visually update the HUD if it is open for one of the changed tokens
         if (canvas.tokens.hud.rendered && tokens.some(t => t.id === canvas.tokens.hud.object?.id)) {
             canvas.tokens.hud.render();
         }
@@ -123,7 +97,18 @@ class CombatDistances {
             return choices;
         }, {});
 
-        // --- NEW SETTING: Calculation Mode ---
+        // --- UPDATED SETTING: Coverage Threshold (Default 0.10) ---
+        game.settings.register(this.ID, 'coverageThreshold', {
+            name: 'Grid Coverage Threshold',
+            hint: 'How much of the token must be inside the range to count? (0.01 = just touching, 0.5 = 50% coverage).',
+            scope: 'client',
+            config: true,
+            type: Number,
+            range: { min: 0.01, max: 1.0, step: 0.01 },
+            default: 0.10, // Default updated to 0.10
+            onChange: () => { /* affects next calculation */ }
+        });
+
         game.settings.register(this.ID, 'calculationMode', {
             name: 'Calculation Mode',
             hint: 'Choose how elevation affects distance measurement.',
@@ -136,7 +121,7 @@ class CombatDistances {
                 "both": "Both (Show 3D & 2D)"
             },
             default: "auto",
-            onChange: () => { /* No global refresh needed, affects next hover */ }
+            onChange: () => { }
         });
 
         game.settings.register(this.ID, 'textSize', {
@@ -145,11 +130,7 @@ class CombatDistances {
             scope: 'client',
             config: true,
             type: String,
-            choices: {
-                "small": "Small",
-                "normal": "Normal",
-                "large": "Large"
-            },
+            choices: { "small": "Small", "normal": "Normal", "large": "Large" },
             default: "normal",
             onChange: () => this.refreshAll()
         });
@@ -171,11 +152,7 @@ class CombatDistances {
             scope: 'client',
             config: true,
             type: String,
-            choices: {
-                "solid": "Solid",
-                "dotted": "Dotted",
-                "dashed": "Dashed"
-            },
+            choices: { "solid": "Solid", "dotted": "Dotted", "dashed": "Dashed" },
             default: "solid",
             onChange: () => this.refreshAll()
         });
@@ -186,12 +163,7 @@ class CombatDistances {
             scope: 'client',
             config: true,
             type: String,
-            choices: {
-                "2px": "Normal",
-                "5px": "Large",
-                "8px": "Extra Large",
-                "12px": "Massive"
-            },
+            choices: { "2px": "Normal", "5px": "Large", "8px": "Extra Large", "12px": "Massive" },
             default: "2px",
             onChange: () => this.refreshAll()
         });
@@ -217,13 +189,8 @@ class CombatDistances {
         game.keybindings.register(this.ID, "toggleRings", {
             name: "Toggle Combat Distances",
             hint: "Toggle the distance rings for the selected token(s). Default: R",
-            editable: [
-                { key: "KeyR" }
-            ],
-            onDown: () => {
-                this.Toggle();
-                return true;
-            },
+            editable: [{ key: "KeyR" }],
+            onDown: () => { this.Toggle(); return true; },
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
     }
@@ -232,10 +199,8 @@ class CombatDistances {
 
     static startTicker() {
         this.stopTicker(); 
-        
         this._tickerFunc = this.onTicker.bind(this);
         canvas.app.ticker.add(this._tickerFunc);
-        
         this.refreshAll();
     }
 
@@ -251,8 +216,8 @@ class CombatDistances {
     static onTicker() {
         if (!canvas || !canvas.ready || !canvas.tokens) return;
 
-        const rings = document.getElementsByClassName('range-ring');
-        const hoverLabels = document.getElementsByClassName('combat-distance-hover-label');
+        const rings = document.getElementsByClassName('dhd-range-ring');
+        const hoverLabels = document.getElementsByClassName('dhd-hover-label');
 
         if (rings.length === 0 && hoverLabels.length === 0) return;
 
@@ -290,17 +255,52 @@ class CombatDistances {
         return Number.isInteger(value) ? value : value.toFixed(1);
     }
 
+    /**
+     * Generates a dense grid of sample points for precise coverage detection.
+     * Divides each grid square into a 4x4 subgrid (16 points per square).
+     */
+    static getTokenSamplePoints(token) {
+        if (!token) return [];
+        const grid = canvas.scene.grid.size;
+        const resolution = 4; // 4x4 sample points per grid square
+        const step = grid / resolution;
+        const offset = step / 2; // Center the sample point in its sub-cell
+
+        const startX = token.document.x; 
+        const startY = token.document.y; 
+        const widthSquares = token.document.width; 
+        const heightSquares = token.document.height; 
+        
+        const points = [];
+        
+        // Iterate through every grid square the token occupies
+        for (let gx = 0; gx < widthSquares; gx++) {
+            for (let gy = 0; gy < heightSquares; gy++) {
+                
+                // Base pixel coordinates of this grid square
+                const cellX = startX + (gx * grid);
+                const cellY = startY + (gy * grid);
+
+                // Generate sub-points inside this square
+                for (let sx = 0; sx < resolution; sx++) {
+                    for (let sy = 0; sy < resolution; sy++) {
+                        points.push({
+                            x: cellX + (sx * step) + offset,
+                            y: cellY + (sy * step) + offset
+                        });
+                    }
+                }
+            }
+        }
+        return points;
+    }
+
     // --- Event Handlers ---
 
     static onCanvasPan(canvas, position) {
         this.onTicker();
     }
 
-    /**
-     * Handles the hover event to display distance.
-     * Updated to support 3 modes: Auto (3D), Flat (2D), Both.
-     * PRIORITIZES local override from Toggle() over global settings.
-     */
     static onHoverToken(token, hovered) {
         if (!hovered) {
             this.removeHoverLabel(token.id);
@@ -313,68 +313,108 @@ class CombatDistances {
         const sourceToken = controlled[0];
         if (sourceToken.id === token.id) return;
 
-        // 1. Calculate Horizontal (2D)
-        let horizontalDistance = 0;
-        try {
-            const measurement = canvas.grid.measurePath([sourceToken.center, token.center]);
-            horizontalDistance = measurement.distance;
-        } catch (e) {
-            return;
-        }
-
-        // 2. Calculate Vertical
-        const sourceElevation = sourceToken.document.elevation || 0;
-        const targetElevation = token.document.elevation || 0;
-        const verticalDistance = Math.abs(sourceElevation - targetElevation);
-
-        // 3. Calculate 3D
-        let totalDistance3D = horizontalDistance;
-        if (verticalDistance > 0) {
-            totalDistance3D = Math.sqrt(Math.pow(horizontalDistance, 2) + Math.pow(verticalDistance, 2));
-        }
-
-        // 4. Determine Calculation Mode
-        // Default to settings
+        // --- Setup ---
+        const threshold = game.settings.get(this.ID, 'coverageThreshold'); 
+        
         let calcMode = game.settings.get(this.ID, 'calculationMode');
-
-        // Override if the source token has specific toggle options active
         if (this._activeTokens.has(sourceToken.id)) {
             const activeData = this._activeTokens.get(sourceToken.id);
             if (activeData && activeData.mode) {
                 calcMode = activeData.mode;
             }
         }
-        
-        let primaryDistanceForCategory = totalDistance3D;
-        let displayString = "";
+        const use3D = (calcMode !== 'flat');
 
-        // Normalize string comparison just in case
-        if (calcMode === "flat") {
-            // Mode: Flat (2D Only)
-            primaryDistanceForCategory = horizontalDistance;
-            displayString = `(${this.formatDistance(horizontalDistance)})`;
-        } 
-        else if (calcMode === "both") {
-            // Mode: Both (Show 3D, and 2D if different)
-            primaryDistanceForCategory = totalDistance3D;
-            
-            if (verticalDistance > 0) {
-                // Show "15 | 2D: 10"
-                displayString = `(${this.formatDistance(totalDistance3D)} | 2D: ${this.formatDistance(horizontalDistance)})`;
-            } else {
-                displayString = `(${this.formatDistance(totalDistance3D)})`;
+        const sourceElevation = sourceToken.document.elevation || 0;
+        const targetElevation = token.document.elevation || 0;
+        const verticalDistance = Math.abs(sourceElevation - targetElevation);
+        const verticalDistancePx = verticalDistance * (canvas.scene.grid.size / canvas.scene.grid.distance);
+
+        let finalDistDisplay = Infinity;
+        let finalDist3DDisplay = Infinity;
+        let matchedLabel = "Very Far";
+
+        // --- HIGH RESOLUTION VISUAL COVERAGE LOGIC (EDGE TO EDGE) ---
+        
+        // 1. Source Geometry (Visual Radius)
+        // We calculate the source offset based on its largest dimension to approximate the "Edge" of the source.
+        const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
+        const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
+        const sourceCenter = sourceToken.center;
+
+        // 2. Get Target Sample Points (16 per square for high precision)
+        const targetPoints = this.getTokenSamplePoints(token);
+
+        // 3. Check ranges sorted Small -> Large
+        const sortedRanges = Object.values(this.DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
+        
+        const lineBufferPx = 2; 
+
+        for (const range of sortedRanges) {
+            const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
+            // The visual ring starts at Source Edge (Source Radius) + Range
+            const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
+
+            let pointsInside = 0;
+
+            for (let pTarget of targetPoints) {
+                let distPx = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
+
+                if (use3D && verticalDistancePx > 0) {
+                    distPx = Math.sqrt(Math.pow(distPx, 2) + Math.pow(verticalDistancePx, 2));
+                }
+
+                if (distPx <= visualRingRadiusPx) {
+                    pointsInside++;
+                }
             }
-        } 
-        else {
-            // Mode: Auto (Default 3D)
-            primaryDistanceForCategory = totalDistance3D;
-            displayString = `(${this.formatDistance(totalDistance3D)})`;
+
+            const ratio = pointsInside / targetPoints.length;
+            
+            if (ratio >= threshold) {
+                matchedLabel = range.label;
+                break;
+            }
         }
 
-        const categoryText = this.getDistanceLabel(primaryDistanceForCategory);
+        // --- Calculate display number (Visual Approximation) ---
+        let minPointDistPx = Infinity;
+        for (let pTarget of targetPoints) {
+            const d = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
+            if (d < minPointDistPx) minPointDistPx = d;
+        }
         
-        // Pass the pre-formatted string instead of raw number
-        this.createHoverLabel(token, categoryText, displayString);
+        let distDisplayPx = Math.max(0, minPointDistPx - sourceRadiusPx);
+        let d2d = (distDisplayPx / canvas.scene.grid.size) * canvas.scene.grid.distance;
+        let d3d = d2d;
+
+        if (use3D && verticalDistance > 0) {
+            d3d = Math.sqrt(Math.pow(d2d, 2) + Math.pow(verticalDistance, 2));
+        }
+
+        finalDistDisplay = d2d;
+        finalDist3DDisplay = d3d;
+
+        if (finalDistDisplay === Infinity) return;
+
+        // --- DISPLAY FORMATTING ---
+        let displayString = "";
+
+        if (calcMode === "flat") {
+            displayString = `(${this.formatDistance(finalDistDisplay)})`;
+        } 
+        else if (calcMode === "both") {
+            if (verticalDistance > 0) {
+                displayString = `(${this.formatDistance(finalDist3DDisplay)} | 2D: ${this.formatDistance(finalDistDisplay)})`;
+            } else {
+                displayString = `(${this.formatDistance(finalDist3DDisplay)})`;
+            }
+        } 
+        else { // Auto
+            displayString = `(${this.formatDistance(finalDist3DDisplay)})`;
+        }
+
+        this.createHoverLabel(token, matchedLabel, displayString);
     }
 
     static getDistanceLabel(distance) {
@@ -394,10 +434,9 @@ class CombatDistances {
         const textSize = game.settings.get(this.ID, 'textSize');
         
         const label = document.createElement('div');
-        label.classList.add('combat-distance-hover-label', `text-${textSize}`);
+        label.classList.add('dhd-hover-label', `text-${textSize}`);
         label.dataset.hoverTokenId = token.id;
         
-        // Use the passed string directly (it might contain HTML like the 'Both' mode)
         label.innerHTML = `<span class="category">${text}</span><span class="dist">${distanceDisplayString}</span>`;
         
         container.appendChild(label);
@@ -416,7 +455,7 @@ class CombatDistances {
     }
 
     static removeHoverLabel(tokenId) {
-        const labels = document.querySelectorAll(`.combat-distance-hover-label[data-hover-token-id="${tokenId}"]`);
+        const labels = document.querySelectorAll(`.dhd-hover-label[data-hover-token-id="${tokenId}"]`);
         labels.forEach(label => label.remove());
     }
 
@@ -439,7 +478,6 @@ class CombatDistances {
         const fillStyle = game.settings.get(this.ID, 'fillStyle');
         const paletteKey = game.settings.get(this.ID, 'colorPalette');
         const textSize = game.settings.get(this.ID, 'textSize');
-        
         const currentPalette = this.PALETTES[paletteKey] || this.PALETTES['default'];
         const container = this.getContainer();
         
@@ -447,7 +485,7 @@ class CombatDistances {
             const ring = document.createElement('div');
             ring.dataset.tokenId = token.id;
             ring.dataset.rangeDistance = rangeData.distance; 
-            ring.classList.add('range-ring', rangeKey);
+            ring.classList.add('dhd-range-ring', rangeKey);
             
             ring.style.borderStyle = lineStyle;
             ring.style.borderWidth = lineThickness;
@@ -472,11 +510,10 @@ class CombatDistances {
             }
 
             const label = document.createElement('div');
-            label.classList.add('range-label', `text-${textSize}`);
+            label.classList.add('dhd-range-label', `text-${textSize}`);
             
             const formattedDistance = this.formatDistance(parseFloat(rangeData.distance));
             
-            // Removed the "'" from the label here as well
             label.innerHTML = `<span class="category">${rangeData.label}</span> <span class="dist">(${formattedDistance})</span>`;
             
             ring.appendChild(label);
@@ -485,25 +522,32 @@ class CombatDistances {
             this.updateRingPositionAndSize(ring, token, rangeData.distance);
         });
 
-        // Determine Mode for Map storage based on argument or default
         let storedMode = null;
         if (options.mode) {
             const m = options.mode.toLowerCase();
             if (m === '2d') storedMode = 'flat';
             else if (m === '3d') storedMode = 'auto';
             else if (m === 'both') storedMode = 'both';
-            else storedMode = m; // Fallback for correct keys
+            else storedMode = m; 
         }
 
-        // Tracks token in local Map with its configuration
         this._activeTokens.set(token.id, { mode: storedMode });
     }
 
+    /**
+     * Updates ring visual size.
+     * UPDATED: Now assumes Edge to Edge (Visual) measurement unconditionally.
+     */
     static updateRingPositionAndSize(ring, token, baseDistance) {
         const center = token.center;
         const screenPos = this.getWorldToScreen(center);
-        const gridDist = baseDistance / canvas.scene.grid.distance;
-        const worldDiameter = gridDist * 2 * canvas.grid.size;
+        
+        // Edge to Edge logic is now default:
+        // Diameter offset = Max Dimension (Width or Height)
+        const diameterOffset = Math.max(token.document.width, token.document.height) * canvas.scene.grid.distance;
+
+        const gridDist = (baseDistance * 2 + diameterOffset) / canvas.scene.grid.distance;
+        const worldDiameter = gridDist * canvas.grid.size;
         const screenDiameter = worldDiameter * canvas.stage.scale.x;
 
         ring.style.width = `${screenDiameter}px`;
@@ -517,18 +561,14 @@ class CombatDistances {
         if (canvas && canvas.tokens) {
             canvas.tokens.placeables.forEach(token => {
                 if (this.hasRings(token.id)) {
-                    // Retain existing options when refreshing styles
                     const existingData = this._activeTokens.get(token.id);
-                    // Re-toggle effectively
                     this.createRings(token, { mode: existingData?.mode });
                 }
             });
         }
     }
 
-    static get ranges() {
-        return this.DEFAULTS.ranges;
-    }
+    static get ranges() { return this.DEFAULTS.ranges; }
 
     static onRenderTokenHUD(hud, html, tokenData) {
         const button = $(`
@@ -540,7 +580,6 @@ class CombatDistances {
         const token = canvas.tokens.get(tokenData._id);
         if (!token) return;
         
-        // Check local Set
         if (this.hasRings(token.id)) {
             button.addClass('active');
         }
@@ -554,27 +593,20 @@ class CombatDistances {
     }
 
     static removeRings(tokenId) {
-        const rings = document.querySelectorAll(`.range-ring[data-token-id="${tokenId}"]`);
+        const rings = document.querySelectorAll(`.dhd-range-ring[data-token-id="${tokenId}"]`);
         rings.forEach(ring => ring.remove());
-        
-        // Remove from local Map
         this._activeTokens.delete(tokenId);
     }
 
     static hasRings(tokenId) {
-        // Check against local Map
         return this._activeTokens.has(tokenId);
     }
 
-    static onUpdateToken(tokenDocument, changes) {
-        // Ticker handles position updates.
-        // We only need to ensure that if the ID is still in the Set, it continues to be processed.
-    }
+    static onUpdateToken(tokenDocument, changes) { }
 
     static onDeleteToken(tokenDocument) {
         this.removeRings(tokenDocument.id);
         this.removeHoverLabel(tokenDocument.id);
-        // Extra cleanup guarantee
         this._activeTokens.delete(tokenDocument.id);
     }
 }

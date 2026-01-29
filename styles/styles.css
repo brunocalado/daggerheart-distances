@@ -15,7 +15,8 @@
     z-index: 10; 
 }
 
-.range-ring {
+/* Renamed to dhd-range-ring */
+.dhd-range-ring {
     position: absolute;
     border-width: 2px; 
     border-style: solid;
@@ -29,7 +30,7 @@
 }
 
 /* Static Fill Style */
-.range-ring.static {
+.dhd-range-ring.static {
     background: radial-gradient(circle, 
         rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) 0%, 
         rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) 60%, 
@@ -38,7 +39,7 @@
 }
 
 /* Animated Normal Fill Style (Original Behavior) */
-.range-ring.animated-normal {
+.dhd-range-ring.animated-normal {
     --gradient-stop: 60%;
     animation: pulseGradient 2s infinite alternate ease-in-out;
     background: radial-gradient(circle, 
@@ -49,7 +50,7 @@
 }
 
 /* Animated Light Fill Style (Subtle) */
-.range-ring.animated-light {
+.dhd-range-ring.animated-light {
     --gradient-stop: 60%;
     animation: pulseGradientLight 2s infinite alternate ease-in-out;
     background: radial-gradient(circle, 
@@ -59,19 +60,17 @@
     );
 }
 
-/* Original Animation Keyframes */
 @keyframes pulseGradient {
     0% { --gradient-stop: 60%; }
     100% { --gradient-stop: 50%; }
 }
 
-/* Light Animation Keyframes */
 @keyframes pulseGradientLight {
     0% { --gradient-stop: 70%; }
     100% { --gradient-stop: 60%; }
 }
 
-/* HUD Button Styles */
+/* HUD Button Styles - Specific selector, no change needed */
 .control-icon[title="Toggle Combat Distances"] {
     background: rgba(0, 0, 0, 0.5);
     border: 1px solid #000;
@@ -92,40 +91,40 @@
 /* --- Shared Label Styles (Rings & Hover) --- */
 
 /* Text Size Variations */
-.range-label.text-small, 
-.combat-distance-hover-label.text-small {
+.dhd-range-label.text-small, 
+.dhd-hover-label.text-small {
     font-size: 10px;
 }
 
-.range-label.text-normal, 
-.combat-distance-hover-label.text-normal {
+.dhd-range-label.text-normal, 
+.dhd-hover-label.text-normal {
     font-size: 14px;
 }
 
-.range-label.text-large, 
-.combat-distance-hover-label.text-large {
+.dhd-range-label.text-large, 
+.dhd-hover-label.text-large {
     font-size: 18px;
 }
 
 /* Internal Color Styles (Yellow and Gray) */
-.range-label .category,
-.combat-distance-hover-label .category {
+.dhd-range-label .category,
+.dhd-hover-label .category {
     color: #ffcc00;
     text-transform: uppercase;
     font-size: 0.9em;
     line-height: 1;
 }
 
-.range-label .dist,
-.combat-distance-hover-label .dist {
+.dhd-range-label .dist,
+.dhd-hover-label .dist {
     font-size: 0.9em;
     font-weight: bold;
     color: #ccc;
     line-height: 1;
 }
 
-/* Range Label (Fixed text on rings) */
-.range-label {
+/* Range Label (Fixed text on rings) - Renamed to dhd-range-label */
+.dhd-range-label {
     position: absolute;
     top: -25px; 
     left: 50%;
@@ -136,12 +135,10 @@
     padding: 4px 8px;
     border-radius: 4px;
     border: 1px solid #444;
-    /* Default fallback size, overridden by classes above */
     font-size: 14px;
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     
-    /* Layout */
     display: flex;
     flex-direction: row;
     gap: 4px;
@@ -152,8 +149,8 @@
     pointer-events: none;
 }
 
-/* Hover Distance Label (Floating text on mouse hover) */
-.combat-distance-hover-label {
+/* Hover Distance Label - Renamed to dhd-hover-label */
+.dhd-hover-label {
     position: absolute;
     transform: translate(-50%, -100%); 
     
@@ -162,12 +159,10 @@
     padding: 4px 8px;
     border-radius: 4px;
     border: 1px solid #444;
-    /* Default fallback size, overridden by classes above */
     font-size: 14px;
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     
-    /* Layout */
     display: flex;
     flex-direction: row; 
     gap: 6px; 
