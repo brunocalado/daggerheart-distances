@@ -2,8 +2,9 @@ class CombatDistances {
     static ID = 'daggerheart-distances';
     static _tickerFunc = null; 
     
-    // Local storage of which tokens are active ONLY for this client
-    static _activeTokens = new Set();
+    // Changed from Set to Map to store configuration per token
+    // Key: Token ID, Value: { mode: string|null }
+    static _activeTokens = new Map();
 
     // Color Palette Configurations
     static PALETTES = {
@@ -92,9 +93,10 @@ class CombatDistances {
 
     /**
      * Toggles the rings for the selected tokens.
-     * Can be called via macro: DHDistances.Toggle()
+     * Can be called via macro: DHDistances.Toggle() or DHDistances.Toggle({mode: '2d'})
+     * Options: { mode: '3d' | '2d' | 'both' }
      */
-    static Toggle() {
+    static Toggle(options = {}) {
         const tokens = canvas.tokens.controlled;
         if (tokens.length === 0) {
             ui.notifications.warn("Daggerheart Distances: Select a token first.");
@@ -105,7 +107,7 @@ class CombatDistances {
             if (this.hasRings(token.id)) {
                 this.removeRings(token.id);
             } else {
-                this.createRings(token);
+                this.createRings(token, options);
             }
         });
 
@@ -120,6 +122,22 @@ class CombatDistances {
             choices[key] = this.PALETTES[key].label;
             return choices;
         }, {});
+
+        // --- NEW SETTING: Calculation Mode ---
+        game.settings.register(this.ID, 'calculationMode', {
+            name: 'Calculation Mode',
+            hint: 'Choose how elevation affects distance measurement.',
+            scope: 'client',
+            config: true,
+            type: String,
+            choices: {
+                "auto": "Auto (3D - Default)",
+                "flat": "Flat (2D Only - Ignore Height)",
+                "both": "Both (Show 3D & 2D)"
+            },
+            default: "auto",
+            onChange: () => { /* No global refresh needed, affects next hover */ }
+        });
 
         game.settings.register(this.ID, 'textSize', {
             name: 'Text Size',
@@ -228,9 +246,6 @@ class CombatDistances {
         }
         const container = document.getElementById('combat-distances-container');
         if (container) container.innerHTML = '';
-        
-        // Optional: Clear the Set when changing scenes if you want to reset everything
-        // this._activeTokens.clear();
     }
 
     static onTicker() {
@@ -271,12 +286,21 @@ class CombatDistances {
         return canvas.stage.worldTransform.apply(point);
     }
 
+    static formatDistance(value) {
+        return Number.isInteger(value) ? value : value.toFixed(1);
+    }
+
     // --- Event Handlers ---
 
     static onCanvasPan(canvas, position) {
         this.onTicker();
     }
 
+    /**
+     * Handles the hover event to display distance.
+     * Updated to support 3 modes: Auto (3D), Flat (2D), Both.
+     * PRIORITIZES local override from Toggle() over global settings.
+     */
     static onHoverToken(token, hovered) {
         if (!hovered) {
             this.removeHoverLabel(token.id);
@@ -289,16 +313,68 @@ class CombatDistances {
         const sourceToken = controlled[0];
         if (sourceToken.id === token.id) return;
 
-        let distance = 0;
+        // 1. Calculate Horizontal (2D)
+        let horizontalDistance = 0;
         try {
             const measurement = canvas.grid.measurePath([sourceToken.center, token.center]);
-            distance = measurement.distance;
+            horizontalDistance = measurement.distance;
         } catch (e) {
             return;
         }
 
-        const labelText = this.getDistanceLabel(distance);
-        this.createHoverLabel(token, labelText, distance);
+        // 2. Calculate Vertical
+        const sourceElevation = sourceToken.document.elevation || 0;
+        const targetElevation = token.document.elevation || 0;
+        const verticalDistance = Math.abs(sourceElevation - targetElevation);
+
+        // 3. Calculate 3D
+        let totalDistance3D = horizontalDistance;
+        if (verticalDistance > 0) {
+            totalDistance3D = Math.sqrt(Math.pow(horizontalDistance, 2) + Math.pow(verticalDistance, 2));
+        }
+
+        // 4. Determine Calculation Mode
+        // Default to settings
+        let calcMode = game.settings.get(this.ID, 'calculationMode');
+
+        // Override if the source token has specific toggle options active
+        if (this._activeTokens.has(sourceToken.id)) {
+            const activeData = this._activeTokens.get(sourceToken.id);
+            if (activeData && activeData.mode) {
+                calcMode = activeData.mode;
+            }
+        }
+        
+        let primaryDistanceForCategory = totalDistance3D;
+        let displayString = "";
+
+        // Normalize string comparison just in case
+        if (calcMode === "flat") {
+            // Mode: Flat (2D Only)
+            primaryDistanceForCategory = horizontalDistance;
+            displayString = `(${this.formatDistance(horizontalDistance)})`;
+        } 
+        else if (calcMode === "both") {
+            // Mode: Both (Show 3D, and 2D if different)
+            primaryDistanceForCategory = totalDistance3D;
+            
+            if (verticalDistance > 0) {
+                // Show "15 | 2D: 10"
+                displayString = `(${this.formatDistance(totalDistance3D)} | 2D: ${this.formatDistance(horizontalDistance)})`;
+            } else {
+                displayString = `(${this.formatDistance(totalDistance3D)})`;
+            }
+        } 
+        else {
+            // Mode: Auto (Default 3D)
+            primaryDistanceForCategory = totalDistance3D;
+            displayString = `(${this.formatDistance(totalDistance3D)})`;
+        }
+
+        const categoryText = this.getDistanceLabel(primaryDistanceForCategory);
+        
+        // Pass the pre-formatted string instead of raw number
+        this.createHoverLabel(token, categoryText, displayString);
     }
 
     static getDistanceLabel(distance) {
@@ -311,7 +387,7 @@ class CombatDistances {
         return "Very Far";
     }
 
-    static createHoverLabel(token, text, distance) {
+    static createHoverLabel(token, text, distanceDisplayString) {
         this.removeHoverLabel(token.id);
 
         const container = this.getContainer();
@@ -321,7 +397,8 @@ class CombatDistances {
         label.classList.add('combat-distance-hover-label', `text-${textSize}`);
         label.dataset.hoverTokenId = token.id;
         
-        label.innerHTML = `<span class="category">${text}</span><span class="dist">(${Math.round(distance)}')</span>`;
+        // Use the passed string directly (it might contain HTML like the 'Both' mode)
+        label.innerHTML = `<span class="category">${text}</span><span class="dist">${distanceDisplayString}</span>`;
         
         container.appendChild(label);
         this.updateHoverLabelPosition(label, token);
@@ -353,7 +430,7 @@ class CombatDistances {
         return container;
     }
 
-    static createRings(token) {
+    static createRings(token, options = {}) {
         this.removeRings(token.id);
         
         const currentRanges = this.ranges;
@@ -396,10 +473,11 @@ class CombatDistances {
 
             const label = document.createElement('div');
             label.classList.add('range-label', `text-${textSize}`);
-            const distVal = parseFloat(rangeData.distance) || 0;
-            const formattedDistance = Number.isInteger(distVal) ? distVal : distVal.toFixed(1);
             
-            label.innerHTML = `<span class="category">${rangeData.label}</span> <span class="dist">(${formattedDistance}')</span>`;
+            const formattedDistance = this.formatDistance(parseFloat(rangeData.distance));
+            
+            // Removed the "'" from the label here as well
+            label.innerHTML = `<span class="category">${rangeData.label}</span> <span class="dist">(${formattedDistance})</span>`;
             
             ring.appendChild(label);
             container.appendChild(ring);
@@ -407,8 +485,18 @@ class CombatDistances {
             this.updateRingPositionAndSize(ring, token, rangeData.distance);
         });
 
-        // Tracks token in local Set
-        this._activeTokens.add(token.id);
+        // Determine Mode for Map storage based on argument or default
+        let storedMode = null;
+        if (options.mode) {
+            const m = options.mode.toLowerCase();
+            if (m === '2d') storedMode = 'flat';
+            else if (m === '3d') storedMode = 'auto';
+            else if (m === 'both') storedMode = 'both';
+            else storedMode = m; // Fallback for correct keys
+        }
+
+        // Tracks token in local Map with its configuration
+        this._activeTokens.set(token.id, { mode: storedMode });
     }
 
     static updateRingPositionAndSize(ring, token, baseDistance) {
@@ -429,8 +517,10 @@ class CombatDistances {
         if (canvas && canvas.tokens) {
             canvas.tokens.placeables.forEach(token => {
                 if (this.hasRings(token.id)) {
-                    this.removeRings(token.id);
-                    this.createRings(token);
+                    // Retain existing options when refreshing styles
+                    const existingData = this._activeTokens.get(token.id);
+                    // Re-toggle effectively
+                    this.createRings(token, { mode: existingData?.mode });
                 }
             });
         }
@@ -467,12 +557,12 @@ class CombatDistances {
         const rings = document.querySelectorAll(`.range-ring[data-token-id="${tokenId}"]`);
         rings.forEach(ring => ring.remove());
         
-        // Remove from local Set
+        // Remove from local Map
         this._activeTokens.delete(tokenId);
     }
 
     static hasRings(tokenId) {
-        // Check against local Set
+        // Check against local Map
         return this._activeTokens.has(tokenId);
     }
 
