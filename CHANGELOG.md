@@ -1,3 +1,6 @@
+# 0.0.8
+- Auto disable system distance 
+
 # 0.0.7
 - Target Highlighting: Valid targets within range rings now glow with the ring's color.
 - Ghost Preview: Range rings now follow the token preview while dragging to test positions.

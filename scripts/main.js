@@ -1,12 +1,12 @@
 class CombatDistances {
     static ID = 'daggerheart-distances';
-    static MASS_ID = 'dhd-mass-center'; // ID constante para o ponto central
+    static MASS_ID = 'dhd-mass-center'; // Constant ID for the center point
     static _tickerFunc = null; 
     
     // Key: Token ID, Value: { mode: string|null }
     static _activeTokens = new Map();
     
-    // Armazena o "Token Virtual" para medição em massa
+    // Stores the "Virtual Token" for mass measurement
     static _massToken = null;
 
     static PALETTES = {
@@ -868,4 +868,38 @@ class CombatDistances {
 
 Hooks.once('init', () => {
     CombatDistances.initialize();
+});
+
+// Enforce Daggerheart System Setting: showTokenDistance = "never"
+Hooks.once("ready", async () => {
+    // 1. Verificação de segurança básica
+    if (!game.user.isGM || !CONFIG.DH) return;
+
+    try {
+        const key = CONFIG.DH.SETTINGS.gameSettings.appearance;
+        
+        // 2. Obtém a configuração bruta
+        const rawSettings = game.settings.get(CONFIG.DH.id, key);
+
+        // 3. Conversão Segura: Usa toObject se existir (DataModel), senão usa o próprio objeto
+        // Isso previne o erro "toObject is not a function"
+        const currentSettings = (typeof rawSettings.toObject === 'function') 
+            ? rawSettings.toObject() 
+            : { ...rawSettings };
+
+        // 4. Verifica e Salva se necessário
+        if (currentSettings.showTokenDistance !== "never") {
+            await game.settings.set(CONFIG.DH.id, key, { 
+                ...currentSettings, 
+                showTokenDistance: "never" 
+            });
+            console.log("Combat Distances | Configuração forçada para 'never'.");
+            
+            // Opcional: Recarrega a página se a mudança precisar de reinicialização para surtir efeito
+            // foundry.utils.debouncedReload(); 
+        }
+
+    } catch (err) {
+        console.warn("Combat Distances | Falha ao aplicar configuração:", err);
+    }
 });
