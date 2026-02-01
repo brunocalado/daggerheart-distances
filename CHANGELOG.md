@@ -2,6 +2,7 @@
 - Auto disable system distance works for non gm
 - Highlighting you take in account the token art
 - if a non gm select multiple tokens it will be able to see hover distance 
+- non GM can just hover the mouse of a token without permission and trigger the rings
 
 # 0.0.8
 - Auto disable system distance 

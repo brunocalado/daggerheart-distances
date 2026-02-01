@@ -137,9 +137,14 @@ class CombatDistances {
     }
 
     static Toggle(options = {}) {
-        const tokens = canvas.tokens.controlled;
+        // --- FEATURE UPDATE: Priority for Hovered Token ---
+        // 1. If mouse is over a token, use that token (allows non-GMs to target enemies)
+        // 2. If not, use selected tokens.
+        const hoverToken = canvas.tokens.hover;
+        const tokens = hoverToken ? [hoverToken] : canvas.tokens.controlled;
+
         if (tokens.length === 0) {
-            ui.notifications.warn("Daggerheart Distances: Select a token first.");
+            ui.notifications.warn("Daggerheart Distances: Select or hover over a token first.");
             return;
         }
 
@@ -151,6 +156,7 @@ class CombatDistances {
             }
         });
 
+        // Update HUD if the modified token matches the HUD object
         if (canvas.tokens.hud.rendered && tokens.some(t => t.id === canvas.tokens.hud.object?.id)) {
             canvas.tokens.hud.render();
         }
@@ -873,7 +879,7 @@ Hooks.once('init', () => {
 });
 
 Hooks.once("ready", async () => {
-    if (!CONFIG.DH) return;
+    if (!game.user.isGM || !CONFIG.DH) return;
 
     try {
         const key = CONFIG.DH.SETTINGS.gameSettings.appearance;
