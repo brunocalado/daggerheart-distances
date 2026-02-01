@@ -494,7 +494,13 @@ class CombatDistances {
         hl.style.left = `${screenPos.x}px`;
         hl.style.top = `${screenPos.y}px`;
         
-        const rotation = token.document.rotation || 0;
+        // --- FIX: Respect lockRotation ---
+        // If locked, visual rotation is 0. If not locked, use logical rotation.
+        let rotation = token.document.rotation || 0;
+        if (token.document.lockRotation) {
+            rotation = 0;
+        }
+
         hl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
 
         hl.style.display = '';

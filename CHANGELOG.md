@@ -1,3 +1,6 @@
+# 0.1.0
+- bug fix: document.lockRotation will be take into account
+
 # 0.0.9
 - Auto disable system distance works for non gm
 - Highlighting you take in account the token art
