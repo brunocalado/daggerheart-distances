@@ -248,7 +248,6 @@ class CombatDistances {
             onChange: () => this.refreshAll()
         });
 
-        // --- MOVED TO LAST: Target Highlighting ---
         game.settings.register(this.ID, 'targetHighlighting', {
             name: 'Target Highlighting',
             hint: 'Highlight tokens that are inside your range rings with the corresponding color.',
@@ -272,7 +271,6 @@ class CombatDistances {
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
 
-        // --- NEW SHORTCUT: Mass Measurement (M) ---
         game.keybindings.register(this.ID, "massMeasurement", {
             name: "Mass Measurement",
             hint: "Toggle mass measurement from the center of selected tokens. Default: M",
@@ -304,91 +302,89 @@ class CombatDistances {
     }
 
     static onTicker() {
-        if (!canvas || !canvas.ready || !canvas.tokens) return;
+        try {
+            if (!canvas || !canvas.ready || !canvas.tokens) return;
 
-        const rings = document.getElementsByClassName('dhd-range-ring');
-        const hoverLabels = document.getElementsByClassName('dhd-hover-label');
+            const rings = document.getElementsByClassName('dhd-range-ring');
+            const hoverLabels = document.getElementsByClassName('dhd-hover-label');
 
-        if (rings.length === 0) {
-            const highlights = document.getElementsByClassName('dhd-highlight-ring');
-            while(highlights.length > 0){
-                highlights[0].remove();
-            }
-        }
-
-        if (rings.length === 0 && hoverLabels.length === 0) return;
-
-        const doHighlight = game.settings.get(this.ID, 'targetHighlighting');
-        
-        const tokensHighlightedThisFrame = new Set();
-        const processedSourceIds = new Set();
-
-        for (let ring of rings) {
-            const tokenId = ring.dataset.tokenId;
-            
-            // --- MODIFIED: Handle Virtual Mass Token ---
-            let token = null;
-            if (tokenId === this.MASS_ID) {
-                token = this._massToken;
-            } else {
-                token = canvas.tokens.get(tokenId);
-            }
-            
-            // --- GHOST MOVEMENT PREVIEW FIX ---
-            let effectiveCenter = token ? token.center : {x:0, y:0};
-            let sourceElevation = token ? (token.document.elevation || 0) : 0;
-            let isDragging = false;
-            
-            if (token && tokenId !== this.MASS_ID) { 
-                let preview = token.preview;
-                if (!preview && canvas.tokens.preview?.children) {
-                    preview = canvas.tokens.preview.children.find(c => c._original?.id === tokenId);
-                }
-                if (preview) {
-                    effectiveCenter = preview.center;
-                    sourceElevation = preview.document.elevation !== undefined ? preview.document.elevation : sourceElevation;
-                    isDragging = true;
+            if (rings.length === 0) {
+                const highlights = document.getElementsByClassName('dhd-highlight-ring');
+                while(highlights.length > 0){
+                    highlights[0].remove();
                 }
             }
 
-            const dist = parseFloat(ring.dataset.rangeDistance);
+            if (rings.length === 0 && hoverLabels.length === 0) return;
+
+            const doHighlight = game.settings.get(this.ID, 'targetHighlighting');
             
-            // Allow display if dragging, even if original is hidden
-            // Or if token is normally visible
-            if (token && dist && (token.visible || isDragging)) {
-                this.updateRingPositionAndSize(ring, token, dist, effectiveCenter);
+            const tokensHighlightedThisFrame = new Set();
+            const processedSourceIds = new Set();
+
+            for (let ring of rings) {
+                const tokenId = ring.dataset.tokenId;
                 
-                if (doHighlight && !processedSourceIds.has(tokenId)) {
-                    this.updateTargetHighlights(token, effectiveCenter, tokensHighlightedThisFrame, sourceElevation);
-                    processedSourceIds.add(tokenId);
+                let token = null;
+                if (tokenId === this.MASS_ID) {
+                    token = this._massToken;
+                } else {
+                    token = canvas.tokens.get(tokenId);
                 }
-            } else {
-                ring.style.display = 'none'; 
-            }
-        }
+                
+                // --- GHOST MOVEMENT PREVIEW FIX ---
+                let effectiveCenter = token ? token.center : {x:0, y:0};
+                let sourceElevation = token ? (token.document.elevation || 0) : 0;
+                let isDragging = false;
+                
+                if (token && tokenId !== this.MASS_ID) { 
+                    let preview = token.preview;
+                    if (!preview && canvas.tokens.preview?.children) {
+                        preview = canvas.tokens.preview.children.find(c => c._original?.id === tokenId);
+                    }
+                    if (preview) {
+                        effectiveCenter = preview.center;
+                        sourceElevation = preview.document.elevation !== undefined ? preview.document.elevation : sourceElevation;
+                        isDragging = true;
+                    }
+                }
 
-        const existingHighlights = document.getElementsByClassName('dhd-highlight-ring');
-        for (let hl of existingHighlights) {
-            if (!tokensHighlightedThisFrame.has(hl.dataset.targetId)) {
-                hl.remove();
+                const dist = parseFloat(ring.dataset.rangeDistance);
+                
+                if (token && dist && (token.visible || isDragging)) {
+                    this.updateRingPositionAndSize(ring, token, dist, effectiveCenter);
+                    
+                    if (doHighlight && !processedSourceIds.has(tokenId)) {
+                        this.updateTargetHighlights(token, effectiveCenter, tokensHighlightedThisFrame, sourceElevation);
+                        processedSourceIds.add(tokenId);
+                    }
+                } else {
+                    ring.style.display = 'none'; 
+                }
             }
-        }
 
-        for (let label of hoverLabels) {
-            const tokenId = label.dataset.hoverTokenId;
-            let token = (tokenId === this.MASS_ID) ? this._massToken : canvas.tokens.get(tokenId);
-            
-            if (token && token.visible) {
-                this.updateHoverLabelPosition(label, token);
-            } else {
-                label.style.display = 'none';
+            const existingHighlights = document.getElementsByClassName('dhd-highlight-ring');
+            for (let hl of existingHighlights) {
+                if (!tokensHighlightedThisFrame.has(hl.dataset.targetId)) {
+                    hl.remove();
+                }
             }
+
+            for (let label of hoverLabels) {
+                const tokenId = label.dataset.hoverTokenId;
+                let token = (tokenId === this.MASS_ID) ? this._massToken : canvas.tokens.get(tokenId);
+                
+                if (token && token.visible) {
+                    this.updateHoverLabelPosition(label, token);
+                } else {
+                    label.style.display = 'none';
+                }
+            }
+        } catch (err) {
+            console.warn("Daggerheart Distances | Ticker Error:", err);
         }
     }
 
-    /**
-     * Logic to highlight targets inside rings
-     */
     static updateTargetHighlights(sourceToken, sourceCenter, activeSet, sourceElevationOverride = null) {
         const potentialTargets = canvas.tokens.placeables;
         const ranges = this.DEFAULTS.ranges;
@@ -403,7 +399,6 @@ class CombatDistances {
         const paletteKey = game.settings.get(this.ID, 'colorPalette');
         const currentPalette = this.PALETTES[paletteKey] || this.PALETTES['default'];
 
-        // Safety for Mass Token (width 0)
         const sW = sourceToken.document.width || 0;
         const sH = sourceToken.document.height || 0;
         const sourceDimSquares = Math.max(sW, sH);
@@ -460,9 +455,11 @@ class CombatDistances {
         const container = this.getContainer();
         
         if (!hl) {
-            hl = document.createElement('div');
+            hl = document.createElement('img');
             hl.classList.add('dhd-highlight-ring');
             hl.dataset.targetId = token.id;
+            // Safer access to texture src
+            hl.src = token.document.texture?.src || ""; 
             container.appendChild(hl);
         }
 
@@ -478,15 +475,22 @@ class CombatDistances {
         hl.style.setProperty('--hl-b', b);
         
         const screenPos = this.getWorldToScreen(token.center);
-        const tokenW = token.document.width * canvas.grid.size * canvas.stage.scale.x;
-        const tokenH = token.document.height * canvas.grid.size * canvas.stage.scale.y;
-        const size = Math.max(tokenW, tokenH); 
-
-        hl.style.width = `${size}px`;
-        hl.style.height = `${size}px`;
+        
+        // Safer access to texture scale
+        const scaleX = token.document.texture?.scaleX || 1;
+        const scaleY = token.document.texture?.scaleY || 1;
+        
+        const tokenW = token.document.width * canvas.grid.size * canvas.stage.scale.x * Math.abs(scaleX);
+        const tokenH = token.document.height * canvas.grid.size * canvas.stage.scale.y * Math.abs(scaleY);
+        
+        hl.style.width = `${tokenW}px`;
+        hl.style.height = `${tokenH}px`;
         hl.style.left = `${screenPos.x}px`;
         hl.style.top = `${screenPos.y}px`;
         
+        const rotation = token.document.rotation || 0;
+        hl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+
         hl.style.display = '';
     }
 
@@ -504,7 +508,7 @@ class CombatDistances {
     static getTokenSamplePoints(token) {
         if (!token) return [];
         const grid = canvas.scene.grid.size;
-        const resolution = 4; // 4x4 sample points per grid square
+        const resolution = 4;
         const step = grid / resolution;
         const offset = step / 2;
 
@@ -538,119 +542,126 @@ class CombatDistances {
     }
 
     static onHoverToken(token, hovered) {
-        if (!hovered) {
-            this.removeHoverLabel(token.id);
-            return;
-        }
-
-        const controlled = canvas.tokens.controlled;
-        if (controlled.length !== 1) return;
-
-        const sourceToken = controlled[0];
-        if (sourceToken.id === token.id) return;
-
-        // --- GHOST MOVEMENT SUPPORT FOR HOVER ---
-        let sourceCenter = sourceToken.center;
-        
-        // 1. Try standard preview
-        let preview = sourceToken.preview;
-        // 2. Fallback
-        if (!preview && canvas.tokens.preview?.children) {
-            preview = canvas.tokens.preview.children.find(c => c._original?.id === sourceToken.id);
-        }
-
-        let sourceElevation = sourceToken.document.elevation || 0;
-
-        if (preview) {
-            sourceCenter = preview.center;
-            sourceElevation = preview.document.elevation !== undefined ? preview.document.elevation : sourceElevation;
-        }
-
-        // --- Setup ---
-        const threshold = game.settings.get(this.ID, 'coverageThreshold'); 
-        let calcMode = game.settings.get(this.ID, 'calculationMode');
-        if (this._activeTokens.has(sourceToken.id)) {
-            const activeData = this._activeTokens.get(sourceToken.id);
-            if (activeData && activeData.mode) {
-                calcMode = activeData.mode;
+        try {
+            if (!hovered) {
+                this.removeHoverLabel(token.id);
+                return;
             }
-        }
-        const use3D = (calcMode !== 'flat');
 
-        const targetElevation = token.document.elevation || 0;
-        const verticalDistance = Math.abs(sourceElevation - targetElevation);
-        const verticalDistancePx = verticalDistance * (canvas.scene.grid.size / canvas.scene.grid.distance);
+            const controlled = canvas.tokens.controlled;
+            
+            // --- FIX: Allow loose selection. If multiple are selected, use the first one. ---
+            if (controlled.length === 0) return; 
 
-        let finalDistDisplay = Infinity;
-        let finalDist3DDisplay = Infinity;
-        let matchedLabel = "Very Far";
+            const sourceToken = controlled[0];
+            if (sourceToken.id === token.id) return;
 
-        // --- HIGH RESOLUTION VISUAL COVERAGE LOGIC (EDGE TO EDGE) ---
-        const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
-        const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
-        
-        const targetPoints = this.getTokenSamplePoints(token);
-        const sortedRanges = Object.values(this.DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
-        const lineBufferPx = 2; 
+            // --- GHOST MOVEMENT SUPPORT FOR HOVER ---
+            let sourceCenter = sourceToken.center;
+            
+            // 1. Try standard preview
+            let preview = sourceToken.preview;
+            
+            // 2. Fallback with Safe Access
+            // Some players might not have access to _original or children array might be tricky
+            if (!preview && canvas.tokens.preview?.children) {
+                preview = canvas.tokens.preview.children.find(c => c._original?.id === sourceToken.id);
+            }
 
-        for (const range of sortedRanges) {
-            const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
-            const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
+            let sourceElevation = sourceToken.document.elevation || 0;
 
-            let pointsInside = 0;
-            for (let pTarget of targetPoints) {
-                let distPx = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
-                if (use3D && verticalDistancePx > 0) {
-                    distPx = Math.sqrt(Math.pow(distPx, 2) + Math.pow(verticalDistancePx, 2));
+            if (preview) {
+                sourceCenter = preview.center;
+                sourceElevation = preview.document.elevation !== undefined ? preview.document.elevation : sourceElevation;
+            }
+
+            // --- Setup ---
+            const threshold = game.settings.get(this.ID, 'coverageThreshold'); 
+            let calcMode = game.settings.get(this.ID, 'calculationMode');
+            if (this._activeTokens.has(sourceToken.id)) {
+                const activeData = this._activeTokens.get(sourceToken.id);
+                if (activeData && activeData.mode) {
+                    calcMode = activeData.mode;
                 }
-                if (distPx <= visualRingRadiusPx) pointsInside++;
+            }
+            const use3D = (calcMode !== 'flat');
+
+            const targetElevation = token.document.elevation || 0;
+            const verticalDistance = Math.abs(sourceElevation - targetElevation);
+            // Safety check for NaN
+            const safeVertDist = isNaN(verticalDistance) ? 0 : verticalDistance;
+            const verticalDistancePx = safeVertDist * (canvas.scene.grid.size / canvas.scene.grid.distance);
+
+            let finalDistDisplay = Infinity;
+            let finalDist3DDisplay = Infinity;
+            let matchedLabel = "Very Far";
+
+            const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
+            const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
+            
+            const targetPoints = this.getTokenSamplePoints(token);
+            const sortedRanges = Object.values(this.DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
+            const lineBufferPx = 2; 
+
+            for (const range of sortedRanges) {
+                const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
+                const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
+
+                let pointsInside = 0;
+                for (let pTarget of targetPoints) {
+                    let distPx = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
+                    if (use3D && verticalDistancePx > 0) {
+                        distPx = Math.sqrt(Math.pow(distPx, 2) + Math.pow(verticalDistancePx, 2));
+                    }
+                    if (distPx <= visualRingRadiusPx) pointsInside++;
+                }
+
+                const ratio = pointsInside / targetPoints.length;
+                if (ratio >= threshold) {
+                    matchedLabel = range.label;
+                    break;
+                }
             }
 
-            const ratio = pointsInside / targetPoints.length;
-            if (ratio >= threshold) {
-                matchedLabel = range.label;
-                break;
+            let minPointDistPx = Infinity;
+            for (let pTarget of targetPoints) {
+                const d = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
+                if (d < minPointDistPx) minPointDistPx = d;
             }
-        }
+            
+            let distDisplayPx = Math.max(0, minPointDistPx - sourceRadiusPx);
+            let d2d = (distDisplayPx / canvas.scene.grid.size) * canvas.scene.grid.distance;
+            let d3d = d2d;
 
-        // --- Calculate display number (Visual Approximation) ---
-        let minPointDistPx = Infinity;
-        for (let pTarget of targetPoints) {
-            const d = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
-            if (d < minPointDistPx) minPointDistPx = d;
-        }
-        
-        let distDisplayPx = Math.max(0, minPointDistPx - sourceRadiusPx);
-        let d2d = (distDisplayPx / canvas.scene.grid.size) * canvas.scene.grid.distance;
-        let d3d = d2d;
+            if (use3D && safeVertDist > 0) {
+                d3d = Math.sqrt(Math.pow(d2d, 2) + Math.pow(safeVertDist, 2));
+            }
 
-        if (use3D && verticalDistance > 0) {
-            d3d = Math.sqrt(Math.pow(d2d, 2) + Math.pow(verticalDistance, 2));
-        }
+            finalDistDisplay = d2d;
+            finalDist3DDisplay = d3d;
 
-        finalDistDisplay = d2d;
-        finalDist3DDisplay = d3d;
+            if (finalDistDisplay === Infinity) return;
 
-        if (finalDistDisplay === Infinity) return;
+            let displayString = "";
 
-        // --- DISPLAY FORMATTING ---
-        let displayString = "";
-
-        if (calcMode === "flat") {
-            displayString = `(${this.formatDistance(finalDistDisplay)})`;
-        } 
-        else if (calcMode === "both") {
-            if (verticalDistance > 0) {
-                displayString = `(${this.formatDistance(finalDist3DDisplay)} | 2D: ${this.formatDistance(finalDistDisplay)})`;
-            } else {
+            if (calcMode === "flat") {
+                displayString = `(${this.formatDistance(finalDistDisplay)})`;
+            } 
+            else if (calcMode === "both") {
+                if (safeVertDist > 0) {
+                    displayString = `(${this.formatDistance(finalDist3DDisplay)} | 2D: ${this.formatDistance(finalDistDisplay)})`;
+                } else {
+                    displayString = `(${this.formatDistance(finalDist3DDisplay)})`;
+                }
+            } 
+            else { // Auto
                 displayString = `(${this.formatDistance(finalDist3DDisplay)})`;
             }
-        } 
-        else { // Auto
-            displayString = `(${this.formatDistance(finalDist3DDisplay)})`;
-        }
 
-        this.createHoverLabel(token, matchedLabel, displayString);
+            this.createHoverLabel(token, matchedLabel, displayString);
+        } catch (err) {
+            console.error("Daggerheart Distances | Hover Calculation Error:", err);
+        }
     }
 
     static getDistanceLabel(distance) {
@@ -708,7 +719,6 @@ class CombatDistances {
     static createRings(token, options = {}) {
         this.removeRings(token.id);
         
-        // --- FIX: Restore Mass Token after cleaning ---
         if (token.id === this.MASS_ID) {
             this._massToken = token;
         }
@@ -775,17 +785,10 @@ class CombatDistances {
         this._activeTokens.set(token.id, { mode: storedMode });
     }
 
-    /**
-     * Updates ring visual size and position.
-     * UPDATED: Accepts 'customCenter' for Ghost Movement support.
-     */
     static updateRingPositionAndSize(ring, token, baseDistance, customCenter = null) {
         const center = customCenter || token.center;
         const screenPos = this.getWorldToScreen(center);
         
-        // Edge to Edge logic is default:
-        // Diameter offset = Max Dimension (Width or Height)
-        // Ensure token.document exists and handles mass token (width 0)
         const tW = (token.document && token.document.width) || 0;
         const tH = (token.document && token.document.height) || 0;
         const diameterOffset = Math.max(tW, tH) * canvas.scene.grid.distance;
@@ -847,7 +850,6 @@ class CombatDistances {
 
         this._activeTokens.delete(tokenId);
         
-        // Clean up mass token if it was removed
         if (tokenId === this.MASS_ID) {
             this._massToken = null;
         }
@@ -870,33 +872,22 @@ Hooks.once('init', () => {
     CombatDistances.initialize();
 });
 
-// Enforce Daggerheart System Setting: showTokenDistance = "never"
 Hooks.once("ready", async () => {
-    // 1. Verificação de segurança básica
-    if (!game.user.isGM || !CONFIG.DH) return;
+    if (!CONFIG.DH) return;
 
     try {
         const key = CONFIG.DH.SETTINGS.gameSettings.appearance;
-        
-        // 2. Obtém a configuração bruta
         const rawSettings = game.settings.get(CONFIG.DH.id, key);
-
-        // 3. Conversão Segura: Usa toObject se existir (DataModel), senão usa o próprio objeto
-        // Isso previne o erro "toObject is not a function"
         const currentSettings = (typeof rawSettings.toObject === 'function') 
             ? rawSettings.toObject() 
             : { ...rawSettings };
 
-        // 4. Verifica e Salva se necessário
         if (currentSettings.showTokenDistance !== "never") {
             await game.settings.set(CONFIG.DH.id, key, { 
                 ...currentSettings, 
                 showTokenDistance: "never" 
             });
             console.log("Combat Distances | Configuração forçada para 'never'.");
-            
-            // Opcional: Recarrega a página se a mudança precisar de reinicialização para surtir efeito
-            // foundry.utils.debouncedReload(); 
         }
 
     } catch (err) {

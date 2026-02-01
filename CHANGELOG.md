@@ -1,3 +1,8 @@
+# 0.0.9
+- Auto disable system distance works for non gm
+- Highlighting you take in account the token art
+- if a non gm select multiple tokens it will be able to see hover distance 
+
 # 0.0.8
 - Auto disable system distance 
 
