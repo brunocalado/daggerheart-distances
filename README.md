@@ -65,6 +65,7 @@ You have many easy ways to show or hide the range rings around a token:
 
 3. You can also use the macro `DHDistances.Toggle();`. This works for multiple selected tokens. Use `DHDistances.MassMeasurement();` for Mass Measurement.
 
+
 ```js
 DHDistances.Toggle({mode: '2d'}); // Calculates distance ignoring elevation.
 ```
@@ -75,6 +76,10 @@ DHDistances.Toggle({mode: '3d'}); // Calculates distance accounting for elevatio
 
 ```js
 DHDistances.Toggle({mode: 'both'}); // Shows both 3D and 2D distances.
+```
+
+```js
+DHDistances.Toggle({remote: true}); // This will make the rings show to all clients
 ```
 
 ### Configuration

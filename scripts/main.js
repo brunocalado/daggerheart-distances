@@ -3,7 +3,7 @@ class CombatDistances {
     static MASS_ID = 'dhd-mass-center'; // Constant ID for the center point
     static _tickerFunc = null; 
     
-    // Key: Token ID, Value: { mode: string|null }
+    // Key: Token ID, Value: { mode: string|null, timerId: number|null }
     static _activeTokens = new Map();
     
     // Stores the "Virtual Token" for mass measurement
@@ -136,10 +136,17 @@ class CombatDistances {
         this.createRings(this._massToken, options);
     }
 
-    static Toggle(options = {}) {
-        // --- FEATURE UPDATE: Priority for Hovered Token ---
-        // 1. If mouse is over a token, use that token (allows non-GMs to target enemies)
-        // 2. If not, use selected tokens.
+    /**
+     * Toggles rings on tokens.
+     * @param {Object} options 
+     * @param {boolean} options.remote - If true, broadcasts the toggle to all clients (GM only).
+     */
+    static async Toggle(options = {}) {
+        // --- STEP 2: The Method Toggle (Trigger Logic) ---
+        const remote = options.remote || false;
+
+        // 1. Identify Target Tokens
+        // Priority: Hovered Token -> Selected Tokens
         const hoverToken = canvas.tokens.hover;
         const tokens = hoverToken ? [hoverToken] : canvas.tokens.controlled;
 
@@ -148,6 +155,26 @@ class CombatDistances {
             return;
         }
 
+        // 2. Handle Remote Broadcast (GM Only)
+        if (remote) {
+            if (!game.user.isGM) {
+                // Silently fail if user is not GM
+                return;
+            }
+
+            const payload = {
+                triggerId: foundry.utils.randomID(),
+                sceneId: canvas.scene.id,
+                tokenIds: tokens.map(t => t.id),
+                timestamp: Date.now()
+            };
+
+            // Update the setting to trigger the listener on all clients (including self)
+            await game.settings.set(this.ID, 'broadcastState', payload);
+            return; 
+        }
+
+        // 3. Handle Local Toggle (Standard Behavior)
         tokens.forEach(token => {
             if (this.hasRings(token.id)) {
                 this.removeRings(token.id);
@@ -156,10 +183,71 @@ class CombatDistances {
             }
         });
 
-        // Update HUD if the modified token matches the HUD object
+        // Update HUD if needed
         if (canvas.tokens.hud.rendered && tokens.some(t => t.id === canvas.tokens.hud.object?.id)) {
             canvas.tokens.hud.render();
         }
+    }
+
+    // --- Internal Logic for Broadcast ---
+
+    /**
+     * STEP 3: The Listener
+     * Handles changes to the 'broadcastState' setting.
+     */
+    static _handleBroadcastChange(data) {
+        // Validation: Scene must match
+        if (data.sceneId !== canvas.scene.id) return;
+
+        // Anti-Stale: Check timestamp (ignore if older than 10 seconds)
+        const now = Date.now();
+        if (now - data.timestamp > 10000) return;
+
+        // Retrieve tokens
+        const tokens = [];
+        for (const id of data.tokenIds) {
+            const token = canvas.tokens.get(id);
+            if (token) tokens.push(token);
+        }
+
+        if (tokens.length > 0) {
+            this._applyLocalToggle(tokens);
+        }
+    }
+
+    /**
+     * STEP 4: Visual Application
+     * Applies rings locally with a timer.
+     */
+    static _applyLocalToggle(tokens) {
+        // Ensure ticker is running
+        if (!this._tickerFunc) this.startTicker();
+
+        const duration = game.settings.get(this.ID, 'broadcastDuration') * 1000; // Convert to ms
+
+        tokens.forEach(token => {
+            // Reset: Remove existing rings to refresh visual state
+            if (this.hasRings(token.id)) {
+                this.removeRings(token.id);
+            }
+
+            // Create new rings
+            this.createRings(token);
+
+            // Set timer to remove
+            const timerId = setTimeout(() => {
+                this.removeRings(token.id);
+            }, duration);
+
+            // Store timerId so we can cancel it if needed (in removeRings)
+            const activeData = this._activeTokens.get(token.id);
+            if (activeData) {
+                activeData.timerId = timerId;
+            }
+        });
+
+        // Force frame render immediately
+        this.onTicker();
     }
 
     static registerSettings() {
@@ -167,6 +255,26 @@ class CombatDistances {
             choices[key] = this.PALETTES[key].label;
             return choices;
         }, {});
+
+        // --- STEP 1: Synchronization Configuration ---
+        game.settings.register(this.ID, 'broadcastState', {
+            scope: 'world',
+            config: false, // Hidden setting acting as data channel
+            type: Object,
+            default: {},
+            onChange: (data) => this._handleBroadcastChange(data)
+        });
+
+        game.settings.register(this.ID, 'broadcastDuration', {
+            name: 'Broadcast Duration (Seconds)',
+            hint: 'How long the rings remain visible when broadcasted by the GM.',
+            scope: 'world',
+            config: true,
+            type: Number,
+            default: 7,
+            range: { min: 1, max: 30, step: 1 }
+        });
+        // ---------------------------------------------
 
         game.settings.register(this.ID, 'coverageThreshold', {
             name: 'Grid Coverage Threshold',
@@ -273,7 +381,19 @@ class CombatDistances {
             name: "Toggle Combat Distances",
             hint: "Toggle the distance rings for the selected token(s). Default: R",
             editable: [{ key: "KeyR" }],
-            onDown: () => { this.Toggle(); return true; },
+            onDown: () => { this.Toggle({ remote: false }); return true; },
+            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+        });
+
+        // New Broadcast Binding (Shift+R)
+        game.keybindings.register(this.ID, "broadcastRings", {
+            name: "Broadcast Rings (GM Only)",
+            hint: "Shows rings to ALL players for a short duration. Default: Shift+R",
+            editable: [{ key: "KeyR", modifiers: [KeyboardManager.MODIFIER_KEYS.SHIFT] }],
+            onDown: () => { 
+                this.Toggle({ remote: true }); 
+                return true; 
+            },
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
 
@@ -729,7 +849,8 @@ class CombatDistances {
     }
 
     static createRings(token, options = {}) {
-        this.removeRings(token.id);
+        // NOTE: Does not call removeRings directly to avoid recursion issues in logic, 
+        // but assumes caller has cleaned up if necessary.
         
         if (token.id === this.MASS_ID) {
             this._massToken = token;
@@ -794,7 +915,9 @@ class CombatDistances {
             else storedMode = m; 
         }
 
-        this._activeTokens.set(token.id, { mode: storedMode });
+        // Store active state (preserving existing timerId if somehow this was a refresh without clear)
+        const existing = this._activeTokens.get(token.id) || {};
+        this._activeTokens.set(token.id, { ...existing, mode: storedMode });
     }
 
     static updateRingPositionAndSize(ring, token, baseDistance, customCenter = null) {
@@ -821,6 +944,8 @@ class CombatDistances {
             canvas.tokens.placeables.forEach(token => {
                 if (this.hasRings(token.id)) {
                     const existingData = this._activeTokens.get(token.id);
+                    // Remove first to clean DOM, then recreate
+                    this.removeRings(token.id); 
                     this.createRings(token, { mode: existingData?.mode });
                 }
             });
@@ -852,6 +977,15 @@ class CombatDistances {
     }
 
     static removeRings(tokenId) {
+        // --- CLEANUP TIMERS ---
+        // Crucial for Broadcast: If a token has a pending removal timer, we must clear it
+        // to prevent it from removing future rings (e.g. if GM broadcasts again quickly).
+        const activeData = this._activeTokens.get(tokenId);
+        if (activeData && activeData.timerId) {
+            clearTimeout(activeData.timerId);
+            activeData.timerId = null;
+        }
+
         const rings = document.querySelectorAll(`.dhd-range-ring[data-token-id="${tokenId}"]`);
         rings.forEach(ring => ring.remove());
         

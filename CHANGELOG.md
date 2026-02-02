@@ -1,3 +1,6 @@
+# 0.1.1
+- You can now broadcast the rings to all clients. Use Shift + R or DHDistances.Toggle({remote: true});
+
 # 0.1.0
 - bug fix: document.lockRotation will be take into account
 
