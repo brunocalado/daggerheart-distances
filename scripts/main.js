@@ -389,7 +389,8 @@ class CombatDistances {
         game.keybindings.register(this.ID, "broadcastRings", {
             name: "Broadcast Rings (GM Only)",
             hint: "Shows rings to ALL players for a short duration. Default: Shift+R",
-            editable: [{ key: "KeyR", modifiers: [KeyboardManager.MODIFIER_KEYS.SHIFT] }],
+            // Corrected deprecation warning for V13: using namespaced KeyboardManager
+            editable: [{ key: "KeyR", modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
             onDown: () => { 
                 this.Toggle({ remote: true }); 
                 return true; 

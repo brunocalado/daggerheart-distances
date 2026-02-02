@@ -1,3 +1,6 @@
+# 0.1.2
+- removed warning for deprecated code
+
 # 0.1.1
 - You can now broadcast the rings to all clients. Use Shift + R or DHDistances.Toggle({remote: true});
 
