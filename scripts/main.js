@@ -621,13 +621,17 @@ class CombatDistances {
         hl.style.top = `${screenPos.y}px`;
         
         // --- FIX: Respect lockRotation ---
-        // If locked, visual rotation is 0. If not locked, use logical rotation.
         let rotation = token.document.rotation || 0;
         if (token.document.lockRotation) {
             rotation = 0;
         }
 
-        hl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+        // --- NEW FIX: Mirroring (Negative Scale) ---
+        // If scale is negative, flip the highlight element too
+        const flipX = scaleX < 0 ? -1 : 1;
+        const flipY = scaleY < 0 ? -1 : 1;
+
+        hl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(${flipX}, ${flipY})`;
 
         hl.style.display = '';
     }
