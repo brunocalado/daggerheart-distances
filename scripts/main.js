@@ -50,10 +50,10 @@ class CombatDistances {
 
     static DEFAULTS = {
         ranges: {
-            ring1: { distance: 5, label: "Melee" },
-            ring2: { distance: 15, label: "Very Close" },
-            ring3: { distance: 30, label: "Close" },
-            ring4: { distance: 60, label: "Far" }
+            ring1: { distance: 5, label: "DHD.ranges.melee" },
+            ring2: { distance: 15, label: "DHD.ranges.veryClose" },
+            ring3: { distance: 30, label: "DHD.ranges.close" },
+            ring4: { distance: 60, label: "DHD.ranges.far" }
         }
     };
 
@@ -587,6 +587,11 @@ class CombatDistances {
             hl.dataset.targetId = token.id;
             // Safer access to texture src
             hl.src = token.document.texture?.src || ""; 
+            
+            // --- FIXES: Aspect Ratio & Click Through ---
+            hl.style.pointerEvents = "none";
+            hl.style.objectFit = "contain";
+            
             container.appendChild(hl);
         }
 
@@ -727,7 +732,9 @@ class CombatDistances {
 
             let finalDistDisplay = Infinity;
             let finalDist3DDisplay = Infinity;
-            let matchedLabel = "Very Far";
+            
+            // Default to 'Far' (or very far) using the key if outside all ranges
+            let matchedLabel = "DHD.ranges.far"; 
 
             const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
             const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
@@ -804,7 +811,7 @@ class CombatDistances {
                 return range.label;
             }
         }
-        return "Very Far";
+        return "DHD.ranges.far";
     }
 
     static createHoverLabel(token, text, distanceDisplayString) {
@@ -817,7 +824,8 @@ class CombatDistances {
         label.classList.add('dhd-hover-label', `text-${textSize}`);
         label.dataset.hoverTokenId = token.id;
         
-        label.innerHTML = `<span class="category">${text}</span><span class="dist">${distanceDisplayString}</span>`;
+        // --- LOCALIZATION UPDATE: Apply game.i18n.localize here ---
+        label.innerHTML = `<span class="category">${game.i18n.localize(text)}</span><span class="dist">${distanceDisplayString}</span>`;
         
         container.appendChild(label);
         this.updateHoverLabelPosition(label, token);
@@ -899,7 +907,8 @@ class CombatDistances {
             
             const formattedDistance = this.formatDistance(parseFloat(rangeData.distance));
             
-            label.innerHTML = `<span class="category">${rangeData.label}</span> <span class="dist">(${formattedDistance})</span>`;
+            // --- LOCALIZATION UPDATE: Apply game.i18n.localize here ---
+            label.innerHTML = `<span class="category">${game.i18n.localize(rangeData.label)}</span> <span class="dist">(${formattedDistance})</span>`;
             
             ring.appendChild(label);
             container.appendChild(ring);

@@ -1,3 +1,7 @@
+# 0.1.3
+- supports translation
+- bug fix: no longer distorts art
+
 # 0.1.2
 - removed warning for deprecated code
 
