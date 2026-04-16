@@ -737,8 +737,8 @@ class CombatDistances {
             let finalDistDisplay = Infinity;
             let finalDist3DDisplay = Infinity;
             
-            // Default to 'Far' (or very far) using the key if outside all ranges
-            let matchedLabel = "DHD.ranges.far"; 
+            // Default to 'Very Far' if outside all defined ranges
+            let matchedLabel = "DHD.ranges.veryFar";
 
             const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
             const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
@@ -815,7 +815,7 @@ class CombatDistances {
                 return range.label;
             }
         }
-        return "DHD.ranges.far";
+        return "DHD.ranges.veryFar";
     }
 
     static createHoverLabel(token, text, distanceDisplayString) {

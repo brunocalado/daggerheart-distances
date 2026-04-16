@@ -1,3 +1,7 @@
+# 0.1.4
+- [Fixed] Tokens beyond the Far ring (60 ft) now correctly display "Very Far" instead of "Far"
+- [Added] `DHD.ranges.veryFar` localization key (en, pt-BR)
+
 # 0.1.3
 - supports translation
 - bug fix: no longer distorts art
