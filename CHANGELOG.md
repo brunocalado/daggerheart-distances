@@ -1,9 +1,17 @@
+# 0.1.7
+
+- [Fixed] CSS leaking into Foundry UI: added `isolation: isolate` to the overlay container to prevent `mix-blend-mode` on token highlights from visually corrupting the sidebar and other UI elements
+- [Fixed] `overflow: hidden` on the overlay container prevents off-screen rings from adding scrollbars that displaced the hotbar
+- [Fixed] Overlay container now attaches to the canvas wrapper (`#board` parent) instead of `document.body`, scoping it below Foundry's `#interface` layer
+- [Fixed] Removed jQuery dependency from `onRenderTokenHUD`; replaced with native DOM APIs per V13 standards
+
 # 0.1.6
 
 - [Changed] Six visual settings (Text Size, Color Palette, Line Style, Line Thickness, Gradient Fill Style, Target Highlighting) moved out of the default settings list into a dedicated "Visual Settings" dialog opened via a palette button
 
 # 0.1.5
 
+- https://github.com/brunocalado/daggerheart-distances/issues/3
 - [Added] Operation Mode setting: Manual (default), Hover Mode (GM), and Hover Mode (Broadcast)
 - [Added] Hover Mode (GM): hovering a token as GM auto-shows rings locally, removed on mouse-out
 - [Added] Hover Mode (Broadcast): hovering a token as GM broadcasts rings to all players (uses existing broadcast timer)

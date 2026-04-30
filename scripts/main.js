@@ -574,8 +574,11 @@ class CombatDistances {
         }
         // Reset transient mode in case canvas reloads while a key is physically held
         this._transientMode = null;
+        // Remove the container entirely so getContainer() re-attaches it to the correct
+        // parent after the canvas is rebuilt. Clearing innerHTML alone leaves the element
+        // anchored to a stale parent, which displaces Foundry's hotbar and sidebar.
         const container = document.getElementById('combat-distances-container');
-        if (container) container.innerHTML = '';
+        if (container) container.remove();
     }
 
     static onTicker() {
@@ -1036,7 +1039,11 @@ class CombatDistances {
         if (!container) {
             container = document.createElement('div');
             container.id = 'combat-distances-container';
-            document.body.appendChild(container);
+            // Attach to #board's parent (the canvas wrapper) so the overlay is scoped
+            // to the canvas area, staying below Foundry's #interface layer (sidebar, hotbar).
+            // Falls back to document.body if the canvas wrapper is unavailable.
+            const parent = canvas.app?.view?.parentElement ?? document.body;
+            parent.appendChild(container);
         }
         return container;
     }
@@ -1152,25 +1159,26 @@ class CombatDistances {
     static get ranges() { return this.DEFAULTS.ranges; }
 
     static onRenderTokenHUD(hud, html, tokenData) {
-        const button = $(`
-            <div class="control-icon" title="Toggle Combat Distances">
-                <i class="fas fa-circle-dot"></i>
-            </div>
-        `);
-
         const token = canvas.tokens.get(tokenData._id);
         if (!token) return;
-        
+
+        const button = document.createElement('div');
+        button.classList.add('control-icon');
+        button.title = 'Toggle Combat Distances';
+        button.innerHTML = '<i class="fas fa-circle-dot"></i>';
+
         if (this.hasRings(token.id)) {
-            button.addClass('active');
+            button.classList.add('active');
         }
 
-        button.click(async (event) => {
+        button.addEventListener('click', async (event) => {
             event.preventDefault();
             this.Toggle();
         });
 
-        $(html).find('div.left').append(button);
+        // V13: html may be HTMLElement (AppV2) or a jQuery wrapper (legacy HUD).
+        const root = html instanceof HTMLElement ? html : html[0];
+        root?.querySelector('div.left')?.appendChild(button);
     }
 
     static removeRings(tokenId) {
