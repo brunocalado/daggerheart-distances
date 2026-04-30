@@ -1,0 +1,76 @@
+<form>
+    <div class="dhd-visual-settings-form">
+
+        <div class="form-group">
+            <label>Text Size</label>
+            <div class="form-fields">
+                <select name="textSize">
+                    {{#each textSize.choices}}
+                    <option value="{{@key}}" {{#if (eq @key ../textSize.value)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <p class="hint">Choose the size of the text labels.</p>
+        </div>
+
+        <div class="form-group">
+            <label>Color Palette</label>
+            <div class="form-fields">
+                <select name="colorPalette">
+                    {{#each colorPalette.choices}}
+                    <option value="{{@key}}" {{#if (eq @key ../colorPalette.value)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <p class="hint">Choose the color theme for the distance rings.</p>
+        </div>
+
+        <div class="form-group">
+            <label>Line Style</label>
+            <div class="form-fields">
+                <select name="lineStyle">
+                    {{#each lineStyle.choices}}
+                    <option value="{{@key}}" {{#if (eq @key ../lineStyle.value)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <p class="hint">Choose the line style for the distance rings.</p>
+        </div>
+
+        <div class="form-group">
+            <label>Line Thickness</label>
+            <div class="form-fields">
+                <select name="lineThickness">
+                    {{#each lineThickness.choices}}
+                    <option value="{{@key}}" {{#if (eq @key ../lineThickness.value)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <p class="hint">Adjust the thickness of the distance rings.</p>
+        </div>
+
+        <div class="form-group">
+            <label>Gradient Fill Style</label>
+            <div class="form-fields">
+                <select name="fillStyle">
+                    {{#each fillStyle.choices}}
+                    <option value="{{@key}}" {{#if (eq @key ../fillStyle.value)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <p class="hint">Choose the style of the gradient fill.</p>
+        </div>
+
+        <div class="form-group">
+            <label>Target Highlighting</label>
+            <div class="form-fields">
+                <input type="checkbox" name="targetHighlighting" value="true" {{#if targetHighlighting}}checked{{/if}}>
+            </div>
+            <p class="hint">Highlight tokens inside your range rings with the corresponding color.</p>
+        </div>
+
+    </div>
+    <footer class="sheet-footer flexrow">
+        <button type="submit"><i class="fas fa-save"></i> Save Changes</button>
+    </footer>
+</form>

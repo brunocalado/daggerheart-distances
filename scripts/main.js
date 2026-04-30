@@ -1,3 +1,94 @@
+/**
+ * Custom settings dialog for visual appearance options.
+ * Opened via the settings menu button registered with game.settings.registerMenu.
+ * Lifecycle: rendered via HandlebarsApplicationMixin, submitted via AppV2 form handler.
+ */
+class VisualSettingsApp extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
+
+    static DEFAULT_OPTIONS = {
+        id: 'dhd-visual-settings',
+        tag: 'form',
+        form: {
+            // Arrow wrapper defers evaluation until after class definition
+            handler: (...args) => VisualSettingsApp._onSubmit(...args),
+            closeOnSubmit: true
+        },
+        window: {
+            title: 'Daggerheart Distances — Visual Settings'
+        },
+        position: {
+            width: 480,
+            height: 'auto'
+        }
+    };
+
+    static PARTS = {
+        form: {
+            template: 'modules/daggerheart-distances/templates/visual-settings.hbs'
+        }
+    };
+
+    /**
+     * Populates the template context with current setting values and available choices.
+     * Triggered by the AppV2 render lifecycle.
+     * @param {object} options
+     * @returns {Promise<object>}
+     */
+    async _prepareContext(options) {
+        const id = CombatDistances.ID;
+        return {
+            textSize: {
+                value: game.settings.get(id, 'textSize'),
+                choices: { small: 'Small', normal: 'Normal', large: 'Large' }
+            },
+            colorPalette: {
+                value: game.settings.get(id, 'colorPalette'),
+                choices: Object.keys(CombatDistances.PALETTES).reduce((acc, key) => {
+                    acc[key] = CombatDistances.PALETTES[key].label;
+                    return acc;
+                }, {})
+            },
+            lineStyle: {
+                value: game.settings.get(id, 'lineStyle'),
+                choices: { solid: 'Solid', dotted: 'Dotted', dashed: 'Dashed' }
+            },
+            lineThickness: {
+                value: game.settings.get(id, 'lineThickness'),
+                choices: { '2px': 'Normal', '5px': 'Large', '8px': 'Extra Large', '12px': 'Massive' }
+            },
+            fillStyle: {
+                value: game.settings.get(id, 'fillStyle'),
+                choices: {
+                    'static': 'Static',
+                    'animated-normal': 'Animated - Normal',
+                    'animated-light': 'Animated - Light',
+                    'none': 'None'
+                }
+            },
+            targetHighlighting: game.settings.get(id, 'targetHighlighting')
+        };
+    }
+
+    /**
+     * Persists all visual settings and triggers a canvas refresh.
+     * Checkbox coercion is explicit: unchecked boxes are absent from FormDataExtended.
+     * @param {SubmitEvent} event
+     * @param {HTMLFormElement} form
+     * @param {FormDataExtended} formData
+     */
+    static async _onSubmit(event, form, formData) {
+        const id = CombatDistances.ID;
+        const data = formData.object;
+        await game.settings.set(id, 'textSize',           data.textSize);
+        await game.settings.set(id, 'colorPalette',       data.colorPalette);
+        await game.settings.set(id, 'lineStyle',          data.lineStyle);
+        await game.settings.set(id, 'lineThickness',      data.lineThickness);
+        await game.settings.set(id, 'fillStyle',          data.fillStyle);
+        await game.settings.set(id, 'targetHighlighting', data.targetHighlighting === 'true' || data.targetHighlighting === true);
+        CombatDistances.refreshAll();
+    }
+}
+
 class CombatDistances {
     static ID = 'daggerheart-distances';
     static MASS_ID = 'dhd-mass-center'; // Constant ID for the center point
@@ -259,6 +350,15 @@ class CombatDistances {
             return choices;
         }, {});
 
+        game.settings.registerMenu(this.ID, 'visualSettingsMenu', {
+            name: 'Visual Settings',
+            label: 'Open Visual Settings',
+            hint: 'Configure the appearance of the distance rings: colors, lines, effects, and labels.',
+            icon: 'fas fa-palette',
+            type: VisualSettingsApp,
+            restricted: false
+        });
+
         game.settings.register(this.ID, 'operationMode', {
             name: 'Operation Mode',
             hint: 'Choose how distance rings are triggered.',
@@ -324,7 +424,7 @@ class CombatDistances {
             name: 'Text Size',
             hint: 'Choose the size of the text labels.',
             scope: 'client',
-            config: true,
+            config: false,
             type: String,
             choices: { "small": "Small", "normal": "Normal", "large": "Large" },
             default: "normal",
@@ -335,7 +435,7 @@ class CombatDistances {
             name: 'Color Palette',
             hint: 'Choose the color theme for the distance rings.',
             scope: 'client',
-            config: true,
+            config: false,
             type: String,
             choices: paletteChoices,
             default: "default",
@@ -346,7 +446,7 @@ class CombatDistances {
             name: 'Line Style',
             hint: 'Choose the line style for the distance rings.',
             scope: 'client',
-            config: true,
+            config: false,
             type: String,
             choices: { "solid": "Solid", "dotted": "Dotted", "dashed": "Dashed" },
             default: "solid",
@@ -357,7 +457,7 @@ class CombatDistances {
             name: 'Line Thickness',
             hint: 'Adjust the thickness of the distance rings.',
             scope: 'client',
-            config: true,
+            config: false,
             type: String,
             choices: { "2px": "Normal", "5px": "Large", "8px": "Extra Large", "12px": "Massive" },
             default: "2px",
@@ -368,7 +468,7 @@ class CombatDistances {
             name: 'Gradient Fill Style',
             hint: 'Choose the style of the gradient fill.',
             scope: 'client',
-            config: true,
+            config: false,
             type: String,
             choices: {
                 "static": "Static",
@@ -384,7 +484,7 @@ class CombatDistances {
             name: 'Target Highlighting',
             hint: 'Highlight tokens that are inside your range rings with the corresponding color.',
             scope: 'client',
-            config: true,
+            config: false,
             type: Boolean,
             default: true,
             onChange: () => {

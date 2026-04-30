@@ -1,3 +1,7 @@
+# 0.1.6
+
+- [Changed] Six visual settings (Text Size, Color Palette, Line Style, Line Thickness, Gradient Fill Style, Target Highlighting) moved out of the default settings list into a dedicated "Visual Settings" dialog opened via a palette button
+
 # 0.1.5
 
 - [Added] Operation Mode setting: Manual (default), Hover Mode (GM), and Hover Mode (Broadcast)
