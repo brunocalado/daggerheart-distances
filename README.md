@@ -43,6 +43,37 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 
 * **Ghost Preview:** Range rings now follow the token preview while dragging to test positions.
 
+### 📡 Broadcast — Share Rings with Everyone
+
+The GM can show distance rings to **all connected players** at once. When you broadcast, the rings appear on every player's screen and disappear automatically after a configurable duration (default: 7 seconds).
+
+This is perfect for highlighting a threat's reach during combat so the whole table is on the same page — no need to describe distances verbally.
+
+**Three ways to broadcast:**
+
+* **Keyboard:** Select a token and press **`Shift+R`**
+* **Macro:** `DHDistances.Toggle({ remote: true });`
+* **Hover Broadcast Mode:** Enable it in settings and every token you hover will automatically broadcast to players (see Operation Mode below)
+
+> **Note:** Only the GM can broadcast. Players pressing `Shift+R` have no effect.
+
+### 🎮 Operation Mode — How Rings Are Triggered
+
+You can change *how* rings appear by selecting an **Operation Mode** in the Module Settings:
+
+| Mode | What it does |
+|---|---|
+| **Manual** *(default)* | Rings only appear when you press `R` or click the HUD button |
+| **Hover Mode (GM)** | Rings appear automatically as the GM hovers over tokens — locally only |
+| **Hover Mode (Broadcast)** | Same as above, but each hover broadcasts the rings to all players |
+
+You can also **temporarily override** the active mode using hold-keys — useful when you're in Manual mode but want a quick broadcast without changing settings:
+
+* **Hold `Shift+H`** — activates Hover Mode (GM) while the key is held
+* **Hold `Shift+B`** — activates Hover Mode (Broadcast) while the key is held
+
+Release the key and the mode returns to normal.
+
 ### 🎨 Customization
 
 * **Beautiful Themes:** Choose from pre-made color palettes like "Traffic Light", "Neon Cyberpunk", or "Warm Sunset".
@@ -61,10 +92,25 @@ You have many easy ways to show or hide the range rings around a token:
 
 1. **Token HUD:** Right-click a token to open the HUD, then click the **Circle** icon (<i class="fas fa-circle-dot"></i>).
 
-2. **Keyboard Shortcut:** Select a token and press **`R`** to toggle the rings on/off instantly. You can use **`M`** for Mass Measurement.
+2. **Keyboard Shortcuts:**
 
-3. You can also use the macro `DHDistances.Toggle();`. This works for multiple selected tokens. Use `DHDistances.MassMeasurement();` for Mass Measurement.
+| Shortcut | Action |
+|---|---|
+| `R` | Toggle rings on/off (local, just for you) |
+| `Shift+R` | Broadcast rings to all players (GM only) |
+| `M` | Mass Measurement from selected tokens |
+| `Hold Shift+H` | Temporarily enable Hover Mode (GM) |
+| `Hold Shift+B` | Temporarily enable Hover Mode (Broadcast) |
 
+> All keybindings can be reassigned in **Foundry Settings → Configure Controls**.
+
+3. You can also use macros:
+
+```js
+DHDistances.Toggle();              // Toggle rings for selected/hovered token
+DHDistances.Toggle({ remote: true }); // Broadcast rings to all players (GM only)
+DHDistances.MassMeasurement();     // Mass Measurement from selected tokens
+```
 
 ```js
 DHDistances.Toggle({mode: '2d'}); // Calculates distance ignoring elevation.
@@ -76,10 +122,6 @@ DHDistances.Toggle({mode: '3d'}); // Calculates distance accounting for elevatio
 
 ```js
 DHDistances.Toggle({mode: 'both'}); // Shows both 3D and 2D distances.
-```
-
-```js
-DHDistances.Toggle({remote: true}); // This will make the rings show to all clients
 ```
 
 ### Configuration
