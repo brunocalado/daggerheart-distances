@@ -9,6 +9,9 @@ class CombatDistances {
     // Stores the "Virtual Token" for mass measurement
     static _massToken = null;
 
+    // Transient override set by held keybindings (Shift+H, Shift+B). Null = use setting.
+    static _transientMode = null;
+
     static PALETTES = {
         "default": {
             label: "Traffic Light",
@@ -179,7 +182,7 @@ class CombatDistances {
             if (this.hasRings(token.id)) {
                 this.removeRings(token.id);
             } else {
-                this.createRings(token, options);
+                this.createRings(token, { ...options, pinned: true });
             }
         });
 
@@ -255,6 +258,21 @@ class CombatDistances {
             choices[key] = this.PALETTES[key].label;
             return choices;
         }, {});
+
+        game.settings.register(this.ID, 'operationMode', {
+            name: 'Operation Mode',
+            hint: 'Choose how distance rings are triggered.',
+            scope: 'client',
+            config: true,
+            type: String,
+            choices: {
+                'manual':           'Manual',
+                'hover-gm':         'Hover Mode (GM)',
+                'hover-broadcast':  'Hover Mode (Broadcast)'
+            },
+            default: 'manual',
+            onChange: () => {}
+        });
 
         // --- STEP 1: Synchronization Configuration ---
         game.settings.register(this.ID, 'broadcastState', {
@@ -402,9 +420,39 @@ class CombatDistances {
             name: "Mass Measurement",
             hint: "Toggle mass measurement from the center of selected tokens. Default: M",
             editable: [{ key: "KeyM" }],
-            onDown: () => { 
-                this.MassMeasurement(); 
-                return true; 
+            onDown: () => {
+                this.MassMeasurement();
+                return true;
+            },
+            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+        });
+
+        game.keybindings.register(this.ID, 'transientHoverGM', {
+            name: 'Temporary Hover Mode (GM)',
+            hint: 'While held, activates Hover Mode (GM) regardless of the Operation Mode setting. Default: Shift+H',
+            editable: [{ key: 'KeyH', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
+            onDown: () => {
+                this._transientMode = 'hover-gm';
+                return true;
+            },
+            onUp: () => {
+                this._transientMode = null;
+                return true;
+            },
+            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+        });
+
+        game.keybindings.register(this.ID, 'transientHoverBroadcast', {
+            name: 'Temporary Hover Mode (Broadcast)',
+            hint: 'While held, activates Hover Mode (Broadcast) regardless of the Operation Mode setting. Default: Shift+B',
+            editable: [{ key: 'KeyB', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
+            onDown: () => {
+                this._transientMode = 'hover-broadcast';
+                return true;
+            },
+            onUp: () => {
+                this._transientMode = null;
+                return true;
             },
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
@@ -424,6 +472,8 @@ class CombatDistances {
             canvas.app.ticker.remove(this._tickerFunc);
             this._tickerFunc = null;
         }
+        // Reset transient mode in case canvas reloads while a key is physically held
+        this._transientMode = null;
         const container = document.getElementById('combat-distances-container');
         if (container) container.innerHTML = '';
     }
@@ -684,6 +734,36 @@ class CombatDistances {
     }
 
     static onHoverToken(token, hovered) {
+        // --- HOVER MODE RING LOGIC ---
+        // Resolve effective mode: transient key override takes priority over setting
+        const effectiveMode = this._transientMode || game.settings.get(this.ID, 'operationMode');
+
+        if (effectiveMode !== 'manual' && game.user.isGM) {
+            if (hovered) {
+                if (effectiveMode === 'hover-gm') {
+                    // Only create rings if none exist (don't overwrite pinned rings from R key)
+                    if (!this.hasRings(token.id)) {
+                        this.createRings(token, { pinned: false });
+                    }
+                } else if (effectiveMode === 'hover-broadcast') {
+                    // Use the existing broadcast mechanism (timed, visible to all players)
+                    this.Toggle({ remote: true, _sourceTokenId: token.id });
+                }
+            } else {
+                // Mouse left the token
+                if (effectiveMode === 'hover-gm') {
+                    const activeData = this._activeTokens.get(token.id);
+                    // Only remove if these rings were created by hover (not pinned by R key)
+                    if (activeData && activeData.pinned === false) {
+                        this.removeRings(token.id);
+                    }
+                }
+                // hover-broadcast: intentionally no removal here.
+                // The broadcast timer (broadcastDuration setting) handles expiry on all clients.
+            }
+        }
+
+        // --- HOVER LABEL LOGIC ---
         try {
             if (!hovered) {
                 this.removeHoverLabel(token.id);
@@ -931,7 +1011,10 @@ class CombatDistances {
 
         // Store active state (preserving existing timerId if somehow this was a refresh without clear)
         const existing = this._activeTokens.get(token.id) || {};
-        this._activeTokens.set(token.id, { ...existing, mode: storedMode });
+        // pinned: true = manually activated (R key / HUD button), persists after hover-out
+        // pinned: false = activated by hover mode, removed on mouse-out
+        const pinned = options.pinned !== false; // default true
+        this._activeTokens.set(token.id, { ...existing, mode: storedMode, pinned });
     }
 
     static updateRingPositionAndSize(ring, token, baseDistance, customCenter = null) {

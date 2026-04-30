@@ -1,3 +1,13 @@
+# 0.1.5
+
+- [Added] Operation Mode setting: Manual (default), Hover Mode (GM), and Hover Mode (Broadcast)
+- [Added] Hover Mode (GM): hovering a token as GM auto-shows rings locally, removed on mouse-out
+- [Added] Hover Mode (Broadcast): hovering a token as GM broadcasts rings to all players (uses existing broadcast timer)
+- [Added] Transient keybindings Shift+H and Shift+B to temporarily override the active Operation Mode while held
+- [Changed] `_activeTokens` entries now carry a `pinned` flag to distinguish manually-activated rings (persistent) from hover-triggered rings (ephemeral)
+- [Added] Localization keys for Operation Mode setting (en, pt-BR)
+
+
 # 0.1.4
 - [Fixed] Tokens beyond the Far ring (60 ft) now correctly display "Very Far" instead of "Far"
 - [Added] `DHD.ranges.veryFar` localization key (en, pt-BR)

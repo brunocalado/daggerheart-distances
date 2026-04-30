@@ -3,5 +3,10 @@
     "DHD.ranges.veryClose": "Very Close",
     "DHD.ranges.close": "Close",
     "DHD.ranges.far": "Far",
-    "DHD.ranges.veryFar": "Very Far"
+    "DHD.ranges.veryFar": "Very Far",
+    "DHD.settings.operationMode.name": "Operation Mode",
+    "DHD.settings.operationMode.hint": "Choose how distance rings are triggered.",
+    "DHD.settings.operationMode.manual": "Manual",
+    "DHD.settings.operationMode.hoverGM": "Hover Mode (GM)",
+    "DHD.settings.operationMode.hoverBroadcast": "Hover Mode (Broadcast)"
 }

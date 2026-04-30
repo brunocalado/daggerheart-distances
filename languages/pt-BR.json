@@ -3,5 +3,10 @@
     "DHD.ranges.veryClose": "Muito Perto",
     "DHD.ranges.close": "Perto",
     "DHD.ranges.far": "Longe",
-    "DHD.ranges.veryFar": "Muito Distante"
+    "DHD.ranges.veryFar": "Muito Distante",
+    "DHD.settings.operationMode.name": "Modo de Operação",
+    "DHD.settings.operationMode.hint": "Escolha como os anéis de distância são ativados.",
+    "DHD.settings.operationMode.manual": "Manual",
+    "DHD.settings.operationMode.hoverGM": "Modo Hover (Mestre)",
+    "DHD.settings.operationMode.hoverBroadcast": "Modo Hover (Transmissão)"
 }
