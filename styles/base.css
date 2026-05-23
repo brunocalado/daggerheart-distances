@@ -1,0 +1,198 @@
+/* Must be at root — @property and @keyframes cannot be nested inside a class selector */
+@property --gradient-stop {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 60%;
+}
+
+@keyframes pulseGradient {
+    0%   { --gradient-stop: 60%; }
+    100% { --gradient-stop: 50%; }
+}
+
+@keyframes pulseGradientLight {
+    0%   { --gradient-stop: 70%; }
+    100% { --gradient-stop: 60%; }
+}
+
+@keyframes highlightPulse {
+    0%   {
+        filter: drop-shadow(0 0 2px rgba(var(--hl-r), var(--hl-g), var(--hl-b), 0.5))
+                drop-shadow(0 0 5px rgba(var(--hl-r), var(--hl-g), var(--hl-b), 0.5));
+        opacity: 0.6;
+    }
+    100% {
+        filter: drop-shadow(0 0 8px rgba(var(--hl-r), var(--hl-g), var(--hl-b), 1))
+                drop-shadow(0 0 15px rgba(var(--hl-r), var(--hl-g), var(--hl-b), 0.8));
+        opacity: 1;
+    }
+}
+
+/* Canvas overlay scope — class is added to #combat-distances-container in getContainer() */
+.daggerheart-distances {
+    /* Canvas overlay colors: semi-transparent blacks are intentional here.
+       These elements render over the PIXI canvas (always a scene image),
+       not inside a Foundry ApplicationV2 window, so theme vars do not apply to bg.
+       Text and border colors defer to core vars with hardcoded fallbacks. */
+    --dhd-label-bg: rgba(0, 0, 0, 0.85);
+    --dhd-label-color: var(--color-text-primary, #fff);
+    --dhd-label-border: var(--color-border, #444);
+    --dhd-label-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    --dhd-category-color: #ffcc00;
+    --dhd-dist-color: var(--color-text-secondary, #ccc);
+
+    &#combat-distances-container {
+        position: absolute;
+        pointer-events: none;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 3;
+        /* overflow:hidden prevents off-screen rings from creating scrollbars that displace UI */
+        overflow: hidden;
+        /* isolation:isolate confines mix-blend-mode on child highlights to this context,
+           preventing visual compositing bleed onto the Foundry sidebar and hotbar */
+        isolation: isolate;
+    }
+
+    .dhd-range-ring {
+        position: absolute;
+        border-width: 2px;
+        border-style: solid;
+        border-radius: 50%;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        box-sizing: border-box;
+        --ring-r: 0;
+        --ring-g: 0;
+        --ring-b: 0;
+
+        &.static {
+            background: radial-gradient(circle,
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) 0%,
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) 60%,
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0.25) 100%
+            );
+        }
+
+        &.animated-normal {
+            --gradient-stop: 60%;
+            animation: pulseGradient 2s infinite alternate ease-in-out;
+            background: radial-gradient(circle,
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) 0%,
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) var(--gradient-stop),
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0.25) 100%
+            );
+        }
+
+        &.animated-light {
+            --gradient-stop: 60%;
+            animation: pulseGradientLight 2s infinite alternate ease-in-out;
+            background: radial-gradient(circle,
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) 0%,
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0) var(--gradient-stop),
+                rgba(var(--ring-r), var(--ring-g), var(--ring-b), 0.25) 100%
+            );
+        }
+    }
+
+    .dhd-range-label,
+    .dhd-hover-label {
+        &.text-small  { font-size: 10px; }
+        &.text-normal { font-size: 14px; }
+        &.text-large  { font-size: 18px; }
+
+        .category {
+            color: var(--dhd-category-color);
+            text-transform: uppercase;
+            font-size: 0.9em;
+            line-height: 1;
+        }
+
+        .dist {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: var(--dhd-dist-color);
+            line-height: 1;
+        }
+    }
+
+    .dhd-range-label {
+        position: absolute;
+        top: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--dhd-label-bg);
+        color: var(--dhd-label-color);
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid var(--dhd-label-border);
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: var(--dhd-label-shadow);
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        align-items: baseline;
+        white-space: nowrap;
+        z-index: 101;
+        pointer-events: none;
+    }
+
+    .dhd-hover-label {
+        position: absolute;
+        transform: translate(-50%, -100%);
+        background: var(--dhd-label-bg);
+        color: var(--dhd-label-color);
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid var(--dhd-label-border);
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: var(--dhd-label-shadow);
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        align-items: baseline;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 2000;
+        margin-top: -10px;
+    }
+
+    img.dhd-highlight-ring {
+        position: absolute;
+        pointer-events: none;
+        box-sizing: border-box;
+        z-index: 100;
+        --hl-r: 255;
+        --hl-g: 255;
+        --hl-b: 255;
+        opacity: 0.8;
+        filter: drop-shadow(0 0 5px rgba(var(--hl-r), var(--hl-g), var(--hl-b), 1))
+                drop-shadow(0 0 10px rgba(var(--hl-r), var(--hl-g), var(--hl-b), 0.8));
+        mix-blend-mode: screen;
+        animation: highlightPulse 1.5s infinite alternate ease-in-out;
+    }
+}
+
+/* HUD button — injected into Foundry's TokenHUD DOM, which we do not control.
+   Cannot be scoped under .daggerheart-distances; attribute selector provides specificity. */
+.control-icon[title="Toggle Combat Distances"] {
+    background: var(--color-bg-option, rgba(0, 0, 0, 0.5));
+    border: 1px solid var(--color-border, #000);
+    border-radius: 5px;
+    cursor: pointer;
+    padding-top: 0;
+
+    &.active {
+        /* Intentional green: semantic "active" indicator, not theme-sensitive */
+        background: rgba(0, 255, 0, 0.5);
+        border: 1px solid #4b4;
+    }
+
+    &:hover {
+        border: 1px solid var(--color-text-primary, #fff);
+    }
+}

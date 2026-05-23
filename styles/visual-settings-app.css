@@ -1,0 +1,50 @@
+/* VisualSettingsApp — scoped via DEFAULT_OPTIONS.classes: ['daggerheart-distances'] */
+.daggerheart-distances {
+    .dhd-visual-settings-form {
+        padding: 8px 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .form-group {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        grid-template-rows: auto auto;
+        align-items: center;
+        column-gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.07));
+
+        label {
+            font-weight: bold;
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .form-fields {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .hint {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            font-size: 11px;
+            color: var(--color-text-secondary, #888);
+            margin: 2px 0 0 0;
+            font-style: italic;
+        }
+
+        select,
+        input[type="checkbox"] {
+            width: 100%;
+        }
+    }
+
+    .dhd-visual-settings-form footer {
+        margin-top: 12px;
+        padding-top: 8px;
+        border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.15));
+    }
+}

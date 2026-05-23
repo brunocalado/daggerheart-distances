@@ -1,3 +1,11 @@
+# 0.2.0
+
+- v14 only
+- [Changed] Introduced `scripts/constants.js` with `MODULE_ID` constant; all internal references to the module id now import this constant instead of using string literals
+- [Changed] CSS split into `styles/base.css` (canvas overlay) and `styles/visual-settings-app.css` (settings dialog) — one file per concern
+- [Changed] All CSS rules scoped under `.daggerheart-distances` to prevent style leaks into Foundry core
+- [Changed] Hardcoded colors in CSS replaced with Foundry core variables (`--color-text-primary`, `--color-text-secondary`, `--color-border`) and module-level custom properties (`--dhd-label-bg`, `--dhd-category-color`, etc.)
+
 # 0.1.7
 
 - [Fixed] CSS leaking into Foundry UI: added `isolation: isolate` to the overlay container to prevent `mix-blend-mode` on token highlights from visually corrupting the sidebar and other UI elements

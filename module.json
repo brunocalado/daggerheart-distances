@@ -2,50 +2,54 @@
   "id": "daggerheart-distances",
   "title": "Daggerheart: Distances",
   "description": "Visualizes Daggerheart combat ranges with customizable rings and hover distance calculations.",
-  "version": "0.1.7",
+  
+  "version": "0.2.0",
+  
   "compatibility": {
-    "minimum": "13",
-    "verified": "13"
+    "minimum": "14",
+    "verified": "14"
   },
+  
   "authors": [
     {
       "name": "Mestre Digital",
+      "url": "http://youtube.com/@mestredigital",
       "flags": {}
-    }    
+    }
   ],
+  
   "relationships": {
     "systems": [
       {
         "id": "daggerheart",
         "type": "system",
         "compatibility": {
-          "minimum": "1.6.2"
+          "minimum": "2.2.6"
         }
       }
     ]
-  }, 
+  },
   "esmodules": [
     "scripts/main.js"
   ],
-  "templates": [
-    "templates/visual-settings.hbs"
-  ],
-  "styles": [
-    {
-      "src": "styles/styles.css"
-    }
-  ],
 
+  "styles": [
+    { "src": "styles/base.css" },
+    { "src": "styles/visual-settings-app.css" }
+  ],
+  
   "languages": [
     {
       "lang": "en",
       "name": "English",
-      "path": "languages/en.json"
+      "path": "languages/en.json",
+      "flags": {}
     },
     {
       "lang": "pt-BR",
       "name": "Portuguese (Brazil)",
-      "path": "languages/pt-BR.json"
+      "path": "languages/pt-BR.json",
+      "flags": {}
     }
   ],
   
@@ -61,10 +65,11 @@
         "ASSISTANT": "OWNER"
       },
       "flags": {}
-    }    
-  ],  
+    }
+  ],
   
   "url": "https://github.com/brunocalado/daggerheart-distances",
   "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json",
-  "download": "https://codeload.github.com/brunocalado/daggerheart-distances/zip/main"
+  "download": "https://codeload.github.com/brunocalado/daggerheart-distances/zip/main",
+  "flags": {}
 }

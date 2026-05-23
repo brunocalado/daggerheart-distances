@@ -1,3 +1,5 @@
+import { MODULE_ID } from './constants.js';
+
 /**
  * Custom settings dialog for visual appearance options.
  * Opened via the settings menu button registered with game.settings.registerMenu.
@@ -7,6 +9,7 @@ class VisualSettingsApp extends foundry.applications.api.HandlebarsApplicationMi
 
     static DEFAULT_OPTIONS = {
         id: 'dhd-visual-settings',
+        classes: ['daggerheart-distances'],
         tag: 'form',
         form: {
             // Arrow wrapper defers evaluation until after class definition
@@ -35,7 +38,7 @@ class VisualSettingsApp extends foundry.applications.api.HandlebarsApplicationMi
      * @returns {Promise<object>}
      */
     async _prepareContext(options) {
-        const id = CombatDistances.ID;
+        const id = MODULE_ID;
         return {
             textSize: {
                 value: game.settings.get(id, 'textSize'),
@@ -77,7 +80,7 @@ class VisualSettingsApp extends foundry.applications.api.HandlebarsApplicationMi
      * @param {FormDataExtended} formData
      */
     static async _onSubmit(event, form, formData) {
-        const id = CombatDistances.ID;
+        const id = MODULE_ID;
         const data = formData.object;
         await game.settings.set(id, 'textSize',           data.textSize);
         await game.settings.set(id, 'colorPalette',       data.colorPalette);
@@ -90,7 +93,6 @@ class VisualSettingsApp extends foundry.applications.api.HandlebarsApplicationMi
 }
 
 class CombatDistances {
-    static ID = 'daggerheart-distances';
     static MASS_ID = 'dhd-mass-center'; // Constant ID for the center point
     static _tickerFunc = null; 
     
@@ -264,7 +266,7 @@ class CombatDistances {
             };
 
             // Update the setting to trigger the listener on all clients (including self)
-            await game.settings.set(this.ID, 'broadcastState', payload);
+            await game.settings.set(MODULE_ID, 'broadcastState', payload);
             return; 
         }
 
@@ -317,7 +319,7 @@ class CombatDistances {
         // Ensure ticker is running
         if (!this._tickerFunc) this.startTicker();
 
-        const duration = game.settings.get(this.ID, 'broadcastDuration') * 1000; // Convert to ms
+        const duration = game.settings.get(MODULE_ID, 'broadcastDuration') * 1000; // Convert to ms
 
         tokens.forEach(token => {
             // Reset: Remove existing rings to refresh visual state
@@ -350,7 +352,7 @@ class CombatDistances {
             return choices;
         }, {});
 
-        game.settings.registerMenu(this.ID, 'visualSettingsMenu', {
+        game.settings.registerMenu(MODULE_ID, 'visualSettingsMenu', {
             name: 'Visual Settings',
             label: 'Open Visual Settings',
             hint: 'Configure the appearance of the distance rings: colors, lines, effects, and labels.',
@@ -359,7 +361,7 @@ class CombatDistances {
             restricted: false
         });
 
-        game.settings.register(this.ID, 'operationMode', {
+        game.settings.register(MODULE_ID, 'operationMode', {
             name: 'Operation Mode',
             hint: 'Choose how distance rings are triggered.',
             scope: 'client',
@@ -375,7 +377,7 @@ class CombatDistances {
         });
 
         // --- STEP 1: Synchronization Configuration ---
-        game.settings.register(this.ID, 'broadcastState', {
+        game.settings.register(MODULE_ID, 'broadcastState', {
             scope: 'world',
             config: false, // Hidden setting acting as data channel
             type: Object,
@@ -383,7 +385,7 @@ class CombatDistances {
             onChange: (data) => this._handleBroadcastChange(data)
         });
 
-        game.settings.register(this.ID, 'broadcastDuration', {
+        game.settings.register(MODULE_ID, 'broadcastDuration', {
             name: 'Broadcast Duration (Seconds)',
             hint: 'How long the rings remain visible when broadcasted by the GM.',
             scope: 'world',
@@ -394,7 +396,7 @@ class CombatDistances {
         });
         // ---------------------------------------------
 
-        game.settings.register(this.ID, 'coverageThreshold', {
+        game.settings.register(MODULE_ID, 'coverageThreshold', {
             name: 'Grid Coverage Threshold',
             hint: 'How much of the token must be inside the range to count? (0.01 = just touching, 0.5 = 50% coverage).',
             scope: 'client',
@@ -405,7 +407,7 @@ class CombatDistances {
             onChange: () => { }
         });
 
-        game.settings.register(this.ID, 'calculationMode', {
+        game.settings.register(MODULE_ID, 'calculationMode', {
             name: 'Calculation Mode',
             hint: 'Choose how elevation affects distance measurement.',
             scope: 'client',
@@ -420,7 +422,7 @@ class CombatDistances {
             onChange: () => { }
         });
 
-        game.settings.register(this.ID, 'textSize', {
+        game.settings.register(MODULE_ID, 'textSize', {
             name: 'Text Size',
             hint: 'Choose the size of the text labels.',
             scope: 'client',
@@ -431,7 +433,7 @@ class CombatDistances {
             onChange: () => this.refreshAll()
         });
 
-        game.settings.register(this.ID, 'colorPalette', {
+        game.settings.register(MODULE_ID, 'colorPalette', {
             name: 'Color Palette',
             hint: 'Choose the color theme for the distance rings.',
             scope: 'client',
@@ -442,7 +444,7 @@ class CombatDistances {
             onChange: () => this.refreshAll()
         });
 
-        game.settings.register(this.ID, 'lineStyle', {
+        game.settings.register(MODULE_ID, 'lineStyle', {
             name: 'Line Style',
             hint: 'Choose the line style for the distance rings.',
             scope: 'client',
@@ -453,7 +455,7 @@ class CombatDistances {
             onChange: () => this.refreshAll()
         });
 
-        game.settings.register(this.ID, 'lineThickness', {
+        game.settings.register(MODULE_ID, 'lineThickness', {
             name: 'Line Thickness',
             hint: 'Adjust the thickness of the distance rings.',
             scope: 'client',
@@ -464,7 +466,7 @@ class CombatDistances {
             onChange: () => this.refreshAll()
         });
 
-        game.settings.register(this.ID, 'fillStyle', {
+        game.settings.register(MODULE_ID, 'fillStyle', {
             name: 'Gradient Fill Style',
             hint: 'Choose the style of the gradient fill.',
             scope: 'client',
@@ -480,7 +482,7 @@ class CombatDistances {
             onChange: () => this.refreshAll()
         });
 
-        game.settings.register(this.ID, 'targetHighlighting', {
+        game.settings.register(MODULE_ID, 'targetHighlighting', {
             name: 'Target Highlighting',
             hint: 'Highlight tokens that are inside your range rings with the corresponding color.',
             scope: 'client',
@@ -495,7 +497,7 @@ class CombatDistances {
     }
 
     static registerKeybindings() {
-        game.keybindings.register(this.ID, "toggleRings", {
+        game.keybindings.register(MODULE_ID, "toggleRings", {
             name: "Toggle Combat Distances",
             hint: "Toggle the distance rings for the selected token(s). Default: R",
             editable: [{ key: "KeyR" }],
@@ -504,7 +506,7 @@ class CombatDistances {
         });
 
         // New Broadcast Binding (Shift+R)
-        game.keybindings.register(this.ID, "broadcastRings", {
+        game.keybindings.register(MODULE_ID, "broadcastRings", {
             name: "Broadcast Rings (GM Only)",
             hint: "Shows rings to ALL players for a short duration. Default: Shift+R",
             // Corrected deprecation warning for V13: using namespaced KeyboardManager
@@ -516,7 +518,7 @@ class CombatDistances {
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
 
-        game.keybindings.register(this.ID, "massMeasurement", {
+        game.keybindings.register(MODULE_ID, "massMeasurement", {
             name: "Mass Measurement",
             hint: "Toggle mass measurement from the center of selected tokens. Default: M",
             editable: [{ key: "KeyM" }],
@@ -527,7 +529,7 @@ class CombatDistances {
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
 
-        game.keybindings.register(this.ID, 'transientHoverGM', {
+        game.keybindings.register(MODULE_ID, 'transientHoverGM', {
             name: 'Temporary Hover Mode (GM)',
             hint: 'While held, activates Hover Mode (GM) regardless of the Operation Mode setting. Default: Shift+H',
             editable: [{ key: 'KeyH', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
@@ -542,7 +544,7 @@ class CombatDistances {
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
         });
 
-        game.keybindings.register(this.ID, 'transientHoverBroadcast', {
+        game.keybindings.register(MODULE_ID, 'transientHoverBroadcast', {
             name: 'Temporary Hover Mode (Broadcast)',
             hint: 'While held, activates Hover Mode (Broadcast) regardless of the Operation Mode setting. Default: Shift+B',
             editable: [{ key: 'KeyB', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
@@ -597,7 +599,7 @@ class CombatDistances {
 
             if (rings.length === 0 && hoverLabels.length === 0) return;
 
-            const doHighlight = game.settings.get(this.ID, 'targetHighlighting');
+            const doHighlight = game.settings.get(MODULE_ID, 'targetHighlighting');
             
             const tokensHighlightedThisFrame = new Set();
             const processedSourceIds = new Set();
@@ -668,15 +670,15 @@ class CombatDistances {
     static updateTargetHighlights(sourceToken, sourceCenter, activeSet, sourceElevationOverride = null) {
         const potentialTargets = canvas.tokens.placeables;
         const ranges = this.DEFAULTS.ranges;
-        const threshold = game.settings.get(this.ID, 'coverageThreshold');
-        let calcMode = game.settings.get(this.ID, 'calculationMode');
+        const threshold = game.settings.get(MODULE_ID, 'coverageThreshold');
+        let calcMode = game.settings.get(MODULE_ID, 'calculationMode');
         
         if (this._activeTokens.has(sourceToken.id)) {
             const activeData = this._activeTokens.get(sourceToken.id);
             if (activeData && activeData.mode) calcMode = activeData.mode;
         }
         const use3D = (calcMode !== 'flat');
-        const paletteKey = game.settings.get(this.ID, 'colorPalette');
+        const paletteKey = game.settings.get(MODULE_ID, 'colorPalette');
         const currentPalette = this.PALETTES[paletteKey] || this.PALETTES['default'];
 
         const sW = sourceToken.document.width || 0;
@@ -839,7 +841,7 @@ class CombatDistances {
     static onHoverToken(token, hovered) {
         // --- HOVER MODE RING LOGIC ---
         // Resolve effective mode: transient key override takes priority over setting
-        const effectiveMode = this._transientMode || game.settings.get(this.ID, 'operationMode');
+        const effectiveMode = this._transientMode || game.settings.get(MODULE_ID, 'operationMode');
 
         if (effectiveMode !== 'manual' && game.user.isGM) {
             if (hovered) {
@@ -901,8 +903,8 @@ class CombatDistances {
             }
 
             // --- Setup ---
-            const threshold = game.settings.get(this.ID, 'coverageThreshold'); 
-            let calcMode = game.settings.get(this.ID, 'calculationMode');
+            const threshold = game.settings.get(MODULE_ID, 'coverageThreshold'); 
+            let calcMode = game.settings.get(MODULE_ID, 'calculationMode');
             if (this._activeTokens.has(sourceToken.id)) {
                 const activeData = this._activeTokens.get(sourceToken.id);
                 if (activeData && activeData.mode) {
@@ -1005,7 +1007,7 @@ class CombatDistances {
         this.removeHoverLabel(token.id);
 
         const container = this.getContainer();
-        const textSize = game.settings.get(this.ID, 'textSize');
+        const textSize = game.settings.get(MODULE_ID, 'textSize');
         
         const label = document.createElement('div');
         label.classList.add('dhd-hover-label', `text-${textSize}`);
@@ -1039,6 +1041,7 @@ class CombatDistances {
         if (!container) {
             container = document.createElement('div');
             container.id = 'combat-distances-container';
+            container.classList.add(MODULE_ID);
             // Attach to #board's parent (the canvas wrapper) so the overlay is scoped
             // to the canvas area, staying below Foundry's #interface layer (sidebar, hotbar).
             // Falls back to document.body if the canvas wrapper is unavailable.
@@ -1057,11 +1060,11 @@ class CombatDistances {
         }
         
         const currentRanges = this.ranges;
-        const lineStyle = game.settings.get(this.ID, 'lineStyle');
-        const lineThickness = game.settings.get(this.ID, 'lineThickness');
-        const fillStyle = game.settings.get(this.ID, 'fillStyle');
-        const paletteKey = game.settings.get(this.ID, 'colorPalette');
-        const textSize = game.settings.get(this.ID, 'textSize');
+        const lineStyle = game.settings.get(MODULE_ID, 'lineStyle');
+        const lineThickness = game.settings.get(MODULE_ID, 'lineThickness');
+        const fillStyle = game.settings.get(MODULE_ID, 'fillStyle');
+        const paletteKey = game.settings.get(MODULE_ID, 'colorPalette');
+        const textSize = game.settings.get(MODULE_ID, 'textSize');
         const currentPalette = this.PALETTES[paletteKey] || this.PALETTES['default'];
         const container = this.getContainer();
         
