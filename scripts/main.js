@@ -1,166 +1,28 @@
-import { MODULE_ID } from './constants.js';
-
-/**
- * Custom settings dialog for visual appearance options.
- * Opened via the settings menu button registered with game.settings.registerMenu.
- * Lifecycle: rendered via HandlebarsApplicationMixin, submitted via AppV2 form handler.
- */
-class VisualSettingsApp extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
-
-    static DEFAULT_OPTIONS = {
-        id: 'dhd-visual-settings',
-        classes: ['daggerheart-distances'],
-        tag: 'form',
-        form: {
-            // Arrow wrapper defers evaluation until after class definition
-            handler: (...args) => VisualSettingsApp._onSubmit(...args),
-            closeOnSubmit: true
-        },
-        window: {
-            title: 'Daggerheart Distances — Visual Settings'
-        },
-        position: {
-            width: 480,
-            height: 'auto'
-        }
-    };
-
-    static PARTS = {
-        form: {
-            template: 'modules/daggerheart-distances/templates/visual-settings.hbs'
-        }
-    };
-
-    /**
-     * Populates the template context with current setting values and available choices.
-     * Triggered by the AppV2 render lifecycle.
-     * @param {object} options
-     * @returns {Promise<object>}
-     */
-    async _prepareContext(options) {
-        const id = MODULE_ID;
-        return {
-            textSize: {
-                value: game.settings.get(id, 'textSize'),
-                choices: { small: 'Small', normal: 'Normal', large: 'Large' }
-            },
-            colorPalette: {
-                value: game.settings.get(id, 'colorPalette'),
-                choices: Object.keys(CombatDistances.PALETTES).reduce((acc, key) => {
-                    acc[key] = CombatDistances.PALETTES[key].label;
-                    return acc;
-                }, {})
-            },
-            lineStyle: {
-                value: game.settings.get(id, 'lineStyle'),
-                choices: { solid: 'Solid', dotted: 'Dotted', dashed: 'Dashed' }
-            },
-            lineThickness: {
-                value: game.settings.get(id, 'lineThickness'),
-                choices: { '2px': 'Normal', '5px': 'Large', '8px': 'Extra Large', '12px': 'Massive' }
-            },
-            fillStyle: {
-                value: game.settings.get(id, 'fillStyle'),
-                choices: {
-                    'static': 'Static',
-                    'animated-normal': 'Animated - Normal',
-                    'animated-light': 'Animated - Light',
-                    'none': 'None'
-                }
-            },
-            targetHighlighting: game.settings.get(id, 'targetHighlighting')
-        };
-    }
-
-    /**
-     * Persists all visual settings and triggers a canvas refresh.
-     * Checkbox coercion is explicit: unchecked boxes are absent from FormDataExtended.
-     * @param {SubmitEvent} event
-     * @param {HTMLFormElement} form
-     * @param {FormDataExtended} formData
-     */
-    static async _onSubmit(event, form, formData) {
-        const id = MODULE_ID;
-        const data = formData.object;
-        await game.settings.set(id, 'textSize',           data.textSize);
-        await game.settings.set(id, 'colorPalette',       data.colorPalette);
-        await game.settings.set(id, 'lineStyle',          data.lineStyle);
-        await game.settings.set(id, 'lineThickness',      data.lineThickness);
-        await game.settings.set(id, 'fillStyle',          data.fillStyle);
-        await game.settings.set(id, 'targetHighlighting', data.targetHighlighting === 'true' || data.targetHighlighting === true);
-        CombatDistances.refreshAll();
-    }
-}
+import { MODULE_ID, PALETTES, DEFAULTS } from './constants.js';
+import { getWorldToScreen, formatDistance, getTokenSamplePoints } from './helpers.js';
+import { registerSettings, registerKeybindings } from './registration.js';
 
 class CombatDistances {
     static MASS_ID = 'dhd-mass-center'; // Constant ID for the center point
-    static _tickerFunc = null; 
-    
+    static _tickerFunc = null;
+
     // Key: Token ID, Value: { mode: string|null, timerId: number|null }
     static _activeTokens = new Map();
-    
+
     // Stores the "Virtual Token" for mass measurement
     static _massToken = null;
 
     // Transient override set by held keybindings (Shift+H, Shift+B). Null = use setting.
     static _transientMode = null;
 
-    static PALETTES = {
-        "default": {
-            label: "Traffic Light",
-            colors: {
-                ring1: "#ff0000",
-                ring2: "#ffa500",
-                ring3: "#ffff00",
-                ring4: "#90ee90"
-            }
-        },
-        "option2": {
-            label: "Inverse Traffic Light",
-            colors: {
-                ring1: "#90ee90",
-                ring2: "#ffff00",
-                ring3: "#ffa500",
-                ring4: "#ff0000"
-            }
-        },
-        "option3": {
-            label: "Synthwave",
-            colors: {
-                ring1: "#ff00ff", // Magenta
-                ring2: "#bd00ff", // Electric Purple
-                ring3: "#00aaff", // Dodger Blue
-                ring4: "#00ffff"  // Cyan
-            }
-        },
-        "option4": {
-            label: "True Fire",
-            colors: {
-                ring1: "#ff0000", // Pure Red
-                ring2: "#ff4500", // Orange Red
-                ring3: "#ffa500", // Orange
-                ring4: "#ffcc00"  // Golden Yellow
-            }
-        }
-    };
-
-    static DEFAULTS = {
-        ranges: {
-            ring1: { distance: 5, label: "DHD.ranges.melee" },
-            ring2: { distance: 15, label: "DHD.ranges.veryClose" },
-            ring3: { distance: 30, label: "DHD.ranges.close" },
-            ring4: { distance: 60, label: "DHD.ranges.far" }
-        }
-    };
-
     static initialize() {
-        this.registerSettings();
-        this.registerKeybindings();
+        registerSettings(this);
+        registerKeybindings(this);
 
         Hooks.on('renderTokenHUD', this.onRenderTokenHUD.bind(this));
         Hooks.on('deleteToken', this.onDeleteToken.bind(this));
         Hooks.on('hoverToken', this.onHoverToken.bind(this));
-        Hooks.on('updateToken', this.onUpdateToken.bind(this)); 
+        Hooks.on('updateToken', this.onUpdateToken.bind(this));
 
         Hooks.on('canvasReady', this.startTicker.bind(this));
         Hooks.on('canvasTearDown', this.stopTicker.bind(this));
@@ -198,16 +60,16 @@ class CombatDistances {
         let minY = Infinity;
         let maxY = -Infinity;
         let sumEl = 0;
-        
+
         tokens.forEach(t => {
             const x = t.center.x;
             const y = t.center.y;
-            
+
             if (x < minX) minX = x;
             if (x > maxX) maxX = x;
             if (y < minY) minY = y;
             if (y > maxY) maxY = y;
-            
+
             sumEl += (t.document.elevation || 0);
         });
 
@@ -219,12 +81,12 @@ class CombatDistances {
         this._massToken = {
             id: this.MASS_ID,
             center: { x: centerX, y: centerY },
-            document: { 
-                x: centerX, 
+            document: {
+                x: centerX,
                 y: centerY,
                 elevation: avgElevation,
-                width: 0, 
-                height: 0 
+                width: 0,
+                height: 0
             },
             visible: true
         };
@@ -234,7 +96,7 @@ class CombatDistances {
 
     /**
      * Toggles rings on tokens.
-     * @param {Object} options 
+     * @param {Object} options
      * @param {boolean} options.remote - If true, broadcasts the toggle to all clients (GM only).
      */
     static async Toggle(options = {}) {
@@ -267,7 +129,7 @@ class CombatDistances {
 
             // Update the setting to trigger the listener on all clients (including self)
             await game.settings.set(MODULE_ID, 'broadcastState', payload);
-            return; 
+            return;
         }
 
         // 3. Handle Local Toggle (Standard Behavior)
@@ -346,224 +208,10 @@ class CombatDistances {
         this.onTicker();
     }
 
-    static registerSettings() {
-        const paletteChoices = Object.keys(this.PALETTES).reduce((choices, key) => {
-            choices[key] = this.PALETTES[key].label;
-            return choices;
-        }, {});
-
-        game.settings.registerMenu(MODULE_ID, 'visualSettingsMenu', {
-            name: 'Visual Settings',
-            label: 'Open Visual Settings',
-            hint: 'Configure the appearance of the distance rings: colors, lines, effects, and labels.',
-            icon: 'fas fa-palette',
-            type: VisualSettingsApp,
-            restricted: false
-        });
-
-        game.settings.register(MODULE_ID, 'operationMode', {
-            name: 'Operation Mode',
-            hint: 'Choose how distance rings are triggered.',
-            scope: 'client',
-            config: true,
-            type: String,
-            choices: {
-                'manual':           'Manual',
-                'hover-gm':         'Hover Mode (GM)',
-                'hover-broadcast':  'Hover Mode (Broadcast)'
-            },
-            default: 'manual',
-            onChange: () => {}
-        });
-
-        // --- STEP 1: Synchronization Configuration ---
-        game.settings.register(MODULE_ID, 'broadcastState', {
-            scope: 'world',
-            config: false, // Hidden setting acting as data channel
-            type: Object,
-            default: {},
-            onChange: (data) => this._handleBroadcastChange(data)
-        });
-
-        game.settings.register(MODULE_ID, 'broadcastDuration', {
-            name: 'Broadcast Duration (Seconds)',
-            hint: 'How long the rings remain visible when broadcasted by the GM.',
-            scope: 'world',
-            config: true,
-            type: Number,
-            default: 7,
-            range: { min: 1, max: 30, step: 1 }
-        });
-        // ---------------------------------------------
-
-        game.settings.register(MODULE_ID, 'coverageThreshold', {
-            name: 'Grid Coverage Threshold',
-            hint: 'How much of the token must be inside the range to count? (0.01 = just touching, 0.5 = 50% coverage).',
-            scope: 'client',
-            config: true,
-            type: Number,
-            range: { min: 0.01, max: 1.0, step: 0.01 },
-            default: 0.10,
-            onChange: () => { }
-        });
-
-        game.settings.register(MODULE_ID, 'calculationMode', {
-            name: 'Calculation Mode',
-            hint: 'Choose how elevation affects distance measurement.',
-            scope: 'client',
-            config: true,
-            type: String,
-            choices: {
-                "auto": "Auto (3D - Default)",
-                "flat": "Flat (2D Only - Ignore Height)",
-                "both": "Both (Show 3D & 2D)"
-            },
-            default: "auto",
-            onChange: () => { }
-        });
-
-        game.settings.register(MODULE_ID, 'textSize', {
-            name: 'Text Size',
-            hint: 'Choose the size of the text labels.',
-            scope: 'client',
-            config: false,
-            type: String,
-            choices: { "small": "Small", "normal": "Normal", "large": "Large" },
-            default: "normal",
-            onChange: () => this.refreshAll()
-        });
-
-        game.settings.register(MODULE_ID, 'colorPalette', {
-            name: 'Color Palette',
-            hint: 'Choose the color theme for the distance rings.',
-            scope: 'client',
-            config: false,
-            type: String,
-            choices: paletteChoices,
-            default: "default",
-            onChange: () => this.refreshAll()
-        });
-
-        game.settings.register(MODULE_ID, 'lineStyle', {
-            name: 'Line Style',
-            hint: 'Choose the line style for the distance rings.',
-            scope: 'client',
-            config: false,
-            type: String,
-            choices: { "solid": "Solid", "dotted": "Dotted", "dashed": "Dashed" },
-            default: "solid",
-            onChange: () => this.refreshAll()
-        });
-
-        game.settings.register(MODULE_ID, 'lineThickness', {
-            name: 'Line Thickness',
-            hint: 'Adjust the thickness of the distance rings.',
-            scope: 'client',
-            config: false,
-            type: String,
-            choices: { "2px": "Normal", "5px": "Large", "8px": "Extra Large", "12px": "Massive" },
-            default: "2px",
-            onChange: () => this.refreshAll()
-        });
-
-        game.settings.register(MODULE_ID, 'fillStyle', {
-            name: 'Gradient Fill Style',
-            hint: 'Choose the style of the gradient fill.',
-            scope: 'client',
-            config: false,
-            type: String,
-            choices: {
-                "static": "Static",
-                "animated-normal": "Animated - Normal",
-                "animated-light": "Animated - Light",
-                "none": "None"
-            },
-            default: "animated-light",
-            onChange: () => this.refreshAll()
-        });
-
-        game.settings.register(MODULE_ID, 'targetHighlighting', {
-            name: 'Target Highlighting',
-            hint: 'Highlight tokens that are inside your range rings with the corresponding color.',
-            scope: 'client',
-            config: false,
-            type: Boolean,
-            default: true,
-            onChange: () => {
-                const highlights = document.querySelectorAll('.dhd-highlight-ring');
-                highlights.forEach(h => h.remove());
-            }
-        });
-    }
-
-    static registerKeybindings() {
-        game.keybindings.register(MODULE_ID, "toggleRings", {
-            name: "Toggle Combat Distances",
-            hint: "Toggle the distance rings for the selected token(s). Default: R",
-            editable: [{ key: "KeyR" }],
-            onDown: () => { this.Toggle({ remote: false }); return true; },
-            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
-        });
-
-        // New Broadcast Binding (Shift+R)
-        game.keybindings.register(MODULE_ID, "broadcastRings", {
-            name: "Broadcast Rings (GM Only)",
-            hint: "Shows rings to ALL players for a short duration. Default: Shift+R",
-            // Corrected deprecation warning for V13: using namespaced KeyboardManager
-            editable: [{ key: "KeyR", modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
-            onDown: () => { 
-                this.Toggle({ remote: true }); 
-                return true; 
-            },
-            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
-        });
-
-        game.keybindings.register(MODULE_ID, "massMeasurement", {
-            name: "Mass Measurement",
-            hint: "Toggle mass measurement from the center of selected tokens. Default: M",
-            editable: [{ key: "KeyM" }],
-            onDown: () => {
-                this.MassMeasurement();
-                return true;
-            },
-            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
-        });
-
-        game.keybindings.register(MODULE_ID, 'transientHoverGM', {
-            name: 'Temporary Hover Mode (GM)',
-            hint: 'While held, activates Hover Mode (GM) regardless of the Operation Mode setting. Default: Shift+H',
-            editable: [{ key: 'KeyH', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
-            onDown: () => {
-                this._transientMode = 'hover-gm';
-                return true;
-            },
-            onUp: () => {
-                this._transientMode = null;
-                return true;
-            },
-            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
-        });
-
-        game.keybindings.register(MODULE_ID, 'transientHoverBroadcast', {
-            name: 'Temporary Hover Mode (Broadcast)',
-            hint: 'While held, activates Hover Mode (Broadcast) regardless of the Operation Mode setting. Default: Shift+B',
-            editable: [{ key: 'KeyB', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
-            onDown: () => {
-                this._transientMode = 'hover-broadcast';
-                return true;
-            },
-            onUp: () => {
-                this._transientMode = null;
-                return true;
-            },
-            precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
-        });
-    }
-
     // --- Ticker Management ---
 
     static startTicker() {
-        this.stopTicker(); 
+        this.stopTicker();
         this._tickerFunc = this.onTicker.bind(this);
         canvas.app.ticker.add(this._tickerFunc);
         this.refreshAll();
@@ -592,7 +240,7 @@ class CombatDistances {
 
             if (rings.length === 0) {
                 const highlights = document.getElementsByClassName('dhd-highlight-ring');
-                while(highlights.length > 0){
+                while (highlights.length > 0) {
                     highlights[0].remove();
                 }
             }
@@ -600,26 +248,26 @@ class CombatDistances {
             if (rings.length === 0 && hoverLabels.length === 0) return;
 
             const doHighlight = game.settings.get(MODULE_ID, 'targetHighlighting');
-            
+
             const tokensHighlightedThisFrame = new Set();
             const processedSourceIds = new Set();
 
             for (let ring of rings) {
                 const tokenId = ring.dataset.tokenId;
-                
+
                 let token = null;
                 if (tokenId === this.MASS_ID) {
                     token = this._massToken;
                 } else {
                     token = canvas.tokens.get(tokenId);
                 }
-                
+
                 // --- GHOST MOVEMENT PREVIEW FIX ---
-                let effectiveCenter = token ? token.center : {x:0, y:0};
+                let effectiveCenter = token ? token.center : { x: 0, y: 0 };
                 let sourceElevation = token ? (token.document.elevation || 0) : 0;
                 let isDragging = false;
-                
-                if (token && tokenId !== this.MASS_ID) { 
+
+                if (token && tokenId !== this.MASS_ID) {
                     let preview = token.preview;
                     if (!preview && canvas.tokens.preview?.children) {
                         preview = canvas.tokens.preview.children.find(c => c._original?.id === tokenId);
@@ -632,16 +280,16 @@ class CombatDistances {
                 }
 
                 const dist = parseFloat(ring.dataset.rangeDistance);
-                
+
                 if (token && dist && (token.visible || isDragging)) {
                     this.updateRingPositionAndSize(ring, token, dist, effectiveCenter);
-                    
+
                     if (doHighlight && !processedSourceIds.has(tokenId)) {
                         this.updateTargetHighlights(token, effectiveCenter, tokensHighlightedThisFrame, sourceElevation);
                         processedSourceIds.add(tokenId);
                     }
                 } else {
-                    ring.style.display = 'none'; 
+                    ring.style.display = 'none';
                 }
             }
 
@@ -655,7 +303,7 @@ class CombatDistances {
             for (let label of hoverLabels) {
                 const tokenId = label.dataset.hoverTokenId;
                 let token = (tokenId === this.MASS_ID) ? this._massToken : canvas.tokens.get(tokenId);
-                
+
                 if (token && token.visible) {
                     this.updateHoverLabelPosition(label, token);
                 } else {
@@ -669,22 +317,22 @@ class CombatDistances {
 
     static updateTargetHighlights(sourceToken, sourceCenter, activeSet, sourceElevationOverride = null) {
         const potentialTargets = canvas.tokens.placeables;
-        const ranges = this.DEFAULTS.ranges;
+        const ranges = DEFAULTS.ranges;
         const threshold = game.settings.get(MODULE_ID, 'coverageThreshold');
         let calcMode = game.settings.get(MODULE_ID, 'calculationMode');
-        
+
         if (this._activeTokens.has(sourceToken.id)) {
             const activeData = this._activeTokens.get(sourceToken.id);
             if (activeData && activeData.mode) calcMode = activeData.mode;
         }
         const use3D = (calcMode !== 'flat');
         const paletteKey = game.settings.get(MODULE_ID, 'colorPalette');
-        const currentPalette = this.PALETTES[paletteKey] || this.PALETTES['default'];
+        const currentPalette = PALETTES[paletteKey] || PALETTES['default'];
 
         const sW = sourceToken.document.width || 0;
         const sH = sourceToken.document.height || 0;
         const sourceDimSquares = Math.max(sW, sH);
-        
+
         const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
         const lineBufferPx = 2;
 
@@ -694,16 +342,16 @@ class CombatDistances {
             if (target.id === sourceToken.id) continue;
             if (!target.visible) continue;
 
-            const targetPoints = this.getTokenSamplePoints(target);
-            
+            const targetPoints = getTokenSamplePoints(target);
+
             const targetElevation = target.document.elevation || 0;
             const verticalDistance = Math.abs(sourceElevation - targetElevation);
             const verticalDistancePx = verticalDistance * (canvas.scene.grid.size / canvas.scene.grid.distance);
 
             let matchedRangeKey = null;
 
-            const rangesWithKeys = Object.entries(ranges).map(([k, v]) => ({key: k, ...v}))
-                .sort((a,b) => a.distance - b.distance);
+            const rangesWithKeys = Object.entries(ranges).map(([k, v]) => ({ key: k, ...v }))
+                .sort((a, b) => a.distance - b.distance);
 
             for (const range of rangesWithKeys) {
                 const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
@@ -720,7 +368,7 @@ class CombatDistances {
 
                 if ((pointsInside / targetPoints.length) >= threshold) {
                     matchedRangeKey = range.key;
-                    break; 
+                    break;
                 }
             }
 
@@ -735,22 +383,22 @@ class CombatDistances {
     static drawHighlight(token, colorStr) {
         let hl = document.querySelector(`.dhd-highlight-ring[data-target-id="${token.id}"]`);
         const container = this.getContainer();
-        
+
         if (!hl) {
             hl = document.createElement('img');
             hl.classList.add('dhd-highlight-ring');
             hl.dataset.targetId = token.id;
             // Safer access to texture src
-            hl.src = token.document.texture?.src || ""; 
-            
+            hl.src = token.document.texture?.src || "";
+
             // --- FIXES: Aspect Ratio & Click Through ---
             hl.style.pointerEvents = "none";
             hl.style.objectFit = "contain";
-            
+
             container.appendChild(hl);
         }
 
-        let r=0, g=0, b=0;
+        let r = 0, g = 0, b = 0;
         if (colorStr.startsWith('#')) {
             r = parseInt(colorStr.slice(1, 3), 16);
             g = parseInt(colorStr.slice(3, 5), 16);
@@ -760,21 +408,21 @@ class CombatDistances {
         hl.style.setProperty('--hl-r', r);
         hl.style.setProperty('--hl-g', g);
         hl.style.setProperty('--hl-b', b);
-        
-        const screenPos = this.getWorldToScreen(token.center);
-        
+
+        const screenPos = getWorldToScreen(token.center);
+
         // Safer access to texture scale
         const scaleX = token.document.texture?.scaleX || 1;
         const scaleY = token.document.texture?.scaleY || 1;
-        
+
         const tokenW = token.document.width * canvas.grid.size * canvas.stage.scale.x * Math.abs(scaleX);
         const tokenH = token.document.height * canvas.grid.size * canvas.stage.scale.y * Math.abs(scaleY);
-        
+
         hl.style.width = `${tokenW}px`;
         hl.style.height = `${tokenH}px`;
         hl.style.left = `${screenPos.x}px`;
         hl.style.top = `${screenPos.y}px`;
-        
+
         // --- FIX: Respect lockRotation ---
         let rotation = token.document.rotation || 0;
         if (token.document.lockRotation) {
@@ -789,47 +437,6 @@ class CombatDistances {
         hl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(${flipX}, ${flipY})`;
 
         hl.style.display = '';
-    }
-
-    // --- Coordinate Helpers ---
-
-    static getWorldToScreen(point) {
-        if (!point || typeof point.x !== 'number' || typeof point.y !== 'number') return {x: 0, y: 0};
-        return canvas.stage.worldTransform.apply(point);
-    }
-
-    static formatDistance(value) {
-        return Number.isInteger(value) ? value : value.toFixed(1);
-    }
-
-    static getTokenSamplePoints(token) {
-        if (!token) return [];
-        const grid = canvas.scene.grid.size;
-        const resolution = 4;
-        const step = grid / resolution;
-        const offset = step / 2;
-
-        const startX = token.document.x; 
-        const startY = token.document.y; 
-        const widthSquares = token.document.width; 
-        const heightSquares = token.document.height; 
-        
-        const points = [];
-        for (let gx = 0; gx < widthSquares; gx++) {
-            for (let gy = 0; gy < heightSquares; gy++) {
-                const cellX = startX + (gx * grid);
-                const cellY = startY + (gy * grid);
-                for (let sx = 0; sx < resolution; sx++) {
-                    for (let sy = 0; sy < resolution; sy++) {
-                        points.push({
-                            x: cellX + (sx * step) + offset,
-                            y: cellY + (sy * step) + offset
-                        });
-                    }
-                }
-            }
-        }
-        return points;
     }
 
     // --- Event Handlers ---
@@ -876,19 +483,19 @@ class CombatDistances {
             }
 
             const controlled = canvas.tokens.controlled;
-            
+
             // --- FIX: Allow loose selection. If multiple are selected, use the first one. ---
-            if (controlled.length === 0) return; 
+            if (controlled.length === 0) return;
 
             const sourceToken = controlled[0];
             if (sourceToken.id === token.id) return;
 
             // --- GHOST MOVEMENT SUPPORT FOR HOVER ---
             let sourceCenter = sourceToken.center;
-            
+
             // 1. Try standard preview
             let preview = sourceToken.preview;
-            
+
             // 2. Fallback with Safe Access
             // Some players might not have access to _original or children array might be tricky
             if (!preview && canvas.tokens.preview?.children) {
@@ -903,7 +510,7 @@ class CombatDistances {
             }
 
             // --- Setup ---
-            const threshold = game.settings.get(MODULE_ID, 'coverageThreshold'); 
+            const threshold = game.settings.get(MODULE_ID, 'coverageThreshold');
             let calcMode = game.settings.get(MODULE_ID, 'calculationMode');
             if (this._activeTokens.has(sourceToken.id)) {
                 const activeData = this._activeTokens.get(sourceToken.id);
@@ -921,16 +528,16 @@ class CombatDistances {
 
             let finalDistDisplay = Infinity;
             let finalDist3DDisplay = Infinity;
-            
+
             // Default to 'Very Far' if outside all defined ranges
             let matchedLabel = "DHD.ranges.veryFar";
 
             const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
             const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
-            
-            const targetPoints = this.getTokenSamplePoints(token);
-            const sortedRanges = Object.values(this.DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
-            const lineBufferPx = 2; 
+
+            const targetPoints = getTokenSamplePoints(token);
+            const sortedRanges = Object.values(DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
+            const lineBufferPx = 2;
 
             for (const range of sortedRanges) {
                 const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
@@ -957,7 +564,7 @@ class CombatDistances {
                 const d = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
                 if (d < minPointDistPx) minPointDistPx = d;
             }
-            
+
             let distDisplayPx = Math.max(0, minPointDistPx - sourceRadiusPx);
             let d2d = (distDisplayPx / canvas.scene.grid.size) * canvas.scene.grid.distance;
             let d3d = d2d;
@@ -974,17 +581,17 @@ class CombatDistances {
             let displayString = "";
 
             if (calcMode === "flat") {
-                displayString = `(${this.formatDistance(finalDistDisplay)})`;
-            } 
+                displayString = `(${formatDistance(finalDistDisplay)})`;
+            }
             else if (calcMode === "both") {
                 if (safeVertDist > 0) {
-                    displayString = `(${this.formatDistance(finalDist3DDisplay)} | 2D: ${this.formatDistance(finalDistDisplay)})`;
+                    displayString = `(${formatDistance(finalDist3DDisplay)} | 2D: ${formatDistance(finalDistDisplay)})`;
                 } else {
-                    displayString = `(${this.formatDistance(finalDist3DDisplay)})`;
+                    displayString = `(${formatDistance(finalDist3DDisplay)})`;
                 }
-            } 
+            }
             else { // Auto
-                displayString = `(${this.formatDistance(finalDist3DDisplay)})`;
+                displayString = `(${formatDistance(finalDist3DDisplay)})`;
             }
 
             this.createHoverLabel(token, matchedLabel, displayString);
@@ -994,7 +601,7 @@ class CombatDistances {
     }
 
     static getDistanceLabel(distance) {
-        const ranges = Object.values(this.DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
+        const ranges = Object.values(DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
         for (const range of ranges) {
             if (distance <= range.distance) {
                 return range.label;
@@ -1008,14 +615,14 @@ class CombatDistances {
 
         const container = this.getContainer();
         const textSize = game.settings.get(MODULE_ID, 'textSize');
-        
+
         const label = document.createElement('div');
         label.classList.add('dhd-hover-label', `text-${textSize}`);
         label.dataset.hoverTokenId = token.id;
-        
+
         // --- LOCALIZATION UPDATE: Apply game.i18n.localize here ---
         label.innerHTML = `<span class="category">${game.i18n.localize(text)}</span><span class="dist">${distanceDisplayString}</span>`;
-        
+
         container.appendChild(label);
         this.updateHoverLabelPosition(label, token);
     }
@@ -1024,11 +631,11 @@ class CombatDistances {
         if (!labelElement || !token) return;
 
         const worldPos = { x: token.center.x, y: token.y };
-        const screenPos = this.getWorldToScreen(worldPos);
+        const screenPos = getWorldToScreen(worldPos);
 
         labelElement.style.left = `${screenPos.x}px`;
         labelElement.style.top = `${screenPos.y}px`;
-        labelElement.style.display = ''; 
+        labelElement.style.display = '';
     }
 
     static removeHoverLabel(tokenId) {
@@ -1052,38 +659,38 @@ class CombatDistances {
     }
 
     static createRings(token, options = {}) {
-        // NOTE: Does not call removeRings directly to avoid recursion issues in logic, 
+        // NOTE: Does not call removeRings directly to avoid recursion issues in logic,
         // but assumes caller has cleaned up if necessary.
-        
+
         if (token.id === this.MASS_ID) {
             this._massToken = token;
         }
-        
+
         const currentRanges = this.ranges;
         const lineStyle = game.settings.get(MODULE_ID, 'lineStyle');
         const lineThickness = game.settings.get(MODULE_ID, 'lineThickness');
         const fillStyle = game.settings.get(MODULE_ID, 'fillStyle');
         const paletteKey = game.settings.get(MODULE_ID, 'colorPalette');
         const textSize = game.settings.get(MODULE_ID, 'textSize');
-        const currentPalette = this.PALETTES[paletteKey] || this.PALETTES['default'];
+        const currentPalette = PALETTES[paletteKey] || PALETTES['default'];
         const container = this.getContainer();
-        
+
         Object.entries(currentRanges).forEach(([rangeKey, rangeData]) => {
             const ring = document.createElement('div');
             ring.dataset.tokenId = token.id;
-            ring.dataset.rangeDistance = rangeData.distance; 
+            ring.dataset.rangeDistance = rangeData.distance;
             ring.classList.add('dhd-range-ring', rangeKey);
-            
+
             ring.style.borderStyle = lineStyle;
             ring.style.borderWidth = lineThickness;
-            
+
             let color = currentPalette.colors[rangeKey] || '#000000';
             let r, g, b;
             if (color.startsWith('#')) {
                 r = parseInt(color.slice(1, 3), 16);
                 g = parseInt(color.slice(3, 5), 16);
                 b = parseInt(color.slice(5, 7), 16);
-            } else { r=0; g=0; b=0; }
+            } else { r = 0; g = 0; b = 0; }
 
             ring.style.borderColor = `rgba(${r}, ${g}, ${b}, 0.5)`;
 
@@ -1098,15 +705,15 @@ class CombatDistances {
 
             const label = document.createElement('div');
             label.classList.add('dhd-range-label', `text-${textSize}`);
-            
-            const formattedDistance = this.formatDistance(parseFloat(rangeData.distance));
-            
+
+            const formattedDistance = formatDistance(parseFloat(rangeData.distance));
+
             // --- LOCALIZATION UPDATE: Apply game.i18n.localize here ---
             label.innerHTML = `<span class="category">${game.i18n.localize(rangeData.label)}</span> <span class="dist">(${formattedDistance})</span>`;
-            
+
             ring.appendChild(label);
             container.appendChild(ring);
-            
+
             this.updateRingPositionAndSize(ring, token, rangeData.distance, token.center);
         });
 
@@ -1116,7 +723,7 @@ class CombatDistances {
             if (m === '2d') storedMode = 'flat';
             else if (m === '3d') storedMode = 'auto';
             else if (m === 'both') storedMode = 'both';
-            else storedMode = m; 
+            else storedMode = m;
         }
 
         // Store active state (preserving existing timerId if somehow this was a refresh without clear)
@@ -1129,8 +736,8 @@ class CombatDistances {
 
     static updateRingPositionAndSize(ring, token, baseDistance, customCenter = null) {
         const center = customCenter || token.center;
-        const screenPos = this.getWorldToScreen(center);
-        
+        const screenPos = getWorldToScreen(center);
+
         const tW = (token.document && token.document.width) || 0;
         const tH = (token.document && token.document.height) || 0;
         const diameterOffset = Math.max(tW, tH) * canvas.scene.grid.distance;
@@ -1143,7 +750,7 @@ class CombatDistances {
         ring.style.height = `${screenDiameter}px`;
         ring.style.left = `${screenPos.x}px`;
         ring.style.top = `${screenPos.y}px`;
-        ring.style.display = ''; 
+        ring.style.display = '';
     }
 
     static refreshAll() {
@@ -1152,14 +759,14 @@ class CombatDistances {
                 if (this.hasRings(token.id)) {
                     const existingData = this._activeTokens.get(token.id);
                     // Remove first to clean DOM, then recreate
-                    this.removeRings(token.id); 
+                    this.removeRings(token.id);
                     this.createRings(token, { mode: existingData?.mode });
                 }
             });
         }
     }
 
-    static get ranges() { return this.DEFAULTS.ranges; }
+    static get ranges() { return DEFAULTS.ranges; }
 
     static onRenderTokenHUD(hud, html, tokenData) {
         const token = canvas.tokens.get(tokenData._id);
@@ -1196,14 +803,14 @@ class CombatDistances {
 
         const rings = document.querySelectorAll(`.dhd-range-ring[data-token-id="${tokenId}"]`);
         rings.forEach(ring => ring.remove());
-        
+
         const highlights = document.getElementsByClassName('dhd-highlight-ring');
-        while(highlights.length > 0) {
+        while (highlights.length > 0) {
             highlights[0].remove();
         }
 
         this._activeTokens.delete(tokenId);
-        
+
         if (tokenId === this.MASS_ID) {
             this._massToken = null;
         }
@@ -1232,14 +839,14 @@ Hooks.once("ready", async () => {
     try {
         const key = CONFIG.DH.SETTINGS.gameSettings.appearance;
         const rawSettings = game.settings.get(CONFIG.DH.id, key);
-        const currentSettings = (typeof rawSettings.toObject === 'function') 
-            ? rawSettings.toObject() 
+        const currentSettings = (typeof rawSettings.toObject === 'function')
+            ? rawSettings.toObject()
             : { ...rawSettings };
 
         if (currentSettings.showTokenDistance !== "never") {
-            await game.settings.set(CONFIG.DH.id, key, { 
-                ...currentSettings, 
-                showTokenDistance: "never" 
+            await game.settings.set(CONFIG.DH.id, key, {
+                ...currentSettings,
+                showTokenDistance: "never"
             });
             console.log("Combat Distances | Configuração forçada para 'never'.");
         }

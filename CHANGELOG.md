@@ -5,6 +5,10 @@
 - [Changed] CSS split into `styles/base.css` (canvas overlay) and `styles/visual-settings-app.css` (settings dialog) — one file per concern
 - [Changed] All CSS rules scoped under `.daggerheart-distances` to prevent style leaks into Foundry core
 - [Changed] Hardcoded colors in CSS replaced with Foundry core variables (`--color-text-primary`, `--color-text-secondary`, `--color-border`) and module-level custom properties (`--dhd-label-bg`, `--dhd-category-color`, etc.)
+- [Changed] `PALETTES` and `DEFAULTS` moved from `CombatDistances` static properties to named exports in `scripts/constants.js`
+- [Changed] `VisualSettingsApp` extracted from `main.js` into `scripts/visual-settings-app.js`; refresh callback wired via `initVisualSettingsApp()` to avoid circular imports
+- [Changed] `registerSettings()` and `registerKeybindings()` extracted from `CombatDistances` into `scripts/registration.js` as standalone exported functions
+- [Changed] Pure utility functions (`getWorldToScreen`, `formatDistance`, `getTokenSamplePoints`) extracted from `CombatDistances` into `scripts/helpers.js`
 
 # 0.1.7
 
