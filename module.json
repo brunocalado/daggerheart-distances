@@ -50,6 +50,12 @@
       "name": "Portuguese (Brazil)",
       "path": "languages/pt-BR.json",
       "flags": {}
+    },
+    {
+      "lang": "ru",
+      "name": "Russian",
+      "path": "languages/ru.json",
+      "flags": {}
     }
   ],
   

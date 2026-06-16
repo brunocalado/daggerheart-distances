@@ -1,0 +1,12 @@
+{
+    "DHD.ranges.melee": "Вплотную",
+    "DHD.ranges.veryClose": "Близко",
+    "DHD.ranges.close": "Средне",
+    "DHD.ranges.far": "Далеко",
+    "DHD.ranges.veryFar": "Очень далеко",
+    "DHD.settings.operationMode.name": "Режим работы",
+    "DHD.settings.operationMode.hint": "Выберите, как будут срабатывать кольца дистанции.",
+    "DHD.settings.operationMode.manual": "Вручную",
+    "DHD.settings.operationMode.hoverGM": "При наведении (ГМ)",
+    "DHD.settings.operationMode.hoverBroadcast": "При наведении (Для всех)"
+}
