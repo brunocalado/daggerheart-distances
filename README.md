@@ -101,6 +101,7 @@ You have many easy ways to show or hide the range rings around a token:
 | `M` | Mass Measurement from selected tokens |
 | `Hold Shift+H` | Temporarily enable Hover Mode (GM) |
 | `Hold Shift+B` | Temporarily enable Hover Mode (Broadcast) |
+| `Ctrl+Alt+C` | Remove all previously created rings |
 
 > All keybindings can be reassigned in **Foundry Settings → Configure Controls**.
 
@@ -110,6 +111,7 @@ You have many easy ways to show or hide the range rings around a token:
 DHDistances.Toggle();              // Toggle rings for selected/hovered token
 DHDistances.Toggle({ remote: true }); // Broadcast rings to all players (GM only)
 DHDistances.MassMeasurement();     // Mass Measurement from selected tokens
+DHDistances.clearAll();     // Remove all previously created rings
 ```
 
 ```js
