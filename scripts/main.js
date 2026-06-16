@@ -39,7 +39,7 @@ class CombatDistances {
     static MassMeasurement(options = {}) {
         const tokens = canvas.tokens.controlled;
         if (tokens.length === 0) {
-            ui.notifications.warn("Daggerheart Distances: Select tokens to measure from.");
+            ui.notifications.warn(game.i18n.localize('DHD.notification.selectTokensMeasure'));
             return;
         }
 
@@ -109,7 +109,7 @@ class CombatDistances {
         const tokens = hoverToken ? [hoverToken] : canvas.tokens.controlled;
 
         if (tokens.length === 0) {
-            ui.notifications.warn("Daggerheart Distances: Select or hover over a token first.");
+            ui.notifications.warn(game.i18n.localize('DHD.notification.selectOrHoverToken'));
             return;
         }
 
@@ -160,7 +160,7 @@ class CombatDistances {
 
         // Optional feedback
         if (tokenIds.length > 0) {
-            ui.notifications.info(`Daggerheart Distances: Cleared ${tokenIds.length} distance ring(s).`);
+            ui.notifications.info(game.i18n.format('DHD.notification.clearedRings', { count: tokenIds.length }));
         }
     }
 
@@ -328,7 +328,7 @@ class CombatDistances {
                 }
             }
         } catch (err) {
-            console.warn("Daggerheart Distances | Ticker Error:", err);
+            console.warn(game.i18n.localize('DHD.error.tickerError'), err);
         }
     }
 
@@ -613,7 +613,7 @@ class CombatDistances {
 
             this.createHoverLabel(token, matchedLabel, displayString);
         } catch (err) {
-            console.error("Daggerheart Distances | Hover Calculation Error:", err);
+            console.error(game.i18n.localize('DHD.error.hoverCalculationError'), err);
         }
     }
 
@@ -791,7 +791,7 @@ class CombatDistances {
 
         const button = document.createElement('div');
         button.classList.add('control-icon');
-        button.title = 'Toggle Combat Distances';
+        button.title = game.i18n.localize('DHD.button.toggleCombatDistances');
         button.innerHTML = '<i class="fas fa-circle-dot"></i>';
 
         if (this.hasRings(token.id)) {
@@ -869,6 +869,6 @@ Hooks.once("ready", async () => {
         }
 
     } catch (err) {
-        console.warn("Combat Distances | Falha ao aplicar configuração:", err);
+        console.warn(game.i18n.localize('DHD.error.failureApplyingConfig'), err);
     }
 });
