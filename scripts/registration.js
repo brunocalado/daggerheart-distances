@@ -225,4 +225,16 @@ export function registerKeybindings(CombatDistances) {
         },
         precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
     });
+
+    game.keybindings.register(MODULE_ID, 'clearAll', {
+        name: 'DHD.keybindings.clearAll.name',
+        hint: 'DHD.keybindings.clearAll.hint',
+        editable: [{ key: 'KeyC', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.CONTROL,
+                                              foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.ALT] }],
+        onDown: () => {
+            CombatDistances.clearAll();
+            return true;
+        },
+        precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+    });
 }

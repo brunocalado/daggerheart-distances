@@ -8,5 +8,8 @@
     "DHD.settings.operationMode.hint": "Выберите, как будут срабатывать кольца дистанции.",
     "DHD.settings.operationMode.manual": "Вручную",
     "DHD.settings.operationMode.hoverGM": "При наведении (ГМ)",
-    "DHD.settings.operationMode.hoverBroadcast": "При наведении (Для всех)"
+    "DHD.settings.operationMode.hoverBroadcast": "При наведении (Для всех)",
+    "DHD.keybindings.clearAll.name": "Очистить все кольца дистанции",
+    "DHD.keybindings.clearAll.hint": "Удалить все активные кольца дистанции со всех токенов на сцене. По умолчанию: Alt+C"
 }
+

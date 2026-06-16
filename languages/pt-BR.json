@@ -8,5 +8,8 @@
     "DHD.settings.operationMode.hint": "Escolha como os anéis de distância são ativados.",
     "DHD.settings.operationMode.manual": "Manual",
     "DHD.settings.operationMode.hoverGM": "Modo Hover (Mestre)",
-    "DHD.settings.operationMode.hoverBroadcast": "Modo Hover (Transmissão)"
+    "DHD.settings.operationMode.hoverBroadcast": "Modo Hover (Transmissão)",
+    "DHD.keybindings.clearAll.name": "Limpar Todos os Anéis de Distância",
+    "DHD.keybindings.clearAll.hint": "Remove todos os anéis de distância ativos de todos os tokens na cena. Padrão: Alt+C"
 }
+

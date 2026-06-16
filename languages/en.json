@@ -8,5 +8,8 @@
     "DHD.settings.operationMode.hint": "Choose how distance rings are triggered.",
     "DHD.settings.operationMode.manual": "Manual",
     "DHD.settings.operationMode.hoverGM": "Hover Mode (GM)",
-    "DHD.settings.operationMode.hoverBroadcast": "Hover Mode (Broadcast)"
+    "DHD.settings.operationMode.hoverBroadcast": "Hover Mode (Broadcast)",
+    "DHD.keybindings.clearAll.name": "Clear All Distance Rings",
+    "DHD.keybindings.clearAll.hint": "Remove all active distance rings from all tokens on the scene. Default: Alt+C"
 }
+

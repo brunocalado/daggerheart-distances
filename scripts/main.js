@@ -147,6 +147,23 @@ class CombatDistances {
         }
     }
 
+    /**
+     * Clears all active distance rings from all tokens on the scene.
+     * Public API method accessible via DHDistances.clearAll()
+     */
+    static clearAll() {
+        // Iterate over all active tokens and remove their rings
+        const tokenIds = Array.from(this._activeTokens.keys());
+        tokenIds.forEach(tokenId => {
+            this.removeRings(tokenId);
+        });
+
+        // Optional feedback
+        if (tokenIds.length > 0) {
+            ui.notifications.info(`Daggerheart Distances: Cleared ${tokenIds.length} distance ring(s).`);
+        }
+    }
+
     // --- Internal Logic for Broadcast ---
 
     /**
