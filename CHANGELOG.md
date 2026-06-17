@@ -1,3 +1,9 @@
+# 0.2.2
+
+- [Changed] **Operation Mode** is now a GM-only world setting (`restricted: true`); non-GM players no longer see it in Module Settings
+- [Changed] **Grid Coverage Threshold** is now a GM-only world setting; the GM defines it once for the whole table instead of each player setting their own value
+- [Changed] **Calculation Mode** is now a GM-only world setting; ensures all players use the same elevation calculation method
+
 # 0.2.1
 
 - [Added] `ClearAll()` method: removes all active distance rings at once, locally for the calling user

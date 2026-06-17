@@ -27,8 +27,9 @@ export function registerSettings(CombatDistances) {
     game.settings.register(MODULE_ID, 'operationMode', {
         name: 'Operation Mode',
         hint: 'Choose how distance rings are triggered.',
-        scope: 'client',
+        scope: 'world',
         config: true,
+        restricted: true,
         type: String,
         choices: {
             'manual':           'Manual',
@@ -76,8 +77,9 @@ export function registerSettings(CombatDistances) {
     game.settings.register(MODULE_ID, 'coverageThreshold', {
         name: 'Grid Coverage Threshold',
         hint: 'How much of the token must be inside the range to count? (0.01 = just touching, 0.5 = 50% coverage).',
-        scope: 'client',
+        scope: 'world',
         config: true,
+        restricted: true,
         type: Number,
         range: { min: 0.01, max: 1.0, step: 0.01 },
         default: 0.10,
@@ -87,8 +89,9 @@ export function registerSettings(CombatDistances) {
     game.settings.register(MODULE_ID, 'calculationMode', {
         name: 'Calculation Mode',
         hint: 'Choose how elevation affects distance measurement.',
-        scope: 'client',
+        scope: 'world',
         config: true,
+        restricted: true,
         type: String,
         choices: {
             "auto": "Auto (3D - Default)",
