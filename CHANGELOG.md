@@ -1,3 +1,10 @@
+# 0.2.4
+
+- [Fixed] HUD button styles (border, cursor, active state) were not applied for non-English locales because the CSS selector matched the hardcoded English title string; button now carries a dedicated `dhd-hud-button` class used as the selector
+- [Changed] Extracted the coverage-based range-matching loop into `findMatchedRange()` in `scripts/helpers.js`; eliminates duplicated logic between `updateTargetHighlights()` and `onHoverToken()`
+- [Removed] Dead method `CombatDistances.getDistanceLabel()` — was never called
+
+
 # 0.2.3
 
 - [Changed] Full i18n pass: all user-facing strings are now localized via the translation files (`languages/en.json`, `languages/pt-BR.json`)

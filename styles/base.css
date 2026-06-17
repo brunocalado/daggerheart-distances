@@ -178,8 +178,9 @@
 }
 
 /* HUD button — injected into Foundry's TokenHUD DOM, which we do not control.
-   Cannot be scoped under .daggerheart-distances; attribute selector provides specificity. */
-.control-icon[title="Toggle Combat Distances"] {
+   Cannot be scoped under .daggerheart-distances; dedicated class provides specificity
+   without relying on a localized title string. */
+.control-icon.dhd-hud-button {
     background: var(--color-bg-option, rgba(0, 0, 0, 0.5));
     border: 1px solid var(--color-border, #000);
     border-radius: 5px;

@@ -1,5 +1,5 @@
 import { MODULE_ID, PALETTES, DEFAULTS, CLEAR_ALL_MODE_KEY } from './constants.js';
-import { getWorldToScreen, formatDistance, getTokenSamplePoints } from './helpers.js';
+import { getWorldToScreen, formatDistance, getTokenSamplePoints, findMatchedRange } from './helpers.js';
 import { registerSettings, registerKeybindings } from './registration.js';
 
 class CombatDistances {
@@ -378,29 +378,10 @@ class CombatDistances {
             const verticalDistance = Math.abs(sourceElevation - targetElevation);
             const verticalDistancePx = verticalDistance * (canvas.scene.grid.size / canvas.scene.grid.distance);
 
-            let matchedRangeKey = null;
-
             const rangesWithKeys = Object.entries(ranges).map(([k, v]) => ({ key: k, ...v }))
                 .sort((a, b) => a.distance - b.distance);
 
-            for (const range of rangesWithKeys) {
-                const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
-                const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
-
-                let pointsInside = 0;
-                for (let pTarget of targetPoints) {
-                    let distPx = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
-                    if (use3D && verticalDistancePx > 0) {
-                        distPx = Math.sqrt(Math.pow(distPx, 2) + Math.pow(verticalDistancePx, 2));
-                    }
-                    if (distPx <= visualRingRadiusPx) pointsInside++;
-                }
-
-                if ((pointsInside / targetPoints.length) >= threshold) {
-                    matchedRangeKey = range.key;
-                    break;
-                }
-            }
+            const matchedRangeKey = findMatchedRange(targetPoints, rangesWithKeys, sourceCenter, sourceRadiusPx, use3D, verticalDistancePx, threshold)?.key ?? null;
 
             if (matchedRangeKey) {
                 const color = currentPalette.colors[matchedRangeKey] || '#ffffff';
@@ -559,35 +540,14 @@ class CombatDistances {
             let finalDistDisplay = Infinity;
             let finalDist3DDisplay = Infinity;
 
-            // Default to 'Very Far' if outside all defined ranges
-            let matchedLabel = "DHD.ranges.veryFar";
-
             const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
             const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
 
             const targetPoints = getTokenSamplePoints(token);
             const sortedRanges = Object.values(DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
-            const lineBufferPx = 2;
 
-            for (const range of sortedRanges) {
-                const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
-                const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
-
-                let pointsInside = 0;
-                for (let pTarget of targetPoints) {
-                    let distPx = Math.hypot(pTarget.x - sourceCenter.x, pTarget.y - sourceCenter.y);
-                    if (use3D && verticalDistancePx > 0) {
-                        distPx = Math.sqrt(Math.pow(distPx, 2) + Math.pow(verticalDistancePx, 2));
-                    }
-                    if (distPx <= visualRingRadiusPx) pointsInside++;
-                }
-
-                const ratio = pointsInside / targetPoints.length;
-                if (ratio >= threshold) {
-                    matchedLabel = range.label;
-                    break;
-                }
-            }
+            // Default to 'Very Far' if outside all defined ranges
+            const matchedLabel = findMatchedRange(targetPoints, sortedRanges, sourceCenter, sourceRadiusPx, use3D, verticalDistancePx, threshold)?.label ?? "DHD.ranges.veryFar";
 
             let minPointDistPx = Infinity;
             for (let pTarget of targetPoints) {
@@ -628,16 +588,6 @@ class CombatDistances {
         } catch (err) {
             console.error("Daggerheart Distances | Hover Calculation Error:", err);
         }
-    }
-
-    static getDistanceLabel(distance) {
-        const ranges = Object.values(DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
-        for (const range of ranges) {
-            if (distance <= range.distance) {
-                return range.label;
-            }
-        }
-        return "DHD.ranges.veryFar";
     }
 
     static createHoverLabel(token, text, distanceDisplayString) {
@@ -803,7 +753,7 @@ class CombatDistances {
         if (!token) return;
 
         const button = document.createElement('div');
-        button.classList.add('control-icon');
+        button.classList.add('control-icon', 'dhd-hud-button');
         button.title = game.i18n.localize('DHD.ui.toggleCombatDistances');
         button.innerHTML = '<i class="fas fa-circle-dot"></i>';
 

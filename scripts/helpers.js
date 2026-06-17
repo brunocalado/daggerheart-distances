@@ -18,6 +18,38 @@ export function formatDistance(value) {
 }
 
 /**
+ * Finds the first range whose coverage threshold is met by the target sample points.
+ * Sorted ranges must be ordered ascending by distance; returns the matched range object or null.
+ * @param {{x:number,y:number}[]} targetPoints
+ * @param {Array<{distance:number}>} sortedRanges
+ * @param {{x:number,y:number}} sourceCenter
+ * @param {number} sourceRadiusPx
+ * @param {boolean} use3D
+ * @param {number} verticalDistancePx
+ * @param {number} threshold - fraction 0..1
+ * @param {number} [lineBufferPx=2]
+ * @returns {object|null}
+ */
+export function findMatchedRange(targetPoints, sortedRanges, sourceCenter, sourceRadiusPx, use3D, verticalDistancePx, threshold, lineBufferPx = 2) {
+    for (const range of sortedRanges) {
+        const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
+        const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
+
+        let pointsInside = 0;
+        for (const p of targetPoints) {
+            let distPx = Math.hypot(p.x - sourceCenter.x, p.y - sourceCenter.y);
+            if (use3D && verticalDistancePx > 0) {
+                distPx = Math.sqrt(distPx ** 2 + verticalDistancePx ** 2);
+            }
+            if (distPx <= visualRingRadiusPx) pointsInside++;
+        }
+
+        if ((pointsInside / targetPoints.length) >= threshold) return range;
+    }
+    return null;
+}
+
+/**
  * Returns a dense grid of sample points covering the token's footprint.
  * Used for coverage-based range checks so large tokens are assessed fairly.
  * @param {Token} token
