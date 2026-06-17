@@ -11,6 +11,8 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-red?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/mestredigital)
 
+> Leia em [Português do Brasil](docs/README-PTBR.md)
+
 ## 🌟 Key Features
 
 ### 📏 For Everyone (Players & GM)
@@ -145,6 +147,14 @@ Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
 Install via the Foundry VTT Module browser or use this manifest link:
 
 * *https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json*
+
+## 🌍 Translations
+
+Want to translate this module into your language? Here's how:
+
+1. Download the English translation file: [languages/en.json](https://github.com/brunocalado/daggerheart-distances/blob/main/languages/en.json)
+2. Translate the values (keep the keys unchanged)
+3. Submit your translation at [GitHub Issues](https://github.com/brunocalado/daggerheart-distances/issues) — attach the translated file and mention the target language
 
 ## 📜 Changelog
 
