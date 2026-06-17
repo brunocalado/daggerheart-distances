@@ -146,7 +146,9 @@ Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
 
 Install via the Foundry VTT Module browser or use this manifest link:
 
-* *https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json*
+```js
+https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json
+```
 
 ## 🌍 Translations
 
