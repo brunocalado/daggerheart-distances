@@ -2,8 +2,7 @@
   "id": "daggerheart-distances",
   "title": "Daggerheart: Distances",
   "description": "Visualizes Daggerheart combat ranges with customizable rings and hover distance calculations.",
-  
-  "version": "0.2.0",
+  "version": "0.2.1",
   
   "compatibility": {
     "minimum": "14",
@@ -29,13 +28,14 @@
       }
     ]
   },
+  
   "esmodules": [
     "scripts/main.js"
   ],
-
+  
   "styles": [
-    { "src": "styles/base.css" },
-    { "src": "styles/visual-settings-app.css" }
+    "styles/base.css",
+    "styles/visual-settings-app.css"
   ],
   
   "languages": [

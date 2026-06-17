@@ -1,5 +1,7 @@
 export const MODULE_ID = "daggerheart-distances";
 
+export const CLEAR_ALL_MODE_KEY = 'clearAllMode';
+
 export const PALETTES = {
     "default": {
         label: "Traffic Light",

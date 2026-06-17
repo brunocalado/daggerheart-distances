@@ -1,3 +1,11 @@
+# 0.2.1
+
+- [Added] `ClearAll()` method: removes all active distance rings at once, locally for the calling user
+- [Added] Keybinding `Shift+Delete` to trigger `ClearAll()` (reassignable in Foundry's Configure Controls)
+- [Added] Public macro API: `DHDistances.ClearAll()` — removes all rings for the user who calls it
+- [Added] GM setting **Clear All Mode**: choose whether `ClearAll()` affects only the GM or all connected players (Module Settings → Clear All Mode)
+- [Added] Macro arg for explicit scope override: `DHDistances.clearAll({ scope: 'all' })` broadcasts to all players regardless of setting; `DHDistances.clearAll({ scope: 'self' })` limits to the GM only — arg takes precedence over the setting
+
 # 0.2.0
 
 - v14 only

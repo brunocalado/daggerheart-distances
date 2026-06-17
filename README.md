@@ -9,6 +9,8 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
        loop 
        muted></video>
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-red?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/mestredigital)
+
 ## 🌟 Key Features
 
 ### 📏 For Everyone (Players & GM)
@@ -99,6 +101,7 @@ You have many easy ways to show or hide the range rings around a token:
 | `R` | Toggle rings on/off (local, just for you) |
 | `Shift+R` | Broadcast rings to all players (GM only) |
 | `M` | Mass Measurement from selected tokens |
+| `Shift+Delete` | Clear all active rings at once |
 | `Hold Shift+H` | Temporarily enable Hover Mode (GM) |
 | `Hold Shift+B` | Temporarily enable Hover Mode (Broadcast) |
 
@@ -110,6 +113,7 @@ You have many easy ways to show or hide the range rings around a token:
 DHDistances.Toggle();              // Toggle rings for selected/hovered token
 DHDistances.Toggle({ remote: true }); // Broadcast rings to all players (GM only)
 DHDistances.MassMeasurement();     // Mass Measurement from selected tokens
+DHDistances.ClearAll();            // Remove all active rings (respects Clear All Mode setting)
 ```
 
 ```js
@@ -122,6 +126,12 @@ DHDistances.Toggle({mode: '3d'}); // Calculates distance accounting for elevatio
 
 ```js
 DHDistances.Toggle({mode: 'both'}); // Shows both 3D and 2D distances.
+```
+
+```js
+// GM only: explicit scope override (takes precedence over the Clear All Mode setting)
+DHDistances.ClearAll({ scope: 'all' });  // Remove rings for all connected players
+DHDistances.ClearAll({ scope: 'self' }); // Remove rings for the GM only
 ```
 
 ### Configuration

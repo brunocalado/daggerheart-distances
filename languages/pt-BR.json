@@ -8,5 +8,11 @@
     "DHD.settings.operationMode.hint": "Escolha como os anéis de distância são ativados.",
     "DHD.settings.operationMode.manual": "Manual",
     "DHD.settings.operationMode.hoverGM": "Modo Hover (Mestre)",
-    "DHD.settings.operationMode.hoverBroadcast": "Modo Hover (Transmissão)"
+    "DHD.settings.operationMode.hoverBroadcast": "Modo Hover (Transmissão)",
+    "DHD.settings.clearAllMode.name": "Modo Limpar Tudo (Mestre)",
+    "DHD.settings.clearAllMode.hint": "Quando o Mestre usa Limpar Tudo (Shift+Delete), deve remover os anéis apenas para o Mestre ou para todos os jogadores conectados?",
+    "DHD.settings.clearAllMode.self": "Apenas Mestre",
+    "DHD.settings.clearAllMode.all": "Todos os Jogadores",
+    "DHD.keybindings.clearAll.name": "Limpar Todos os Anéis",
+    "DHD.keybindings.clearAll.hint": "Remove todos os anéis de distância ativos de uma vez. Padrão: Shift+Delete"
 }

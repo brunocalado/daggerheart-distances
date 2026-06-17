@@ -1,4 +1,4 @@
-import { MODULE_ID, PALETTES, DEFAULTS } from './constants.js';
+import { MODULE_ID, PALETTES, DEFAULTS, CLEAR_ALL_MODE_KEY } from './constants.js';
 import { getWorldToScreen, formatDistance, getTokenSamplePoints } from './helpers.js';
 import { registerSettings, registerKeybindings } from './registration.js';
 
@@ -95,6 +95,30 @@ class CombatDistances {
     }
 
     /**
+     * Removes all active distance rings for the calling user.
+     * GMs can also broadcast the clear to all connected clients based on the clearAllMode setting.
+     * @param {Object} [options]
+     * @param {'self'|'all'} [options.scope] - Explicit scope override; takes precedence over the clearAllMode setting. GM only.
+     */
+    static async ClearAll({ scope } = {}) {
+        for (const tokenId of [...this._activeTokens.keys()])
+            this.removeRings(tokenId);
+
+        if (!game.user.isGM) return;
+
+        const effectiveScope = scope ?? game.settings.get(MODULE_ID, CLEAR_ALL_MODE_KEY);
+
+        if (effectiveScope === 'all' && canvas?.scene) {
+            await game.settings.set(MODULE_ID, 'broadcastState', {
+                action: 'clearAll',
+                triggerId: foundry.utils.randomID(),
+                sceneId: canvas.scene.id,
+                timestamp: Date.now()
+            });
+        }
+    }
+
+    /**
      * Toggles rings on tokens.
      * @param {Object} options
      * @param {boolean} options.remote - If true, broadcasts the toggle to all clients (GM only).
@@ -161,7 +185,13 @@ class CombatDistances {
         const now = Date.now();
         if (now - data.timestamp > 10000) return;
 
-        // Retrieve tokens
+        if (data.action === 'clearAll') {
+            for (const tokenId of [...this._activeTokens.keys()])
+                this.removeRings(tokenId);
+            return;
+        }
+
+        // Retrieve tokens (Toggle broadcast)
         const tokens = [];
         for (const id of data.tokenIds) {
             const token = canvas.tokens.get(id);

@@ -8,5 +8,11 @@
     "DHD.settings.operationMode.hint": "Choose how distance rings are triggered.",
     "DHD.settings.operationMode.manual": "Manual",
     "DHD.settings.operationMode.hoverGM": "Hover Mode (GM)",
-    "DHD.settings.operationMode.hoverBroadcast": "Hover Mode (Broadcast)"
+    "DHD.settings.operationMode.hoverBroadcast": "Hover Mode (Broadcast)",
+    "DHD.settings.clearAllMode.name": "Clear All Mode (GM)",
+    "DHD.settings.clearAllMode.hint": "When the GM uses Clear All (Shift+Delete), should it remove rings only for the GM or for all connected players?",
+    "DHD.settings.clearAllMode.self": "GM Only",
+    "DHD.settings.clearAllMode.all": "All Players",
+    "DHD.keybindings.clearAll.name": "Clear All Rings",
+    "DHD.keybindings.clearAll.hint": "Remove all active distance rings at once. Default: Shift+Delete"
 }

@@ -1,4 +1,4 @@
-import { MODULE_ID, PALETTES } from './constants.js';
+import { MODULE_ID, PALETTES, CLEAR_ALL_MODE_KEY } from './constants.js';
 import { VisualSettingsApp, initVisualSettingsApp } from './visual-settings-app.js';
 
 /**
@@ -46,6 +46,20 @@ export function registerSettings(CombatDistances) {
         type: Object,
         default: {},
         onChange: (data) => CombatDistances._handleBroadcastChange(data)
+    });
+
+    game.settings.register(MODULE_ID, CLEAR_ALL_MODE_KEY, {
+        name: 'Clear All Mode (GM)',
+        hint: 'When the GM uses Clear All (Shift+Delete), should it remove rings only for the GM or for all connected players?',
+        scope: 'world',
+        config: true,
+        restricted: true,
+        type: String,
+        choices: {
+            'self': 'GM Only',
+            'all': 'All Players'
+        },
+        default: 'self'
     });
 
     game.settings.register(MODULE_ID, 'broadcastDuration', {
@@ -206,6 +220,17 @@ export function registerKeybindings(CombatDistances) {
         },
         onUp: () => {
             CombatDistances._transientMode = null;
+            return true;
+        },
+        precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+    });
+
+    game.keybindings.register(MODULE_ID, 'clearAll', {
+        name: 'Clear All Rings',
+        hint: 'Remove all active distance rings at once. Default: Shift+Delete',
+        editable: [{ key: 'Delete', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
+        onDown: () => {
+            CombatDistances.ClearAll();
             return true;
         },
         precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
