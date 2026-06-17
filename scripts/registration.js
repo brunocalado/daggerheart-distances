@@ -16,25 +16,25 @@ export function registerSettings(CombatDistances) {
     }, {});
 
     game.settings.registerMenu(MODULE_ID, 'visualSettingsMenu', {
-        name: 'Visual Settings',
-        label: 'Open Visual Settings',
-        hint: 'Configure the appearance of the distance rings: colors, lines, effects, and labels.',
+        name: 'DHD.settings.visualSettingsMenu.name',
+        label: 'DHD.settings.visualSettingsMenu.label',
+        hint: 'DHD.settings.visualSettingsMenu.hint',
         icon: 'fas fa-palette',
         type: VisualSettingsApp,
         restricted: false
     });
 
     game.settings.register(MODULE_ID, 'operationMode', {
-        name: 'Operation Mode',
-        hint: 'Choose how distance rings are triggered.',
+        name: 'DHD.settings.operationMode.name',
+        hint: 'DHD.settings.operationMode.hint',
         scope: 'world',
         config: true,
         restricted: true,
         type: String,
         choices: {
-            'manual':           'Manual',
-            'hover-gm':         'Hover Mode (GM)',
-            'hover-broadcast':  'Hover Mode (Broadcast)'
+            'manual':           'DHD.settings.operationMode.manual',
+            'hover-gm':         'DHD.settings.operationMode.hoverGM',
+            'hover-broadcast':  'DHD.settings.operationMode.hoverBroadcast'
         },
         default: 'manual',
         onChange: () => {}
@@ -50,22 +50,22 @@ export function registerSettings(CombatDistances) {
     });
 
     game.settings.register(MODULE_ID, CLEAR_ALL_MODE_KEY, {
-        name: 'Clear All Mode (GM)',
-        hint: 'When the GM uses Clear All (Shift+Delete), should it remove rings only for the GM or for all connected players?',
+        name: 'DHD.settings.clearAllMode.name',
+        hint: 'DHD.settings.clearAllMode.hint',
         scope: 'world',
         config: true,
         restricted: true,
         type: String,
         choices: {
-            'self': 'GM Only',
-            'all': 'All Players'
+            'self': 'DHD.settings.clearAllMode.self',
+            'all': 'DHD.settings.clearAllMode.all'
         },
         default: 'self'
     });
 
     game.settings.register(MODULE_ID, 'broadcastDuration', {
-        name: 'Broadcast Duration (Seconds)',
-        hint: 'How long the rings remain visible when broadcasted by the GM.',
+        name: 'DHD.settings.broadcastDuration.name',
+        hint: 'DHD.settings.broadcastDuration.hint',
         scope: 'world',
         config: true,
         type: Number,
@@ -75,8 +75,8 @@ export function registerSettings(CombatDistances) {
     // ---------------------------------------------
 
     game.settings.register(MODULE_ID, 'coverageThreshold', {
-        name: 'Grid Coverage Threshold',
-        hint: 'How much of the token must be inside the range to count? (0.01 = just touching, 0.5 = 50% coverage).',
+        name: 'DHD.settings.coverageThreshold.name',
+        hint: 'DHD.settings.coverageThreshold.hint',
         scope: 'world',
         config: true,
         restricted: true,
@@ -87,35 +87,39 @@ export function registerSettings(CombatDistances) {
     });
 
     game.settings.register(MODULE_ID, 'calculationMode', {
-        name: 'Calculation Mode',
-        hint: 'Choose how elevation affects distance measurement.',
+        name: 'DHD.settings.calculationMode.name',
+        hint: 'DHD.settings.calculationMode.hint',
         scope: 'world',
         config: true,
         restricted: true,
         type: String,
         choices: {
-            "auto": "Auto (3D - Default)",
-            "flat": "Flat (2D Only - Ignore Height)",
-            "both": "Both (Show 3D & 2D)"
+            "auto": "DHD.settings.calculationMode.auto",
+            "flat": "DHD.settings.calculationMode.flat",
+            "both": "DHD.settings.calculationMode.both"
         },
         default: "auto",
         onChange: () => { }
     });
 
     game.settings.register(MODULE_ID, 'textSize', {
-        name: 'Text Size',
-        hint: 'Choose the size of the text labels.',
+        name: 'DHD.settings.textSize.name',
+        hint: 'DHD.settings.textSize.hint',
         scope: 'client',
         config: false,
         type: String,
-        choices: { "small": "Small", "normal": "Normal", "large": "Large" },
+        choices: {
+            "small": "DHD.settings.textSize.small",
+            "normal": "DHD.settings.textSize.normal",
+            "large": "DHD.settings.textSize.large"
+        },
         default: "normal",
         onChange: () => CombatDistances.refreshAll()
     });
 
     game.settings.register(MODULE_ID, 'colorPalette', {
-        name: 'Color Palette',
-        hint: 'Choose the color theme for the distance rings.',
+        name: 'DHD.settings.colorPalette.name',
+        hint: 'DHD.settings.colorPalette.hint',
         scope: 'client',
         config: false,
         type: String,
@@ -125,46 +129,55 @@ export function registerSettings(CombatDistances) {
     });
 
     game.settings.register(MODULE_ID, 'lineStyle', {
-        name: 'Line Style',
-        hint: 'Choose the line style for the distance rings.',
+        name: 'DHD.settings.lineStyle.name',
+        hint: 'DHD.settings.lineStyle.hint',
         scope: 'client',
         config: false,
         type: String,
-        choices: { "solid": "Solid", "dotted": "Dotted", "dashed": "Dashed" },
+        choices: {
+            "solid": "DHD.settings.lineStyle.solid",
+            "dotted": "DHD.settings.lineStyle.dotted",
+            "dashed": "DHD.settings.lineStyle.dashed"
+        },
         default: "solid",
         onChange: () => CombatDistances.refreshAll()
     });
 
     game.settings.register(MODULE_ID, 'lineThickness', {
-        name: 'Line Thickness',
-        hint: 'Adjust the thickness of the distance rings.',
+        name: 'DHD.settings.lineThickness.name',
+        hint: 'DHD.settings.lineThickness.hint',
         scope: 'client',
         config: false,
         type: String,
-        choices: { "2px": "Normal", "5px": "Large", "8px": "Extra Large", "12px": "Massive" },
+        choices: {
+            "2px": "DHD.settings.lineThickness.normal",
+            "5px": "DHD.settings.lineThickness.large",
+            "8px": "DHD.settings.lineThickness.extraLarge",
+            "12px": "DHD.settings.lineThickness.massive"
+        },
         default: "2px",
         onChange: () => CombatDistances.refreshAll()
     });
 
     game.settings.register(MODULE_ID, 'fillStyle', {
-        name: 'Gradient Fill Style',
-        hint: 'Choose the style of the gradient fill.',
+        name: 'DHD.settings.fillStyle.name',
+        hint: 'DHD.settings.fillStyle.hint',
         scope: 'client',
         config: false,
         type: String,
         choices: {
-            "static": "Static",
-            "animated-normal": "Animated - Normal",
-            "animated-light": "Animated - Light",
-            "none": "None"
+            "static": "DHD.settings.fillStyle.static",
+            "animated-normal": "DHD.settings.fillStyle.animatedNormal",
+            "animated-light": "DHD.settings.fillStyle.animatedLight",
+            "none": "DHD.settings.fillStyle.none"
         },
         default: "animated-light",
         onChange: () => CombatDistances.refreshAll()
     });
 
     game.settings.register(MODULE_ID, 'targetHighlighting', {
-        name: 'Target Highlighting',
-        hint: 'Highlight tokens that are inside your range rings with the corresponding color.',
+        name: 'DHD.settings.targetHighlighting.name',
+        hint: 'DHD.settings.targetHighlighting.hint',
         scope: 'client',
         config: false,
         type: Boolean,
@@ -183,8 +196,8 @@ export function registerSettings(CombatDistances) {
  */
 export function registerKeybindings(CombatDistances) {
     game.keybindings.register(MODULE_ID, "toggleRings", {
-        name: "Toggle Combat Distances",
-        hint: "Toggle the distance rings for the selected token(s). Default: R",
+        name: "DHD.keybindings.toggleRings.name",
+        hint: "DHD.keybindings.toggleRings.hint",
         editable: [{ key: "KeyR" }],
         onDown: () => { CombatDistances.Toggle({ remote: false }); return true; },
         precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
@@ -192,8 +205,8 @@ export function registerKeybindings(CombatDistances) {
 
     // Corrected deprecation warning for V13: using namespaced KeyboardManager
     game.keybindings.register(MODULE_ID, "broadcastRings", {
-        name: "Broadcast Rings (GM Only)",
-        hint: "Shows rings to ALL players for a short duration. Default: Shift+R",
+        name: "DHD.keybindings.broadcastRings.name",
+        hint: "DHD.keybindings.broadcastRings.hint",
         editable: [{ key: "KeyR", modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
         onDown: () => {
             CombatDistances.Toggle({ remote: true });
@@ -203,8 +216,8 @@ export function registerKeybindings(CombatDistances) {
     });
 
     game.keybindings.register(MODULE_ID, "massMeasurement", {
-        name: "Mass Measurement",
-        hint: "Toggle mass measurement from the center of selected tokens. Default: M",
+        name: "DHD.keybindings.massMeasurement.name",
+        hint: "DHD.keybindings.massMeasurement.hint",
         editable: [{ key: "KeyM" }],
         onDown: () => {
             CombatDistances.MassMeasurement();
@@ -214,8 +227,8 @@ export function registerKeybindings(CombatDistances) {
     });
 
     game.keybindings.register(MODULE_ID, 'transientHoverGM', {
-        name: 'Temporary Hover Mode (GM)',
-        hint: 'While held, activates Hover Mode (GM) regardless of the Operation Mode setting. Default: Shift+H',
+        name: 'DHD.keybindings.transientHoverGM.name',
+        hint: 'DHD.keybindings.transientHoverGM.hint',
         editable: [{ key: 'KeyH', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
         onDown: () => {
             CombatDistances._transientMode = 'hover-gm';
@@ -229,8 +242,8 @@ export function registerKeybindings(CombatDistances) {
     });
 
     game.keybindings.register(MODULE_ID, 'clearAll', {
-        name: 'Clear All Rings',
-        hint: 'Remove all active distance rings at once. Default: Shift+Delete',
+        name: 'DHD.keybindings.clearAll.name',
+        hint: 'DHD.keybindings.clearAll.hint',
         editable: [{ key: 'Delete', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
         onDown: () => {
             CombatDistances.ClearAll();
@@ -240,8 +253,8 @@ export function registerKeybindings(CombatDistances) {
     });
 
     game.keybindings.register(MODULE_ID, 'transientHoverBroadcast', {
-        name: 'Temporary Hover Mode (Broadcast)',
-        hint: 'While held, activates Hover Mode (Broadcast) regardless of the Operation Mode setting. Default: Shift+B',
+        name: 'DHD.keybindings.transientHoverBroadcast.name',
+        hint: 'DHD.keybindings.transientHoverBroadcast.hint',
         editable: [{ key: 'KeyB', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
         onDown: () => {
             CombatDistances._transientMode = 'hover-broadcast';

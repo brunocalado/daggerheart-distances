@@ -1,7 +1,7 @@
 <div class="dhd-visual-settings-form">
 
     <div class="form-group">
-        <label>Text Size</label>
+        <label>{{localize "DHD.settings.textSize.name"}}</label>
         <div class="form-fields">
             <select name="textSize">
                 {{#each textSize.choices}}
@@ -9,11 +9,11 @@
                 {{/each}}
             </select>
         </div>
-        <p class="hint">Choose the size of the text labels.</p>
+        <p class="hint">{{localize "DHD.settings.textSize.hint"}}</p>
     </div>
 
     <div class="form-group">
-        <label>Color Palette</label>
+        <label>{{localize "DHD.settings.colorPalette.name"}}</label>
         <div class="form-fields">
             <select name="colorPalette">
                 {{#each colorPalette.choices}}
@@ -21,11 +21,11 @@
                 {{/each}}
             </select>
         </div>
-        <p class="hint">Choose the color theme for the distance rings.</p>
+        <p class="hint">{{localize "DHD.settings.colorPalette.hint"}}</p>
     </div>
 
     <div class="form-group">
-        <label>Line Style</label>
+        <label>{{localize "DHD.settings.lineStyle.name"}}</label>
         <div class="form-fields">
             <select name="lineStyle">
                 {{#each lineStyle.choices}}
@@ -33,11 +33,11 @@
                 {{/each}}
             </select>
         </div>
-        <p class="hint">Choose the line style for the distance rings.</p>
+        <p class="hint">{{localize "DHD.settings.lineStyle.hint"}}</p>
     </div>
 
     <div class="form-group">
-        <label>Line Thickness</label>
+        <label>{{localize "DHD.settings.lineThickness.name"}}</label>
         <div class="form-fields">
             <select name="lineThickness">
                 {{#each lineThickness.choices}}
@@ -45,11 +45,11 @@
                 {{/each}}
             </select>
         </div>
-        <p class="hint">Adjust the thickness of the distance rings.</p>
+        <p class="hint">{{localize "DHD.settings.lineThickness.hint"}}</p>
     </div>
 
     <div class="form-group">
-        <label>Gradient Fill Style</label>
+        <label>{{localize "DHD.settings.fillStyle.name"}}</label>
         <div class="form-fields">
             <select name="fillStyle">
                 {{#each fillStyle.choices}}
@@ -57,19 +57,19 @@
                 {{/each}}
             </select>
         </div>
-        <p class="hint">Choose the style of the gradient fill.</p>
+        <p class="hint">{{localize "DHD.settings.fillStyle.hint"}}</p>
     </div>
 
     <div class="form-group">
-        <label>Target Highlighting</label>
+        <label>{{localize "DHD.settings.targetHighlighting.name"}}</label>
         <div class="form-fields">
             <input type="checkbox" name="targetHighlighting" value="true" {{#if targetHighlighting}}checked{{/if}}>
         </div>
-        <p class="hint">Highlight tokens inside your range rings with the corresponding color.</p>
+        <p class="hint">{{localize "DHD.settings.targetHighlighting.hint"}}</p>
     </div>
 
     <footer class="sheet-footer flexrow">
-        <button type="submit"><i class="fas fa-save"></i> Save Changes</button>
+        <button type="submit"><i class="fas fa-save"></i> {{localize "DHD.visualSettings.saveChanges"}}</button>
     </footer>
 
 </div>

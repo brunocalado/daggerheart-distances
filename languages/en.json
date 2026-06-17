@@ -4,15 +4,89 @@
     "DHD.ranges.close": "Close",
     "DHD.ranges.far": "Far",
     "DHD.ranges.veryFar": "Very Far",
+
+    "DHD.notifications.massMeasurementNoTokens": "Daggerheart Distances: Select tokens to measure from.",
+    "DHD.notifications.toggleNoTokens": "Daggerheart Distances: Select or hover over a token first.",
+
+    "DHD.ui.toggleCombatDistances": "Toggle Combat Distances",
+
+    "DHD.visualSettings.title": "Daggerheart Distances — Visual Settings",
+    "DHD.visualSettings.saveChanges": "Save Changes",
+
+    "DHD.palettes.trafficLight": "Traffic Light",
+    "DHD.palettes.inverseTrafficLight": "Inverse Traffic Light",
+    "DHD.palettes.synthwave": "Synthwave",
+    "DHD.palettes.trueFire": "True Fire",
+
+    "DHD.settings.visualSettingsMenu.name": "Visual Settings",
+    "DHD.settings.visualSettingsMenu.label": "Open Visual Settings",
+    "DHD.settings.visualSettingsMenu.hint": "Configure the appearance of the distance rings: colors, lines, effects, and labels.",
+
     "DHD.settings.operationMode.name": "Operation Mode",
     "DHD.settings.operationMode.hint": "Choose how distance rings are triggered.",
     "DHD.settings.operationMode.manual": "Manual",
     "DHD.settings.operationMode.hoverGM": "Hover Mode (GM)",
     "DHD.settings.operationMode.hoverBroadcast": "Hover Mode (Broadcast)",
+
     "DHD.settings.clearAllMode.name": "Clear All Mode (GM)",
     "DHD.settings.clearAllMode.hint": "When the GM uses Clear All (Shift+Delete), should it remove rings only for the GM or for all connected players?",
     "DHD.settings.clearAllMode.self": "GM Only",
     "DHD.settings.clearAllMode.all": "All Players",
+
+    "DHD.settings.broadcastDuration.name": "Broadcast Duration (Seconds)",
+    "DHD.settings.broadcastDuration.hint": "How long the rings remain visible when broadcasted by the GM.",
+
+    "DHD.settings.coverageThreshold.name": "Grid Coverage Threshold",
+    "DHD.settings.coverageThreshold.hint": "How much of the token must be inside the range to count? (0.01 = just touching, 0.5 = 50% coverage).",
+
+    "DHD.settings.calculationMode.name": "Calculation Mode",
+    "DHD.settings.calculationMode.hint": "Choose how elevation affects distance measurement.",
+    "DHD.settings.calculationMode.auto": "Auto (3D - Default)",
+    "DHD.settings.calculationMode.flat": "Flat (2D Only - Ignore Height)",
+    "DHD.settings.calculationMode.both": "Both (Show 3D & 2D)",
+
+    "DHD.settings.textSize.name": "Text Size",
+    "DHD.settings.textSize.hint": "Choose the size of the text labels.",
+    "DHD.settings.textSize.small": "Small",
+    "DHD.settings.textSize.normal": "Normal",
+    "DHD.settings.textSize.large": "Large",
+
+    "DHD.settings.colorPalette.name": "Color Palette",
+    "DHD.settings.colorPalette.hint": "Choose the color theme for the distance rings.",
+
+    "DHD.settings.lineStyle.name": "Line Style",
+    "DHD.settings.lineStyle.hint": "Choose the line style for the distance rings.",
+    "DHD.settings.lineStyle.solid": "Solid",
+    "DHD.settings.lineStyle.dotted": "Dotted",
+    "DHD.settings.lineStyle.dashed": "Dashed",
+
+    "DHD.settings.lineThickness.name": "Line Thickness",
+    "DHD.settings.lineThickness.hint": "Adjust the thickness of the distance rings.",
+    "DHD.settings.lineThickness.normal": "Normal",
+    "DHD.settings.lineThickness.large": "Large",
+    "DHD.settings.lineThickness.extraLarge": "Extra Large",
+    "DHD.settings.lineThickness.massive": "Massive",
+
+    "DHD.settings.fillStyle.name": "Gradient Fill Style",
+    "DHD.settings.fillStyle.hint": "Choose the style of the gradient fill.",
+    "DHD.settings.fillStyle.static": "Static",
+    "DHD.settings.fillStyle.animatedNormal": "Animated - Normal",
+    "DHD.settings.fillStyle.animatedLight": "Animated - Light",
+    "DHD.settings.fillStyle.none": "None",
+
+    "DHD.settings.targetHighlighting.name": "Target Highlighting",
+    "DHD.settings.targetHighlighting.hint": "Highlight tokens that are inside your range rings with the corresponding color.",
+
+    "DHD.keybindings.toggleRings.name": "Toggle Combat Distances",
+    "DHD.keybindings.toggleRings.hint": "Toggle the distance rings for the selected token(s). Default: R",
+    "DHD.keybindings.broadcastRings.name": "Broadcast Rings (GM Only)",
+    "DHD.keybindings.broadcastRings.hint": "Shows rings to ALL players for a short duration. Default: Shift+R",
+    "DHD.keybindings.massMeasurement.name": "Mass Measurement",
+    "DHD.keybindings.massMeasurement.hint": "Toggle mass measurement from the center of selected tokens. Default: M",
+    "DHD.keybindings.transientHoverGM.name": "Temporary Hover Mode (GM)",
+    "DHD.keybindings.transientHoverGM.hint": "While held, activates Hover Mode (GM) regardless of the Operation Mode setting. Default: Shift+H",
     "DHD.keybindings.clearAll.name": "Clear All Rings",
-    "DHD.keybindings.clearAll.hint": "Remove all active distance rings at once. Default: Shift+Delete"
+    "DHD.keybindings.clearAll.hint": "Remove all active distance rings at once. Default: Shift+Delete",
+    "DHD.keybindings.transientHoverBroadcast.name": "Temporary Hover Mode (Broadcast)",
+    "DHD.keybindings.transientHoverBroadcast.hint": "While held, activates Hover Mode (Broadcast) regardless of the Operation Mode setting. Default: Shift+B"
 }

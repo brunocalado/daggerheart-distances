@@ -1,3 +1,13 @@
+# 0.2.3
+
+- [Changed] Full i18n pass: all user-facing strings are now localized via the translation files (`languages/en.json`, `languages/pt-BR.json`)
+  - Settings names, hints, and choice labels in Module Settings and Configure Controls
+  - Visual Settings dialog title, field labels, hints, and "Save Changes" button
+  - Token HUD button tooltip
+  - Warning notifications for mass measurement and toggle with no token selected
+  - Color palette names in the palette dropdown
+- [Changed] Translation keys that existed but were unused (`DHD.settings.operationMode.*`, `DHD.settings.clearAllMode.*`, `DHD.keybindings.clearAll.*`) are now correctly wired in `registration.js`
+
 # 0.2.2
 
 - [Changed] **Operation Mode** is now a GM-only world setting (`restricted: true`); non-GM players no longer see it in Module Settings

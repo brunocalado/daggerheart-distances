@@ -4,7 +4,7 @@ export const CLEAR_ALL_MODE_KEY = 'clearAllMode';
 
 export const PALETTES = {
     "default": {
-        label: "Traffic Light",
+        label: "DHD.palettes.trafficLight",
         colors: {
             ring1: "#ff0000",
             ring2: "#ffa500",
@@ -13,7 +13,7 @@ export const PALETTES = {
         }
     },
     "option2": {
-        label: "Inverse Traffic Light",
+        label: "DHD.palettes.inverseTrafficLight",
         colors: {
             ring1: "#90ee90",
             ring2: "#ffff00",
@@ -22,7 +22,7 @@ export const PALETTES = {
         }
     },
     "option3": {
-        label: "Synthwave",
+        label: "DHD.palettes.synthwave",
         colors: {
             ring1: "#ff00ff", // Magenta
             ring2: "#bd00ff", // Electric Purple
@@ -31,7 +31,7 @@ export const PALETTES = {
         }
     },
     "option4": {
-        label: "True Fire",
+        label: "DHD.palettes.trueFire",
         colors: {
             ring1: "#ff0000", // Pure Red
             ring2: "#ff4500", // Orange Red

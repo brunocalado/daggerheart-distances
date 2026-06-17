@@ -4,15 +4,89 @@
     "DHD.ranges.close": "Perto",
     "DHD.ranges.far": "Longe",
     "DHD.ranges.veryFar": "Muito Distante",
+
+    "DHD.notifications.massMeasurementNoTokens": "Daggerheart Distances: Selecione tokens para medir a partir deles.",
+    "DHD.notifications.toggleNoTokens": "Daggerheart Distances: Selecione ou passe o mouse sobre um token primeiro.",
+
+    "DHD.ui.toggleCombatDistances": "Alternar Distâncias de Combate",
+
+    "DHD.visualSettings.title": "Daggerheart Distances — Configurações Visuais",
+    "DHD.visualSettings.saveChanges": "Salvar Alterações",
+
+    "DHD.palettes.trafficLight": "Semáforo",
+    "DHD.palettes.inverseTrafficLight": "Semáforo Invertido",
+    "DHD.palettes.synthwave": "Synthwave",
+    "DHD.palettes.trueFire": "Fogo Real",
+
+    "DHD.settings.visualSettingsMenu.name": "Configurações Visuais",
+    "DHD.settings.visualSettingsMenu.label": "Abrir Configurações Visuais",
+    "DHD.settings.visualSettingsMenu.hint": "Configure a aparência dos anéis de distância: cores, linhas, efeitos e rótulos.",
+
     "DHD.settings.operationMode.name": "Modo de Operação",
     "DHD.settings.operationMode.hint": "Escolha como os anéis de distância são ativados.",
     "DHD.settings.operationMode.manual": "Manual",
     "DHD.settings.operationMode.hoverGM": "Modo Hover (Mestre)",
     "DHD.settings.operationMode.hoverBroadcast": "Modo Hover (Transmissão)",
+
     "DHD.settings.clearAllMode.name": "Modo Limpar Tudo (Mestre)",
     "DHD.settings.clearAllMode.hint": "Quando o Mestre usa Limpar Tudo (Shift+Delete), deve remover os anéis apenas para o Mestre ou para todos os jogadores conectados?",
     "DHD.settings.clearAllMode.self": "Apenas Mestre",
     "DHD.settings.clearAllMode.all": "Todos os Jogadores",
+
+    "DHD.settings.broadcastDuration.name": "Duração da Transmissão (Segundos)",
+    "DHD.settings.broadcastDuration.hint": "Por quanto tempo os anéis ficam visíveis quando transmitidos pelo Mestre.",
+
+    "DHD.settings.coverageThreshold.name": "Limiar de Cobertura da Grade",
+    "DHD.settings.coverageThreshold.hint": "Quanto do token deve estar dentro do alcance para ser contado? (0,01 = apenas tocando, 0,5 = 50% de cobertura).",
+
+    "DHD.settings.calculationMode.name": "Modo de Cálculo",
+    "DHD.settings.calculationMode.hint": "Escolha como a elevação afeta a medição de distância.",
+    "DHD.settings.calculationMode.auto": "Automático (3D - Padrão)",
+    "DHD.settings.calculationMode.flat": "Plano (Apenas 2D - Ignorar Altura)",
+    "DHD.settings.calculationMode.both": "Ambos (Mostrar 3D e 2D)",
+
+    "DHD.settings.textSize.name": "Tamanho do Texto",
+    "DHD.settings.textSize.hint": "Escolha o tamanho dos rótulos de texto.",
+    "DHD.settings.textSize.small": "Pequeno",
+    "DHD.settings.textSize.normal": "Normal",
+    "DHD.settings.textSize.large": "Grande",
+
+    "DHD.settings.colorPalette.name": "Paleta de Cores",
+    "DHD.settings.colorPalette.hint": "Escolha o tema de cores para os anéis de distância.",
+
+    "DHD.settings.lineStyle.name": "Estilo de Linha",
+    "DHD.settings.lineStyle.hint": "Escolha o estilo de linha para os anéis de distância.",
+    "DHD.settings.lineStyle.solid": "Sólida",
+    "DHD.settings.lineStyle.dotted": "Pontilhada",
+    "DHD.settings.lineStyle.dashed": "Tracejada",
+
+    "DHD.settings.lineThickness.name": "Espessura da Linha",
+    "DHD.settings.lineThickness.hint": "Ajuste a espessura dos anéis de distância.",
+    "DHD.settings.lineThickness.normal": "Normal",
+    "DHD.settings.lineThickness.large": "Grande",
+    "DHD.settings.lineThickness.extraLarge": "Extra Grande",
+    "DHD.settings.lineThickness.massive": "Massiva",
+
+    "DHD.settings.fillStyle.name": "Estilo de Preenchimento Gradiente",
+    "DHD.settings.fillStyle.hint": "Escolha o estilo do preenchimento gradiente.",
+    "DHD.settings.fillStyle.static": "Estático",
+    "DHD.settings.fillStyle.animatedNormal": "Animado - Normal",
+    "DHD.settings.fillStyle.animatedLight": "Animado - Leve",
+    "DHD.settings.fillStyle.none": "Nenhum",
+
+    "DHD.settings.targetHighlighting.name": "Destaque de Alvos",
+    "DHD.settings.targetHighlighting.hint": "Destaca tokens que estão dentro dos seus anéis de alcance com a cor correspondente.",
+
+    "DHD.keybindings.toggleRings.name": "Alternar Distâncias de Combate",
+    "DHD.keybindings.toggleRings.hint": "Alterna os anéis de distância para o(s) token(s) selecionado(s). Padrão: R",
+    "DHD.keybindings.broadcastRings.name": "Transmitir Anéis (Apenas Mestre)",
+    "DHD.keybindings.broadcastRings.hint": "Mostra os anéis para TODOS os jogadores por um curto período. Padrão: Shift+R",
+    "DHD.keybindings.massMeasurement.name": "Medição em Massa",
+    "DHD.keybindings.massMeasurement.hint": "Alterna a medição em massa a partir do centro dos tokens selecionados. Padrão: M",
+    "DHD.keybindings.transientHoverGM.name": "Modo Hover Temporário (Mestre)",
+    "DHD.keybindings.transientHoverGM.hint": "Enquanto pressionado, ativa o Modo Hover (Mestre) independentemente da configuração de Modo de Operação. Padrão: Shift+H",
     "DHD.keybindings.clearAll.name": "Limpar Todos os Anéis",
-    "DHD.keybindings.clearAll.hint": "Remove todos os anéis de distância ativos de uma vez. Padrão: Shift+Delete"
+    "DHD.keybindings.clearAll.hint": "Remove todos os anéis de distância ativos de uma vez. Padrão: Shift+Delete",
+    "DHD.keybindings.transientHoverBroadcast.name": "Modo Hover Temporário (Transmissão)",
+    "DHD.keybindings.transientHoverBroadcast.hint": "Enquanto pressionado, ativa o Modo Hover (Transmissão) independentemente da configuração de Modo de Operação. Padrão: Shift+B"
 }

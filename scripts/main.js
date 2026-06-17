@@ -39,7 +39,7 @@ class CombatDistances {
     static MassMeasurement(options = {}) {
         const tokens = canvas.tokens.controlled;
         if (tokens.length === 0) {
-            ui.notifications.warn("Daggerheart Distances: Select tokens to measure from.");
+            ui.notifications.warn(game.i18n.localize('DHD.notifications.massMeasurementNoTokens'));
             return;
         }
 
@@ -133,7 +133,7 @@ class CombatDistances {
         const tokens = hoverToken ? [hoverToken] : canvas.tokens.controlled;
 
         if (tokens.length === 0) {
-            ui.notifications.warn("Daggerheart Distances: Select or hover over a token first.");
+            ui.notifications.warn(game.i18n.localize('DHD.notifications.toggleNoTokens'));
             return;
         }
 
@@ -804,7 +804,7 @@ class CombatDistances {
 
         const button = document.createElement('div');
         button.classList.add('control-icon');
-        button.title = 'Toggle Combat Distances';
+        button.title = game.i18n.localize('DHD.ui.toggleCombatDistances');
         button.innerHTML = '<i class="fas fa-circle-dot"></i>';
 
         if (this.hasRings(token.id)) {

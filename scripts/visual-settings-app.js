@@ -29,7 +29,7 @@ class VisualSettingsApp extends foundry.applications.api.HandlebarsApplicationMi
             closeOnSubmit: true
         },
         window: {
-            title: 'Daggerheart Distances — Visual Settings'
+            title: 'DHD.visualSettings.title'
         },
         position: {
             width: 480,
@@ -54,30 +54,43 @@ class VisualSettingsApp extends foundry.applications.api.HandlebarsApplicationMi
         return {
             textSize: {
                 value: game.settings.get(id, 'textSize'),
-                choices: { small: 'Small', normal: 'Normal', large: 'Large' }
+                choices: {
+                    small: game.i18n.localize('DHD.settings.textSize.small'),
+                    normal: game.i18n.localize('DHD.settings.textSize.normal'),
+                    large: game.i18n.localize('DHD.settings.textSize.large')
+                }
             },
             colorPalette: {
                 value: game.settings.get(id, 'colorPalette'),
                 choices: Object.keys(PALETTES).reduce((acc, key) => {
-                    acc[key] = PALETTES[key].label;
+                    acc[key] = game.i18n.localize(PALETTES[key].label);
                     return acc;
                 }, {})
             },
             lineStyle: {
                 value: game.settings.get(id, 'lineStyle'),
-                choices: { solid: 'Solid', dotted: 'Dotted', dashed: 'Dashed' }
+                choices: {
+                    solid: game.i18n.localize('DHD.settings.lineStyle.solid'),
+                    dotted: game.i18n.localize('DHD.settings.lineStyle.dotted'),
+                    dashed: game.i18n.localize('DHD.settings.lineStyle.dashed')
+                }
             },
             lineThickness: {
                 value: game.settings.get(id, 'lineThickness'),
-                choices: { '2px': 'Normal', '5px': 'Large', '8px': 'Extra Large', '12px': 'Massive' }
+                choices: {
+                    '2px': game.i18n.localize('DHD.settings.lineThickness.normal'),
+                    '5px': game.i18n.localize('DHD.settings.lineThickness.large'),
+                    '8px': game.i18n.localize('DHD.settings.lineThickness.extraLarge'),
+                    '12px': game.i18n.localize('DHD.settings.lineThickness.massive')
+                }
             },
             fillStyle: {
                 value: game.settings.get(id, 'fillStyle'),
                 choices: {
-                    'static': 'Static',
-                    'animated-normal': 'Animated - Normal',
-                    'animated-light': 'Animated - Light',
-                    'none': 'None'
+                    'static': game.i18n.localize('DHD.settings.fillStyle.static'),
+                    'animated-normal': game.i18n.localize('DHD.settings.fillStyle.animatedNormal'),
+                    'animated-light': game.i18n.localize('DHD.settings.fillStyle.animatedLight'),
+                    'none': game.i18n.localize('DHD.settings.fillStyle.none')
                 }
             },
             targetHighlighting: game.settings.get(id, 'targetHighlighting')
