@@ -1,9 +1,9 @@
 {
-  "id": "daggerheart-distances",
-  "title": "Daggerheart: Distances",
+  "id": "daggerheart-distances-extended",
+  "title": "Daggerheart: Distances Extended",
   "description": "Visualizes Daggerheart combat ranges with customizable rings and hover distance calculations.",
   
-  "version": "0.2.0",
+  "version": "0.3.0",
   
   "compatibility": {
     "minimum": "14",
@@ -74,8 +74,8 @@
     }
   ],
   
-  "url": "https://github.com/brunocalado/daggerheart-distances",
-  "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json",
-  "download": "https://codeload.github.com/brunocalado/daggerheart-distances/zip/main",
+  "url": "https://github.com/Crond-Fx/daggerheart-distances",
+  "manifest": "https://raw.githubusercontent.com/Crond-Fx/daggerheart-distances/main/module.json",
+  "download": "https://codeload.github.com/Crond-Fx/daggerheart-distances/zip/main",
   "flags": {}
 }

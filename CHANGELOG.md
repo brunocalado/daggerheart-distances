@@ -1,3 +1,8 @@
+# 0.3.0
+- [Added] Russian language support
+- [Added] *Remove all rings* hotkey & macro
+- [Changed] Localisation update: all hardcoded lines changed to suppport i18n system
+
 # 0.2.0
 
 - v14 only

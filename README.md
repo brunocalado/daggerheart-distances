@@ -136,7 +136,7 @@ Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
 
 Install via the Foundry VTT Module browser or use this manifest link:
 
-* *https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json*
+* *https://raw.githubusercontent.com/Crond-Fx/daggerheart-distances/main/module.json*
 
 ## 📜 Changelog
 
@@ -146,11 +146,11 @@ You can read the full history of changes in the [CHANGELOG](CHANGELOG.md).
 
 * **Code License:** [LICENSE](LICENSE).
 
-* This module is a fork from [this](https://github.com/fsergler/foundry_combat_distances) 
+* This module is a fork from [this](https://github.com/brunocalado/daggerheart-distances) 
 
 **Disclaimer:** This module is an independent creation and is not affiliated with Darrington Press.
 
-# 🧰 My Daggerheart Modules
+# 🧰 Other *brunocalado* Daggerheart Modules
 
 | Module | Description |
 | :--- | :--- |
