@@ -1,0 +1,94 @@
+{
+    "DHD.ranges.melee": "Вплотную",
+    "DHD.ranges.veryClose": "Близко",
+    "DHD.ranges.close": "Средне",
+    "DHD.ranges.far": "Далеко",
+    "DHD.ranges.veryFar": "Очень далеко",
+
+    "DHD.notifications.massMeasurementNoTokens": "Daggerheart Distances: Выберите токены для измерения.",
+    "DHD.notifications.toggleNoTokens": "Daggerheart Distances: Сначала выберите или наведите на токен.",
+
+    "DHD.ui.toggleCombatDistances": "Переключить расстояния боя",
+
+    "DHD.visualSettings.title": "Daggerheart Distances — Параметры визуализации",
+    "DHD.visualSettings.saveChanges": "Сохранить изменения",
+
+    "DHD.palettes.trafficLight": "Светофор",
+    "DHD.palettes.inverseTrafficLight": "Обратный светофор",
+    "DHD.palettes.synthwave": "Synthwave",
+    "DHD.palettes.trueFire": "Огонь, пожар, пламя",
+
+    "DHD.settings.visualSettingsMenu.name": "Параметры визуализации",
+    "DHD.settings.visualSettingsMenu.label": "Открыть параметры визуализации",
+    "DHD.settings.visualSettingsMenu.hint": "Настройте внешний вид колец дистанции: цвета, линии, эффекты и метки.",
+
+    "DHD.settings.operationMode.name": "Режим работы",
+    "DHD.settings.operationMode.hint": "Выберите, как будут срабатывать кольца дистанции.",
+    "DHD.settings.operationMode.manual": "Вручную",
+    "DHD.settings.operationMode.hoverGM": "При наведении (ГМ)",
+    "DHD.settings.operationMode.hoverBroadcast": "При наведении (для всех)",
+
+    "DHD.settings.clearAllMode.name": "Режим очистки всех (ГМ)",
+    "DHD.settings.clearAllMode.hint": "Когда ГМ использует «Очистить всё» (Shift+Delete), должны ли кольца удаляться только для ГМ или для всех подключённых игроков?",
+    "DHD.settings.clearAllMode.self": "Только ГМ",
+    "DHD.settings.clearAllMode.all": "Все игроки",
+
+    "DHD.settings.broadcastDuration.name": "Длительность показа для всех (секунды)",
+    "DHD.settings.broadcastDuration.hint": "Как долго кольца остаются видимыми, когда их транслирует ГМ.",
+
+    "DHD.settings.coverageThreshold.name": "Порог покрытия сетки",
+    "DHD.settings.coverageThreshold.hint": "Какая часть токена должна находиться внутри диапазона? (0.01 = просто касание, 0.5 = 50% покрытие).",
+
+    "DHD.settings.calculationMode.name": "Режим расчёта",
+    "DHD.settings.calculationMode.hint": "Выберите, как высота влияет на измерение расстояния.",
+    "DHD.settings.calculationMode.auto": "Авто (3D - По умолчанию)",
+    "DHD.settings.calculationMode.flat": "Плоская (Только 2D - Игнорировать высоту)",
+    "DHD.settings.calculationMode.both": "Обе (Показать 3D и 2D)",
+
+    "DHD.settings.textSize.name": "Размер текста",
+    "DHD.settings.textSize.hint": "Выберите размер текстовых меток.",
+    "DHD.settings.textSize.small": "Маленький",
+    "DHD.settings.textSize.normal": "Обычный",
+    "DHD.settings.textSize.large": "Большой",
+
+    "DHD.settings.colorPalette.name": "Цветовая палитра",
+    "DHD.settings.colorPalette.hint": "Выберите цветовую тему для колец дистанции.",
+
+    "DHD.settings.lineStyle.name": "Стиль линии",
+    "DHD.settings.lineStyle.hint": "Выберите стиль линии для колец дистанции.",
+    "DHD.settings.lineStyle.solid": "Сплошная",
+    "DHD.settings.lineStyle.dotted": "Пунктирная",
+    "DHD.settings.lineStyle.dashed": "Штрихпунктирная",
+
+    "DHD.settings.lineThickness.name": "Толщина линии",
+    "DHD.settings.lineThickness.hint": "Отрегулируйте толщину колец дистанции.",
+    "DHD.settings.lineThickness.normal": "Обычная",
+    "DHD.settings.lineThickness.large": "Большая",
+    "DHD.settings.lineThickness.extraLarge": "Очень большая",
+    "DHD.settings.lineThickness.massive": "Массивная",
+
+    "DHD.settings.fillStyle.name": "Стиль заполнения градиентом",
+    "DHD.settings.fillStyle.hint": "Выберите стиль заполнения градиентом.",
+    "DHD.settings.fillStyle.static": "Статический",
+    "DHD.settings.fillStyle.animatedNormal": "Анимированный - Нормальный",
+    "DHD.settings.fillStyle.animatedLight": "Анимированный - Лёгкий",
+    "DHD.settings.fillStyle.none": "Нет",
+
+    "DHD.settings.targetHighlighting.name": "Выделение целей",
+    "DHD.settings.targetHighlighting.hint": "Выделите соответствующим цветом токены, которые находятся внутри ваших колец дистанции.",
+
+    "DHD.keybindings.toggleRings.name": "Переключить расстояния боя",
+    "DHD.keybindings.toggleRings.hint": "Переключить кольца дистанции для выбранного(ых) токена(ов). По умолчанию: R",
+    "DHD.keybindings.broadcastRings.name": "Передать кольца (только ГМ)",
+    "DHD.keybindings.broadcastRings.hint": "Показать кольца ВСЕМ игрокам на короткое время. По умолчанию: Shift+R",
+    "DHD.keybindings.massMeasurement.name": "Измерение группы",
+    "DHD.keybindings.massMeasurement.hint": "Переключить измерение из центра группы выбранных токенов. По умолчанию: M",
+    "DHD.keybindings.transientHoverGM.name": "Временный режим наведения (ГМ)",
+    "DHD.keybindings.transientHoverGM.hint": "При удержании активирует режим наведения (ГМ) независимо от параметра Режим работы. По умолчанию: Shift+H",
+    "DHD.keybindings.clearAll.name": "Очистить все кольца",
+    "DHD.keybindings.clearAll.hint": "Удалить все активные кольца дистанции одновременно. По умолчанию: Shift+Delete",
+    "DHD.keybindings.transientHoverBroadcast.name": "Временный режим наведения (для всех)",
+    "DHD.keybindings.transientHoverBroadcast.hint": "При удержании активирует режим наведения (для всех) независимо от параметра Режим работы. По умолчанию: Shift+B"
+}
+
+

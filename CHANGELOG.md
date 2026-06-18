@@ -1,3 +1,7 @@
+# 0.2.5
+
+- RU translation: https://github.com/brunocalado/daggerheart-distances/issues/5
+
 # 0.2.4
 
 - [Fixed] HUD button styles (border, cursor, active state) were not applied for non-English locales because the CSS selector matched the hardcoded English title string; button now carries a dedicated `dhd-hud-button` class used as the selector
