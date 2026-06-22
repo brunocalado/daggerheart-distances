@@ -2,7 +2,7 @@
   "id": "daggerheart-distances",
   "title": "Daggerheart: Distances",
   "description": "Visualizes Daggerheart combat ranges with customizable rings and hover distance calculations.",
-  "version": "0.2.5",
+  "version": "0.2.6",
   
   "compatibility": {
     "minimum": "14",
@@ -47,7 +47,7 @@
     },
     {
       "lang": "pt-BR",
-      "name": "Portuguese (Brazil)",
+      "name": "Portuguese (Brasil)",
       "path": "languages/pt-BR.json",
       "flags": {}
     },

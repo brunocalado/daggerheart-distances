@@ -1,3 +1,7 @@
+# 0.2.6
+
+- Br type translation fixed
+
 # 0.2.5
 
 - RU translation: https://github.com/brunocalado/daggerheart-distances/issues/5
