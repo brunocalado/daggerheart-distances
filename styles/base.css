@@ -185,7 +185,11 @@
     border: 1px solid var(--color-border, #000);
     border-radius: 5px;
     cursor: pointer;
-    padding-top: 0;
+    /* Foundry's centering flex rule targets <button>.control-icon; this button is a <div>
+       (created dynamically in main.js) so it never matches and needs its own centering. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &.active {
         /* Intentional green: semantic "active" indicator, not theme-sensitive */

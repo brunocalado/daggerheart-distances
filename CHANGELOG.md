@@ -1,3 +1,7 @@
+# 0.2.7
+
+- [Fixed] Token HUD button icon was off-center: the button is a `<div>` (not a `<button>`), so it never matched Foundry's core `.control-icon` centering rule (`display: flex; align-items: center; justify-content: center`); now set explicitly on `.dhd-hud-button`
+
 # 0.2.6
 
 - Br type translation fixed

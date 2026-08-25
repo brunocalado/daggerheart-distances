@@ -2,13 +2,12 @@
   "id": "daggerheart-distances",
   "title": "Daggerheart: Distances",
   "description": "Visualizes Daggerheart combat ranges with customizable rings and hover distance calculations.",
-  "version": "0.2.6",
-  
+  "version": "0.2.7",
   "compatibility": {
     "minimum": "14",
-    "verified": "14"
+    "verified": "14",
+    "maximum": "14"
   },
-  
   "authors": [
     {
       "name": "Mestre Digital",
@@ -16,7 +15,6 @@
       "flags": {}
     }
   ],
-  
   "relationships": {
     "systems": [
       {
@@ -28,16 +26,17 @@
       }
     ]
   },
-  
   "esmodules": [
     "scripts/main.js"
   ],
-  
   "styles": [
-    "styles/base.css",
-    "styles/visual-settings-app.css"
+    {
+      "src": "styles/base.css"
+    },
+    {
+      "src": "styles/visual-settings-app.css"
+    }
   ],
-  
   "languages": [
     {
       "lang": "en",
@@ -58,7 +57,6 @@
       "flags": {}
     }
   ],
-  
   "packs": [
     {
       "label": "Distances Macros",
@@ -73,7 +71,6 @@
       "flags": {}
     }
   ],
-  
   "url": "https://github.com/brunocalado/daggerheart-distances",
   "manifest": "https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json",
   "download": "https://codeload.github.com/brunocalado/daggerheart-distances/zip/main",
