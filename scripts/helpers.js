@@ -1,3 +1,5 @@
+import { MODULE_ID, DEFAULTS } from './constants.js';
+
 /**
  * Converts a world-space point to screen-space coordinates using the canvas stage transform.
  * @param {{x: number, y: number}} point
@@ -30,7 +32,7 @@ export function formatDistance(value) {
  * @param {number} [lineBufferPx=2]
  * @returns {object|null}
  */
-export function findMatchedRange(targetPoints, sortedRanges, sourceCenter, sourceRadiusPx, use3D, verticalDistancePx, threshold, lineBufferPx = 2) {
+function findMatchedRange(targetPoints, sortedRanges, sourceCenter, sourceRadiusPx, use3D, verticalDistancePx, threshold, lineBufferPx = 2) {
     for (const range of sortedRanges) {
         const rangePx = (range.distance / canvas.scene.grid.distance) * canvas.scene.grid.size;
         const visualRingRadiusPx = rangePx + sourceRadiusPx + lineBufferPx;
@@ -83,4 +85,32 @@ export function getTokenSamplePoints(token) {
         }
     }
     return points;
+}
+
+// Rings ascending by distance, each carrying its ring key (ring1..ring4) for palette lookup.
+const SORTED_RANGES = Object.entries(DEFAULTS.ranges)
+    .map(([key, range]) => ({ key, ...range }))
+    .sort((a, b) => a.distance - b.distance);
+
+/**
+ * Decides which ring a target falls in when measured from a source circle.
+ * The single range decision shared by the target highlight, the hover label and the public API,
+ * so the three can never disagree. Callers resolve where the source is (live, preview, document)
+ * and whether elevation counts; this function only measures.
+ * @param {object} source
+ * @param {{x: number, y: number}} source.center - world-space center of the source
+ * @param {number} source.elevation
+ * @param {number} source.sizeSquares - largest side of the source, in grid squares
+ * @param {Token} target
+ * @param {boolean} use3D - whether elevation difference counts towards distance
+ * @returns {{key: string, id: string, distance: number, label: string}|null} null beyond the outermost ring
+ */
+export function measureRange(source, target, use3D) {
+    const grid = canvas.scene.grid;
+    const sourceRadiusPx = (source.sizeSquares * grid.size) / 2;
+    const verticalDistance = Math.abs(source.elevation - (target.document.elevation || 0));
+    const verticalDistancePx = verticalDistance * (grid.size / grid.distance);
+    const threshold = game.settings.get(MODULE_ID, 'coverageThreshold');
+
+    return findMatchedRange(getTokenSamplePoints(target), SORTED_RANGES, source.center, sourceRadiusPx, use3D, verticalDistancePx, threshold);
 }

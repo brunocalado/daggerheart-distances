@@ -199,7 +199,7 @@ export function registerKeybindings(CombatDistances) {
         name: "DHD.keybindings.toggleRings.name",
         hint: "DHD.keybindings.toggleRings.hint",
         editable: [{ key: "KeyR" }],
-        onDown: () => { CombatDistances.Toggle({ remote: false }); return true; },
+        onDown: () => { CombatDistances.toggle({ remote: false }); return true; },
         precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
     });
 
@@ -209,7 +209,7 @@ export function registerKeybindings(CombatDistances) {
         hint: "DHD.keybindings.broadcastRings.hint",
         editable: [{ key: "KeyR", modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
         onDown: () => {
-            CombatDistances.Toggle({ remote: true });
+            CombatDistances.toggle({ remote: true });
             return true;
         },
         precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
@@ -220,7 +220,7 @@ export function registerKeybindings(CombatDistances) {
         hint: "DHD.keybindings.massMeasurement.hint",
         editable: [{ key: "KeyM" }],
         onDown: () => {
-            CombatDistances.MassMeasurement();
+            CombatDistances.massMeasurement();
             return true;
         },
         precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
@@ -246,7 +246,7 @@ export function registerKeybindings(CombatDistances) {
         hint: 'DHD.keybindings.clearAll.hint',
         editable: [{ key: 'Delete', modifiers: [foundry.helpers.interaction.KeyboardManager.MODIFIER_KEYS.SHIFT] }],
         onDown: () => {
-            CombatDistances.ClearAll();
+            CombatDistances.clearAll();
             return true;
         },
         precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL

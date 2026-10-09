@@ -41,11 +41,13 @@ export const PALETTES = {
     }
 };
 
+// `id` matches the Daggerheart system's range ids (CONFIG.DH.GENERAL.range) so the public API
+// speaks the same vocabulary as the system's own `isWithinRange`.
 export const DEFAULTS = {
     ranges: {
-        ring1: { distance: 5,  label: "DHD.ranges.melee" },
-        ring2: { distance: 15, label: "DHD.ranges.veryClose" },
-        ring3: { distance: 30, label: "DHD.ranges.close" },
-        ring4: { distance: 60, label: "DHD.ranges.far" }
+        ring1: { id: "melee",     distance: 5,  label: "DHD.ranges.melee" },
+        ring2: { id: "veryClose", distance: 15, label: "DHD.ranges.veryClose" },
+        ring3: { id: "close",     distance: 30, label: "DHD.ranges.close" },
+        ring4: { id: "far",       distance: 60, label: "DHD.ranges.far" }
     }
 };

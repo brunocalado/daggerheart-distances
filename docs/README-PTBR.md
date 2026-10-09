@@ -37,7 +37,7 @@ Um utilitário visual e intuitivo para o sistema **Daggerheart** no Foundry VTT.
 **O sistema leva em conta o tamanho do token ao calcular o alcance.**
 <p align="center"><img width="700" src="sizes.webp"></p>
 
-* **Medição em Massa:** Selecione múltiplos tokens e use a macro `DHDistances.MassMeasurement();` para gerar anéis de distância a partir do centro do grupo.
+* **Medição em Massa:** Selecione múltiplos tokens e use a macro `game.modules.get("daggerheart-distances").api.massMeasurement();` para gerar anéis de distância a partir do centro do grupo.
 <p align="center"><img width="700" src="massmeasurement.webp"></p>
 
 * **Destaque de Alvos:** Alvos válidos dentro dos anéis de alcance brilham com a cor do anel correspondente.
@@ -54,7 +54,7 @@ Perfeito para destacar o alcance de uma ameaça durante o combate, mantendo toda
 **Três formas de transmitir:**
 
 * **Teclado:** Selecione um token e pressione **`Shift+R`**
-* **Macro:** `DHDistances.Toggle({ remote: true });`
+* **Macro:** `game.modules.get("daggerheart-distances").api.toggle({ remote: true });`
 * **Modo Hover de Transmissão:** Ative nas configurações e cada token que você passar o mouse será automaticamente transmitido aos jogadores (veja Modo de Operação abaixo)
 
 > **Nota:** Apenas o MJ pode transmitir. Jogadores que pressionam `Shift+R` não têm efeito.
@@ -107,32 +107,38 @@ Você tem várias formas fáceis de mostrar ou ocultar os anéis de alcance ao r
 
 > Todos os atalhos podem ser reatribuídos em **Configurações do Foundry → Configurar Controles**.
 
-3. Você também pode usar macros:
+3. Você também pode usar macros. Todas as chamadas passam pela API do módulo:
 
 ```js
-DHDistances.Toggle();              // Alternar anéis para o token selecionado/sob o cursor
-DHDistances.Toggle({ remote: true }); // Transmitir anéis para todos os jogadores (apenas MJ)
-DHDistances.MassMeasurement();     // Medição em Massa a partir dos tokens selecionados
-DHDistances.ClearAll();            // Remover todos os anéis ativos (respeita a configuração Modo Limpar Tudo)
+const api = game.modules.get("daggerheart-distances").api;
 ```
 
 ```js
-DHDistances.Toggle({mode: '2d'}); // Calcula distância ignorando elevação.
+api.toggle();              // Alternar anéis para o token selecionado/sob o cursor
+api.toggle({ remote: true }); // Transmitir anéis para todos os jogadores (apenas MJ)
+api.massMeasurement();     // Medição em Massa a partir dos tokens selecionados
+api.clearAll();            // Remover todos os anéis ativos (respeita a configuração Modo Limpar Tudo)
 ```
 
 ```js
-DHDistances.Toggle({mode: '3d'}); // Calcula distância levando em conta a elevação.
+api.toggle({mode: '2d'}); // Calcula distância ignorando elevação.
 ```
 
 ```js
-DHDistances.Toggle({mode: 'both'}); // Mostra as distâncias 3D e 2D ao mesmo tempo.
+api.toggle({mode: '3d'}); // Calcula distância levando em conta a elevação.
+```
+
+```js
+api.toggle({mode: 'both'}); // Mostra as distâncias 3D e 2D ao mesmo tempo.
 ```
 
 ```js
 // Apenas MJ: substituição explícita de escopo (tem precedência sobre a configuração Modo Limpar Tudo)
-DHDistances.ClearAll({ scope: 'all' });  // Remover anéis para todos os jogadores conectados
-DHDistances.ClearAll({ scope: 'self' }); // Remover anéis apenas para o MJ
+api.clearAll({ scope: 'all' });  // Remover anéis para todos os jogadores conectados
+api.clearAll({ scope: 'self' }); // Remover anéis apenas para o MJ
 ```
+
+Outros módulos podem perguntar ao Distances em qual alcance um token está, com a mesma medição dos anéis. Veja [API.md](API.md) (em inglês).
 
 ### Configuração
 

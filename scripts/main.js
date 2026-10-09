@@ -1,5 +1,5 @@
 import { MODULE_ID, PALETTES, DEFAULTS, CLEAR_ALL_MODE_KEY } from './constants.js';
-import { getWorldToScreen, formatDistance, getTokenSamplePoints, findMatchedRange } from './helpers.js';
+import { getWorldToScreen, formatDistance, getTokenSamplePoints, measureRange } from './helpers.js';
 import { registerSettings, registerKeybindings } from './registration.js';
 
 class CombatDistances {
@@ -28,15 +28,71 @@ class CombatDistances {
         Hooks.on('canvasTearDown', this.stopTicker.bind(this));
         Hooks.on('canvasPan', this.onCanvasPan.bind(this));
 
-        window.DHDistances = this;
+        // The module's single public entry point, used by macros and other modules alike.
+        game.modules.get(MODULE_ID).api = {
+            getRange: this.getRange.bind(this),
+            isWithinRange: this.isWithinRange.bind(this),
+            toggle: this.toggle.bind(this),
+            massMeasurement: this.massMeasurement.bind(this),
+            clearAll: this.clearAll.bind(this)
+        };
     }
 
     // --- Public API ---
 
     /**
+     * Range band of `target` as measured from `source`, using the same decision that colors the
+     * target highlight. Measures from the tokens' document positions with the world calculation
+     * mode, so the answer is the same on every client and independent of any rings being shown.
+     * Hidden tokens are measured too. Not symmetric: the source is a circle sized by its token,
+     * the target is judged by how much of its footprint falls inside that circle.
+     * @param {Token} source - placeable on the current scene
+     * @param {Token} target - placeable on the current scene
+     * @returns {"melee"|"veryClose"|"close"|"far"|"veryFar"}
+     */
+    static getRange(source, target) {
+        const TokenClass = foundry.canvas.placeables.Token;
+        if (!(source instanceof TokenClass) || !(target instanceof TokenClass)) {
+            throw new TypeError(`${MODULE_ID} | getRange expects two Token placeables`);
+        }
+        if (source.id === target.id) return 'melee';
+
+        const doc = source.document;
+        const gridSize = canvas.scene.grid.size;
+        // Document position rather than token.center: the placeable lags behind during movement
+        // animation, and the target's sample points already come from its document.
+        const center = {
+            x: doc.x + (doc.width * gridSize) / 2,
+            y: doc.y + (doc.height * gridSize) / 2
+        };
+        const use3D = game.settings.get(MODULE_ID, 'calculationMode') !== 'flat';
+        const range = measureRange({
+            center,
+            elevation: doc.elevation || 0,
+            sizeSquares: Math.max(doc.width || 0, doc.height || 0)
+        }, target, use3D);
+        return range?.id ?? 'veryFar';
+    }
+
+    /**
+     * Whether `target` is at `rangeId` or closer from `source`. A target at "veryClose" is within
+     * "close"; everything is within "veryFar", as in the Daggerheart system.
+     * @param {Token} source
+     * @param {Token} target
+     * @param {"melee"|"veryClose"|"close"|"far"|"veryFar"} rangeId
+     * @returns {boolean}
+     */
+    static isWithinRange(source, target, rangeId) {
+        const order = [...Object.values(DEFAULTS.ranges).map(r => r.id), 'veryFar'];
+        const limit = order.indexOf(rangeId);
+        if (limit === -1) throw new RangeError(`${MODULE_ID} | Unknown range id "${rangeId}"`);
+        return order.indexOf(this.getRange(source, target)) <= limit;
+    }
+
+    /**
      * Calculates the center of the Bounding Box of selected tokens and creates rings from there.
      */
-    static MassMeasurement(options = {}) {
+    static massMeasurement(options = {}) {
         const tokens = canvas.tokens.controlled;
         if (tokens.length === 0) {
             ui.notifications.warn(game.i18n.localize('DHD.notifications.massMeasurementNoTokens'));
@@ -45,7 +101,7 @@ class CombatDistances {
 
         // Feature: If only 1 token is selected, treat as normal Toggle
         if (tokens.length === 1) {
-            return this.Toggle(options);
+            return this.toggle(options);
         }
 
         // Toggle logic: If mass rings exist, remove them.
@@ -100,7 +156,7 @@ class CombatDistances {
      * @param {Object} [options]
      * @param {'self'|'all'} [options.scope] - Explicit scope override; takes precedence over the clearAllMode setting. GM only.
      */
-    static async ClearAll({ scope } = {}) {
+    static async clearAll({ scope } = {}) {
         for (const tokenId of [...this._activeTokens.keys()])
             this.removeRings(tokenId);
 
@@ -123,7 +179,7 @@ class CombatDistances {
      * @param {Object} options
      * @param {boolean} options.remote - If true, broadcasts the toggle to all clients (GM only).
      */
-    static async Toggle(options = {}) {
+    static async toggle(options = {}) {
         // --- STEP 2: The Method Toggle (Trigger Logic) ---
         const remote = options.remote || false;
 
@@ -345,43 +401,32 @@ class CombatDistances {
         }
     }
 
-    static updateTargetHighlights(sourceToken, sourceCenter, activeSet, sourceElevationOverride = null) {
-        const potentialTargets = canvas.tokens.placeables;
-        const ranges = DEFAULTS.ranges;
-        const threshold = game.settings.get(MODULE_ID, 'coverageThreshold');
-        let calcMode = game.settings.get(MODULE_ID, 'calculationMode');
+    /**
+     * Calculation mode for rings around `tokenId`: the mode the rings were toggled with, if any,
+     * otherwise the world setting. Visual-only; the public API always uses the world setting.
+     * @param {string} tokenId
+     * @returns {"auto"|"flat"|"both"}
+     */
+    static ringCalcMode(tokenId) {
+        return this._activeTokens.get(tokenId)?.mode || game.settings.get(MODULE_ID, 'calculationMode');
+    }
 
-        if (this._activeTokens.has(sourceToken.id)) {
-            const activeData = this._activeTokens.get(sourceToken.id);
-            if (activeData && activeData.mode) calcMode = activeData.mode;
-        }
-        const use3D = (calcMode !== 'flat');
+    static updateTargetHighlights(sourceToken, sourceCenter, activeSet, sourceElevationOverride = null) {
+        const use3D = this.ringCalcMode(sourceToken.id) !== 'flat';
         const paletteKey = game.settings.get(MODULE_ID, 'colorPalette');
         const currentPalette = PALETTES[paletteKey] || PALETTES['default'];
 
-        const sW = sourceToken.document.width || 0;
-        const sH = sourceToken.document.height || 0;
-        const sourceDimSquares = Math.max(sW, sH);
+        const source = {
+            center: sourceCenter,
+            elevation: sourceElevationOverride !== null ? sourceElevationOverride : (sourceToken.document.elevation || 0),
+            sizeSquares: Math.max(sourceToken.document.width || 0, sourceToken.document.height || 0)
+        };
 
-        const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
-        const lineBufferPx = 2;
-
-        const sourceElevation = sourceElevationOverride !== null ? sourceElevationOverride : (sourceToken.document.elevation || 0);
-
-        for (const target of potentialTargets) {
+        for (const target of canvas.tokens.placeables) {
             if (target.id === sourceToken.id) continue;
             if (!target.visible) continue;
 
-            const targetPoints = getTokenSamplePoints(target);
-
-            const targetElevation = target.document.elevation || 0;
-            const verticalDistance = Math.abs(sourceElevation - targetElevation);
-            const verticalDistancePx = verticalDistance * (canvas.scene.grid.size / canvas.scene.grid.distance);
-
-            const rangesWithKeys = Object.entries(ranges).map(([k, v]) => ({ key: k, ...v }))
-                .sort((a, b) => a.distance - b.distance);
-
-            const matchedRangeKey = findMatchedRange(targetPoints, rangesWithKeys, sourceCenter, sourceRadiusPx, use3D, verticalDistancePx, threshold)?.key ?? null;
+            const matchedRangeKey = measureRange(source, target, use3D)?.key ?? null;
 
             if (matchedRangeKey) {
                 const color = currentPalette.colors[matchedRangeKey] || '#ffffff';
@@ -470,7 +515,7 @@ class CombatDistances {
                     }
                 } else if (effectiveMode === 'hover-broadcast') {
                     // Use the existing broadcast mechanism (timed, visible to all players)
-                    this.Toggle({ remote: true, _sourceTokenId: token.id });
+                    this.toggle({ remote: true, _sourceTokenId: token.id });
                 }
             } else {
                 // Mouse left the token
@@ -521,33 +566,28 @@ class CombatDistances {
             }
 
             // --- Setup ---
-            const threshold = game.settings.get(MODULE_ID, 'coverageThreshold');
-            let calcMode = game.settings.get(MODULE_ID, 'calculationMode');
-            if (this._activeTokens.has(sourceToken.id)) {
-                const activeData = this._activeTokens.get(sourceToken.id);
-                if (activeData && activeData.mode) {
-                    calcMode = activeData.mode;
-                }
-            }
+            const calcMode = this.ringCalcMode(sourceToken.id);
             const use3D = (calcMode !== 'flat');
 
             const targetElevation = token.document.elevation || 0;
             const verticalDistance = Math.abs(sourceElevation - targetElevation);
             // Safety check for NaN
             const safeVertDist = isNaN(verticalDistance) ? 0 : verticalDistance;
-            const verticalDistancePx = safeVertDist * (canvas.scene.grid.size / canvas.scene.grid.distance);
 
             let finalDistDisplay = Infinity;
             let finalDist3DDisplay = Infinity;
 
-            const sourceDimSquares = Math.max(sourceToken.document.width, sourceToken.document.height);
+            const sourceDimSquares = Math.max(sourceToken.document.width || 0, sourceToken.document.height || 0);
             const sourceRadiusPx = (sourceDimSquares * canvas.scene.grid.size) / 2;
 
-            const targetPoints = getTokenSamplePoints(token);
-            const sortedRanges = Object.values(DEFAULTS.ranges).sort((a, b) => a.distance - b.distance);
-
             // Default to 'Very Far' if outside all defined ranges
-            const matchedLabel = findMatchedRange(targetPoints, sortedRanges, sourceCenter, sourceRadiusPx, use3D, verticalDistancePx, threshold)?.label ?? "DHD.ranges.veryFar";
+            const matchedLabel = measureRange(
+                { center: sourceCenter, elevation: sourceElevation, sizeSquares: sourceDimSquares },
+                token, use3D
+            )?.label ?? "DHD.ranges.veryFar";
+
+            // The displayed number is the nearest edge distance, separate from the ring decision above.
+            const targetPoints = getTokenSamplePoints(token);
 
             let minPointDistPx = Infinity;
             for (let pTarget of targetPoints) {
@@ -763,7 +803,7 @@ class CombatDistances {
 
         button.addEventListener('click', async (event) => {
             event.preventDefault();
-            this.Toggle();
+            this.toggle();
         });
 
         // V13: html may be HTMLElement (AppV2) or a jQuery wrapper (legacy HUD).

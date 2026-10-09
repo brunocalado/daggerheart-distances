@@ -39,7 +39,7 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 **The system accounts for token size when calculating range.**
 <p align="center"><img width="700" src="docs/sizes.webp"></p>
 
-* **Mass Measurement:** Select multiple tokens and use the macro `DHDistances.MassMeasurement();` to generate distance rings from the center of the group.
+* **Mass Measurement:** Select multiple tokens and use the macro `game.modules.get("daggerheart-distances").api.massMeasurement();` to generate distance rings from the center of the group.
 <p align="center"><img width="700" src="docs/massmeasurement.webp"></p>
 
 * **Target Highlighting:** Valid targets within range rings now glow with the ring's color.
@@ -56,7 +56,7 @@ This is perfect for highlighting a threat's reach during combat so the whole tab
 **Three ways to broadcast:**
 
 * **Keyboard:** Select a token and press **`Shift+R`**
-* **Macro:** `DHDistances.Toggle({ remote: true });`
+* **Macro:** `game.modules.get("daggerheart-distances").api.toggle({ remote: true });`
 * **Hover Broadcast Mode:** Enable it in settings and every token you hover will automatically broadcast to players (see Operation Mode below)
 
 > **Note:** Only the GM can broadcast. Players pressing `Shift+R` have no effect.
@@ -109,32 +109,38 @@ You have many easy ways to show or hide the range rings around a token:
 
 > All keybindings can be reassigned in **Foundry Settings → Configure Controls**.
 
-3. You can also use macros:
+3. You can also use macros. Every call goes through the module API:
 
 ```js
-DHDistances.Toggle();              // Toggle rings for selected/hovered token
-DHDistances.Toggle({ remote: true }); // Broadcast rings to all players (GM only)
-DHDistances.MassMeasurement();     // Mass Measurement from selected tokens
-DHDistances.ClearAll();            // Remove all active rings (respects Clear All Mode setting)
+const api = game.modules.get("daggerheart-distances").api;
 ```
 
 ```js
-DHDistances.Toggle({mode: '2d'}); // Calculates distance ignoring elevation.
+api.toggle();              // Toggle rings for selected/hovered token
+api.toggle({ remote: true }); // Broadcast rings to all players (GM only)
+api.massMeasurement();     // Mass Measurement from selected tokens
+api.clearAll();            // Remove all active rings (respects Clear All Mode setting)
 ```
 
 ```js
-DHDistances.Toggle({mode: '3d'}); // Calculates distance accounting for elevation.
+api.toggle({mode: '2d'}); // Calculates distance ignoring elevation.
 ```
 
 ```js
-DHDistances.Toggle({mode: 'both'}); // Shows both 3D and 2D distances.
+api.toggle({mode: '3d'}); // Calculates distance accounting for elevation.
+```
+
+```js
+api.toggle({mode: 'both'}); // Shows both 3D and 2D distances.
 ```
 
 ```js
 // GM only: explicit scope override (takes precedence over the Clear All Mode setting)
-DHDistances.ClearAll({ scope: 'all' });  // Remove rings for all connected players
-DHDistances.ClearAll({ scope: 'self' }); // Remove rings for the GM only
+api.clearAll({ scope: 'all' });  // Remove rings for all connected players
+api.clearAll({ scope: 'self' }); // Remove rings for the GM only
 ```
+
+Other modules can ask Distances which range a token is in, using the same measurement as the rings. See [docs/API.md](docs/API.md).
 
 ### Configuration
 
