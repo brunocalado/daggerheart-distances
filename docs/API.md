@@ -63,7 +63,7 @@ const inClose = dhd?.active
 
 ## Rings
 
-The same functions the keybindings and the compendium macros use.
+The same functions the keybindings use.
 
 | Function | What it does |
 |---|---|
