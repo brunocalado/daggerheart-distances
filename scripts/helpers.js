@@ -54,6 +54,9 @@ function findMatchedRange(targetPoints, sortedRanges, sourceCenter, sourceRadius
 /**
  * Returns a dense grid of sample points covering the token's footprint.
  * Used for coverage-based range checks so large tokens are assessed fairly.
+ * Points are spread over the real footprint in pixels, not over whole grid squares: Daggerheart
+ * sizes like Tiny (0.5) and Small (0.8) would otherwise be sampled as a full square, with most
+ * points off the token. Integer sizes get exactly `resolution` points per square, as before.
  * @param {Token} token
  * @returns {{x: number, y: number}[]}
  */
@@ -61,27 +64,20 @@ export function getTokenSamplePoints(token) {
     if (!token) return [];
     const grid = canvas.scene.grid.size;
     const resolution = 4;
-    const step = grid / resolution;
-    const offset = step / 2;
+    const { x, y } = token.document;
+    const widthPx = token.document.width * grid;
+    const heightPx = token.document.height * grid;
 
-    const startX = token.document.x;
-    const startY = token.document.y;
-    const widthSquares = token.document.width;
-    const heightSquares = token.document.height;
+    // At least `resolution` points per axis so small tokens still get a fair coverage reading.
+    const cols = Math.max(resolution, Math.round(widthPx / (grid / resolution)));
+    const rows = Math.max(resolution, Math.round(heightPx / (grid / resolution)));
+    const stepX = widthPx / cols;
+    const stepY = heightPx / rows;
 
     const points = [];
-    for (let gx = 0; gx < widthSquares; gx++) {
-        for (let gy = 0; gy < heightSquares; gy++) {
-            const cellX = startX + (gx * grid);
-            const cellY = startY + (gy * grid);
-            for (let sx = 0; sx < resolution; sx++) {
-                for (let sy = 0; sy < resolution; sy++) {
-                    points.push({
-                        x: cellX + (sx * step) + offset,
-                        y: cellY + (sy * step) + offset
-                    });
-                }
-            }
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            points.push({ x: x + stepX * (i + 0.5), y: y + stepY * (j + 0.5) });
         }
     }
     return points;
