@@ -1,6 +1,6 @@
-# Daggerheart: Distâncias
+# Daggerheart: Distances
 
-Daggerheart: Distâncias desenha os quatro anéis de alcance do Daggerheart ao redor de um token (Corpo a Corpo 5 ft, Muito Perto 15 ft, Perto 30 ft, Longe 60 ft) e colore cada um dos outros tokens com a cor do anel em que ele está. Selecione o seu token e passe o mouse sobre outro para ver o alcance e a distância, ou mostre os anéis para todos os jogadores de uma vez.
+Daggerheart: Distances desenha os quatro anéis de alcance do Daggerheart ao redor de um token (Corpo a Corpo 5 ft, Muito Perto 15 ft, Perto 30 ft, Longe 60 ft) e colore cada um dos outros tokens com a cor do anel em que ele está. Selecione o seu token e passe o mouse sobre outro para ver o alcance e a distância, ou mostre os anéis para todos os jogadores de uma vez.
 
 <video src="https://github.com/user-attachments/assets/c6e6a905-9cd4-4666-b742-9719f91a0a7b" 
        controls 
@@ -9,7 +9,9 @@ Daggerheart: Distâncias desenha os quatro anéis de alcance do Daggerheart ao r
        loop 
        muted></video>
 
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-red?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/mestredigital)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/mestredigital) [![More Modules](https://img.shields.io/badge/Foundry%20VTT-More%20Modules-red?style=for-the-badge&logo=gamepad)](https://mestredigital.online/pages/projetos-en)
+
+> Read in [English](../README.md)
 
 ## O que ele mostra
 
@@ -113,7 +115,7 @@ A mesma página mostra como outros módulos podem perguntar em qual alcance um t
 
 Instale pelo navegador de módulos do Foundry VTT, ou use este link de manifesto:
 
-```
+```js
 https://github.com/brunocalado/daggerheart-distances/releases/latest/download/module.json
 ```
 
@@ -143,24 +145,26 @@ O histórico completo de alterações está no [CHANGELOG](../CHANGELOG.md).
 
 | Módulo | Descrição |
 | :--- | :--- |
-| 💀 [**Adversary Manager**](https://github.com/brunocalado/daggerheart-advmanager) | Escale adversários instantaneamente e monte encontros equilibrados no Foundry VTT. |
-| 🌟 [**Best Modules**](https://github.com/brunocalado/dh-best-modules) | Uma coleção curada de módulos essenciais para aprimorar a experiência no Daggerheart. |
+| 💀 [**Adversary Manager**](https://github.com/brunocalado/daggerheart-advmanager) | Escale adversários instantaneamente e monte encontros equilibrados. |
+| 🖼️ [**Art Mapper**](https://github.com/brunocalado/dh-assets) | Atribui artes automaticamente aos compêndios do sistema, atores, tokens e conteúdo de módulos personalizados — mantendo seus visuais organizados e atualizados. |
 | 🐉 [**Colossus**](https://github.com/brunocalado/dh-colossus) | Gerencie encontros com chefões massivos de múltiplas partes com HP independente por parte e um único pool de stress compartilhado. |
-| 💥 [**Critical**](https://github.com/brunocalado/daggerheart-critical) | Acerto Crítico Animado. |
+| 📦 [**Containers**](https://github.com/brunocalado/dh-containers) | Agrupe itens do inventário em contêineres recolhíveis — bolsas, baús, mochilas — para organizar as fichas de personagem. |
+| 💥 [**Critical**](https://github.com/brunocalado/daggerheart-critical) | Críticos animados. |
 | 💠 [**Custom Stat Tracker**](https://github.com/brunocalado/dh-new-stat-tracker) | Adicione rastreadores personalizados aos atores. |
 | ☠️ [**Death Moves**](https://github.com/brunocalado/daggerheart-death-moves) | Aprimora o momento do Movimento de Morte com uma interface dramática e automação completa. |
 | 📏 [**Distances**](https://github.com/brunocalado/daggerheart-distances) | Visualiza alcances de combate com anéis personalizáveis e cálculos por hover. |
-| 📦 [**Extra Content**](https://github.com/brunocalado/daggerheart-extra-content) | Homebrew para Daggerheart. |
-| 🤖 [**Resource Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Executa macros automaticamente quando os recursos de Medo ou Esperança são alterados. |
+| 📦 [**Extra Content**](https://github.com/brunocalado/daggerheart-extra-content) | Pacote de conteúdo homebrew. |
 | 😱 [**Fear Tracker**](https://github.com/brunocalado/daggerheart-fear-tracker) | Adiciona uma barra deslizante animada com tokens de medo configuráveis à interface. |
 | 🧟 [**Horde**](https://github.com/brunocalado/dh-horde) | Divida tokens de horda em dezenas de tokens individuais e gerencie o movimento e os atributos automaticamente. |
 | 🎁 [**Mystery Box**](https://github.com/brunocalado/dh-mystery-box) | Introduz mecânicas de caixa misteriosa para saque aleatório e surpresas. |
 | ⚡ [**Quick Actions**](https://github.com/brunocalado/daggerheart-quickactions) | Acesso rápido a mecânicas comuns como Dano por Queda, Tempo Livre, etc. |
 | 📜 [**Quick Rules**](https://github.com/brunocalado/daggerheart-quickrules) | Guia de referência rápido e acessível para as regras principais. |
-| 🎲 [**Stats**](https://github.com/brunocalado/daggerheart-stats) | Rastreia rolagens de dados do MJ e dos Jogadores. |
-| 🧠 [**Stats Toolbox**](https://github.com/brunocalado/dh-statblock-importer) | Importe usando um bloco de estatísticas. |
-| 🛒 [**Store**](https://github.com/brunocalado/daggerheart-store) | Uma loja dinâmica, interativa e totalmente configurável para o Foundry VTT. |
+| 🤖 [**Resource Macros**](https://github.com/brunocalado/daggerheart-fear-macros) | Executa macros automaticamente quando os recursos de Medo, Esperança, Estresse, PV ou Armadura mudam. |
+| 🎲 [**Stats**](https://github.com/brunocalado/daggerheart-stats) | Registra as rolagens de dados do Mestre e dos Jogadores. |
+| 🧠 [**Stats Toolbox**](https://github.com/brunocalado/dh-statblock-importer) | Importe atores usando um bloco de estatísticas. |
+| 🛒 [**Store**](https://github.com/brunocalado/daggerheart-store) | Uma loja dinâmica, interativa e totalmente configurável dentro do jogo. |
 | 🔍 [**Unidentified**](https://github.com/brunocalado/dh-unidentified) | Oculta nomes e descrições de itens até que sejam identificados pelos jogadores. |
+| 🌌 [**Void**](https://github.com/brunocalado/the-void-unofficial) | Módulo não oficial que traz o conteúdo de playtest de The Void — classes, subclasses, ancestralidades, comunidades, adversários, saques, armas experimentais e mais. |
 
 # 🗺️ Aventuras
 
