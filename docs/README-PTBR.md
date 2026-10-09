@@ -1,6 +1,6 @@
 # Daggerheart: Distâncias
 
-Um utilitário visual e intuitivo para o sistema **Daggerheart** no Foundry VTT. Exibe automaticamente anéis de distância (Corpo a Corpo, Muito Perto, Perto, Longe) ao redor dos tokens e calcula as distâncias entre personagens instantaneamente, ajudando jogadores e MJs a visualizar os alcances de combate sem precisar medir manualmente.
+Daggerheart: Distâncias desenha os quatro anéis de alcance do Daggerheart ao redor de um token (Corpo a Corpo 5 ft, Muito Perto 15 ft, Perto 30 ft, Longe 60 ft) e colore cada um dos outros tokens com a cor do anel em que ele está. Selecione o seu token e passe o mouse sobre outro para ver o alcance e a distância, ou mostre os anéis para todos os jogadores de uma vez.
 
 <video src="https://github.com/user-attachments/assets/c6e6a905-9cd4-4666-b742-9719f91a0a7b" 
        controls 
@@ -11,158 +11,125 @@ Um utilitário visual e intuitivo para o sistema **Daggerheart** no Foundry VTT.
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-red?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/mestredigital)
 
-## 🌟 Funcionalidades Principais
+## O que ele mostra
 
-### 📏 Para Todos (Jogadores e MJ)
+Com os anéis ligados, cada token dentro deles brilha com a cor do menor anel em que está. Tokens além de Longe ficam como estão.
 
-* **Anéis de Alcance Visual:** Veja instantaneamente as 4 faixas de alcance principais do Daggerheart:
+<p align="center"><img width="700" src="highlighting.webp" alt="Tokens ao redor de um personagem brilhando com a cor do anel em que estão"></p>
 
-  * **Corpo a Corpo:** 1,5 m (5 ft.)
+Selecione o seu token e passe o mouse sobre outro. Um rótulo acima dele mostra o alcance (de Corpo a Corpo a Muito Distante) e a distância em pés. Não é preciso ligar os anéis para isso.
 
-  * **Muito Perto:** 4,5 m (15 ft.)
+Os anéis começam na borda do token, então o Corpo a Corpo de uma criatura grande vai mais longe a partir do centro dela do que o de uma pequena. Um alvo conta como dentro de um anel quando uma parte suficiente do corpo dele está dentro: 10% por padrão, ajustável em **Limiar de Cobertura da Grade**. Tokens Tiny e Small são medidos pelo tamanho real.
 
-  * **Perto:** 9 m (30 ft.)
+<p align="center"><img width="700" src="threshold.webp" alt="Quanto de um token precisa estar dentro do anel para contar como no alcance"></p>
 
-  * **Longe:** 18 m (60 ft.)
+<p align="center"><img width="700" src="sizes.webp" alt="Anéis desenhados ao redor de tokens de tamanhos diferentes"></p>
 
-* **Hover Inteligente:** Passe o mouse sobre qualquer token para ver exatamente a que distância ele está do seu personagem. Sem necessidade de régua!
+Enquanto você arrasta um token, os anéis acompanham a pré-visualização, então dá para testar uma posição antes de soltar.
 
-* **Alternância Fácil:** Ative ou desative os anéis rapidamente usando um botão no HUD do Token ou um atalho de teclado.
+Os anéis usam sempre 5, 15, 30 e 60 ft. Eles não seguem as distâncias de alcance alteradas nas configurações do Daggerheart.
 
-* **Detecção de Borda Inteligente:** Preciso para tokens de todos os tamanhos! O sistema mede a distância de borda a borda, em vez de centro a centro. Também verifica a cobertura visual: um token só é considerado "no alcance" se uma porcentagem específica do seu corpo (configurável) estiver fisicamente dentro do anel, garantindo que o que você vê corresponde às regras.
+Quando o Mestre carrega o mundo, o módulo muda a configuração **Show Token Distance on Highlight** do Daggerheart para **Never**, porque o rótulo do módulo substitui o do sistema.
 
-**Defina quanto do token deve estar dentro do círculo para ser considerado no alcance.**
-<p align="center"><img width="700" src="threshold.webp"></p>
+## Mostrando os anéis
 
-**O sistema leva em conta o tamanho do token ao calcular o alcance.**
-<p align="center"><img width="700" src="sizes.webp"></p>
+<p align="center"><img width="600" src="preview.webp" alt="Anéis de alcance ao redor de um token, com o botão no HUD do token"></p>
 
-* **Medição em Massa:** Selecione múltiplos tokens e use a macro `game.modules.get("daggerheart-distances").api.massMeasurement();` para gerar anéis de distância a partir do centro do grupo.
-<p align="center"><img width="700" src="massmeasurement.webp"></p>
-
-* **Destaque de Alvos:** Alvos válidos dentro dos anéis de alcance brilham com a cor do anel correspondente.
-<p align="center"><img width="700" src="highlighting.webp"></p>
-
-* **Pré-visualização Fantasma:** Os anéis de alcance acompanham a pré-visualização do token ao arrastar para testar posições.
-
-### 📡 Transmissão — Compartilhe os Anéis com Todos
-
-O MJ pode mostrar os anéis de distância para **todos os jogadores conectados** de uma vez. Ao transmitir, os anéis aparecem na tela de cada jogador e desaparecem automaticamente após uma duração configurável (padrão: 7 segundos).
-
-Perfeito para destacar o alcance de uma ameaça durante o combate, mantendo toda a mesa na mesma página — sem precisar descrever distâncias verbalmente.
-
-**Três formas de transmitir:**
-
-* **Teclado:** Selecione um token e pressione **`Shift+R`**
-* **Macro:** `game.modules.get("daggerheart-distances").api.toggle({ remote: true });`
-* **Modo Hover de Transmissão:** Ative nas configurações e cada token que você passar o mouse será automaticamente transmitido aos jogadores (veja Modo de Operação abaixo)
-
-> **Nota:** Apenas o MJ pode transmitir. Jogadores que pressionam `Shift+R` não têm efeito.
-
-### 🎮 Modo de Operação — Como os Anéis São Ativados
-
-Você pode alterar *como* os anéis aparecem selecionando um **Modo de Operação** nas Configurações do Módulo:
-
-| Modo | O que faz |
-|---|---|
-| **Manual** *(padrão)* | Os anéis só aparecem quando você pressiona `R` ou clica no botão do HUD |
-| **Modo Hover (MJ)** | Os anéis aparecem automaticamente enquanto o MJ passa o mouse sobre tokens — apenas localmente |
-| **Modo Hover (Transmissão)** | Igual ao anterior, mas cada hover transmite os anéis para todos os jogadores |
-
-Você também pode **substituir temporariamente** o modo ativo usando teclas de atalho — útil quando está no modo Manual mas quer uma transmissão rápida sem alterar as configurações:
-
-* **Segure `Shift+H`** — ativa o Modo Hover (MJ) enquanto a tecla estiver pressionada
-* **Segure `Shift+B`** — ativa o Modo Hover (Transmissão) enquanto a tecla estiver pressionada
-
-Solte a tecla e o modo volta ao normal.
-
-### 🎨 Personalização
-
-* **Temas Bonitos:** Escolha entre paletas de cores pré-definidas como "Semáforo", "Synthwave" ou "Fogo Verdadeiro".
-
-* **Estilos Visuais:** Configure os anéis com linhas sólidas, pontilhadas ou tracejadas, e ajuste a espessura.
-
-* **Efeitos Imersivos:** Ative preenchimentos gradientes animados que pulsam suavemente, ou mantenha simples com cores estáticas.
-
-## ⚙️ Como Usar
-
-### Alternando os Anéis
-
-<p align="center"><img width="600" src="preview.webp"></p>
-
-Você tem várias formas fáceis de mostrar ou ocultar os anéis de alcance ao redor de um token:
-
-1. **HUD do Token:** Clique com o botão direito em um token para abrir o HUD, depois clique no ícone de **Círculo** (<i class="fas fa-circle-dot"></i>).
-
-2. **Atalhos de Teclado:**
+Clique com o botão direito em um token e clique no ícone de círculo no HUD do token, ou use um atalho:
 
 | Atalho | Ação |
 |---|---|
-| `R` | Alternar anéis (local, apenas para você) |
-| `Shift+R` | Transmitir anéis para todos os jogadores (apenas MJ) |
-| `M` | Medição em Massa a partir dos tokens selecionados |
-| `Shift+Delete` | Limpar todos os anéis ativos de uma vez |
-| `Segure Shift+H` | Ativar temporariamente o Modo Hover (MJ) |
-| `Segure Shift+B` | Ativar temporariamente o Modo Hover (Transmissão) |
+| `R` | Liga ou desliga os anéis dos tokens sob o mouse ou selecionados, só para você |
+| `Shift+R` | Mostra os anéis para todos os jogadores (apenas Mestre) |
+| `M` | Anéis a partir do centro dos tokens selecionados |
+| `Shift+Delete` | Remove todos os anéis |
+| Segurar `Shift+H` | Modo Hover (Mestre) enquanto as teclas estão pressionadas |
+| Segurar `Shift+B` | Modo Hover (Transmissão) enquanto as teclas estão pressionadas |
 
-> Todos os atalhos podem ser reatribuídos em **Configurações do Foundry → Configurar Controles**.
+Todos os atalhos podem ser trocados em **Configurar Controles**.
 
-3. Você também pode usar macros. Todas as chamadas passam pela API do módulo:
+O **Modo de Operação**, nas configurações do módulo, decide o que faz os anéis aparecerem:
 
-```js
-const api = game.modules.get("daggerheart-distances").api;
+| Modo | O que acontece |
+|---|---|
+| Manual (padrão) | Os anéis aparecem só com `R` ou com o botão do HUD |
+| Modo Hover (Mestre) | Os anéis aparecem no token sob o mouse do Mestre, só na tela do Mestre |
+| Modo Hover (Transmissão) | Cada token sob o mouse do Mestre mostra seus anéis para todos os jogadores |
+
+As teclas de segurar mudam o modo só enquanto estão pressionadas. Assim, no Manual, você pode segurar `Shift+B` para mostrar algumas ameaças para a mesa e soltar para voltar.
+
+## Mostrando os anéis para os jogadores
+
+O Mestre pode mostrar os anéis de um token na tela de todos os jogadores. Eles somem depois de 7 segundos, ou do tempo definido em **Duração da Transmissão**. Use `Shift+R`, o Modo Hover (Transmissão) ou `toggle({ remote: true })` pela API. Um jogador que aperta `Shift+R` não faz nada.
+
+Por padrão, `Shift+Delete` remove só os anéis do Mestre. Mude **Modo Limpar Tudo** para Todos os Jogadores para removê-los de todas as telas.
+
+## Medindo a partir de um grupo
+
+Selecione vários tokens e aperte `M`. Os anéis são desenhados a partir do centro do grupo, na elevação média. Com um só token selecionado, `M` funciona como `R`.
+
+<p align="center"><img width="700" src="massmeasurement.webp" alt="Anéis desenhados a partir do centro de um grupo de tokens selecionados"></p>
+
+## Elevação
+
+O **Modo de Cálculo** decide se a altura conta:
+
+- Automático (3D): a diferença de elevação entra na distância. É o padrão.
+- Plano (2D): a elevação é ignorada.
+- Ambos: os alcances usam 3D, e o rótulo do hover mostra a distância 3D e a 2D.
+
+## Configurações
+
+<p align="center"><img width="600" src="settings.webp" alt="As configurações do módulo"></p>
+
+Estas ficam nas configurações do módulo e só o Mestre pode mudar:
+
+| Configuração | Padrão |
+|---|---|
+| Modo de Operação | Manual |
+| Modo Limpar Tudo (Mestre) | Apenas Mestre |
+| Duração da Transmissão (Segundos) | 7 |
+| Limiar de Cobertura da Grade | 0.10 |
+| Modo de Cálculo | Automático (3D) |
+
+Cada jogador ajusta a aparência dos próprios anéis em **Abrir Configurações Visuais**:
+
+| Configuração | Opções |
+|---|---|
+| Paleta de Cores | Semáforo (padrão), Semáforo Invertido, Synthwave, Fogo Real |
+| Estilo de Linha | Sólida (padrão), Pontilhada, Tracejada |
+| Espessura da Linha | Normal (padrão), Grande, Extra Grande, Massiva |
+| Estilo de Preenchimento Gradiente | Estático, Animado - Normal, Animado - Leve (padrão), Nenhum |
+| Tamanho do Texto | Pequeno, Normal (padrão), Grande |
+| Destaque de Alvos | Ligado (padrão) ou desligado |
+
+## Macros e API
+
+Tudo o que os atalhos fazem também pode rodar a partir de uma macro. O módulo não tem compêndio de macros: crie uma macro de script com a chamada que você quer, tirada de [API.md](API.md) (em inglês). Por exemplo, anéis que ignoram a elevação, ou um Limpar Tudo que alcança todos os jogadores.
+
+A mesma página mostra como outros módulos podem perguntar em qual alcance um token está em relação a outro, com a mesma medição que os anéis usam.
+
+## Instalação
+
+Instale pelo navegador de módulos do Foundry VTT, ou use este link de manifesto:
+
+```
+https://github.com/brunocalado/daggerheart-distances/releases/latest/download/module.json
 ```
 
-```js
-api.toggle();              // Alternar anéis para o token selecionado/sob o cursor
-api.toggle({ remote: true }); // Transmitir anéis para todos os jogadores (apenas MJ)
-api.massMeasurement();     // Medição em Massa a partir dos tokens selecionados
-api.clearAll();            // Remover todos os anéis ativos (respeita a configuração Modo Limpar Tudo)
-```
+Precisa do Foundry VTT v14 e do sistema Daggerheart 2.2.6 ou mais recente.
 
-```js
-api.toggle({mode: '2d'}); // Calcula distância ignorando elevação.
-```
+## Traduções
 
-```js
-api.toggle({mode: '3d'}); // Calcula distância levando em conta a elevação.
-```
+Para traduzir o módulo para o seu idioma:
 
-```js
-api.toggle({mode: 'both'}); // Mostra as distâncias 3D e 2D ao mesmo tempo.
-```
+1. Baixe o arquivo em inglês: [languages/en.json](https://github.com/brunocalado/daggerheart-distances/blob/main/languages/en.json)
+2. Traduza os valores e mantenha as chaves sem alteração.
+3. Envie o arquivo em [GitHub Issues](https://github.com/brunocalado/daggerheart-distances/issues) e diga qual é o idioma.
 
-```js
-// Apenas MJ: substituição explícita de escopo (tem precedência sobre a configuração Modo Limpar Tudo)
-api.clearAll({ scope: 'all' });  // Remover anéis para todos os jogadores conectados
-api.clearAll({ scope: 'self' }); // Remover anéis apenas para o MJ
-```
+## Changelog
 
-Outros módulos podem perguntar ao Distances em qual alcance um token está, com a mesma medição dos anéis. Veja [API.md](API.md) (em inglês).
-
-### Configuração
-
-Acesse a aba **Configurações do Módulo** no Foundry VTT para personalizar a aparência:
-
-<p align="center"><img width="600" src="settings.webp"></p>
-
-## 🚀 Instalação
-
-Instale pelo navegador de Módulos do Foundry VTT ou use este link de manifesto:
-
-* *https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json*
-
-## 🌍 Traduções
-
-Quer traduzir este módulo para o seu idioma? Veja como:
-
-1. Baixe o arquivo de tradução em inglês: [languages/en.json](https://github.com/brunocalado/daggerheart-distances/blob/main/languages/en.json)
-2. Traduza os valores (mantenha as chaves sem alteração)
-3. Envie sua tradução em [GitHub Issues](https://github.com/brunocalado/daggerheart-distances/issues) — anexe o arquivo traduzido e mencione o idioma de destino
-
-## 📜 Changelog
-
-Você pode ler o histórico completo de alterações no [CHANGELOG](../CHANGELOG.md).
+O histórico completo de alterações está no [CHANGELOG](../CHANGELOG.md).
 
 ## ⚖️ Créditos e Licença
 

@@ -1,6 +1,6 @@
 # Daggerheart: Distances
 
-A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It automatically displays distance rings (Melee, Very Close, Close, Far) around tokens and calculates distances between characters instantly, helping players and GMs visualize combat ranges without needing to measure manually.
+Daggerheart: Distances draws the four range rings of Daggerheart around a token (Melee 5 ft, Very Close 15 ft, Close 30 ft, Far 60 ft) and colors every other token by the ring it is in. Select your token and hover another to see its range and distance, or show the rings to every player at once.
 
 <video src="https://github.com/user-attachments/assets/c6e6a905-9cd4-4666-b742-9719f91a0a7b" 
        controls 
@@ -13,160 +13,125 @@ A visual and intuitive utility for the **Daggerheart** system in Foundry VTT. It
 
 > Leia em [Português do Brasil](docs/README-PTBR.md)
 
-## 🌟 Key Features
+## What it shows
 
-### 📏 For Everyone (Players & GM)
+When rings are on, every token inside them glows with the color of the smallest ring it is in. Tokens beyond Far stay as they are.
 
-* **Visual Range Rings:** Instantly see the 4 main range bands of Daggerheart:
+<p align="center"><img width="700" src="docs/highlighting.webp" alt="Tokens around a character glowing with the color of the ring they are in"></p>
 
-  * **Melee:** 5 ft.
+Select your token and hover another one. A label above it shows the range (Melee to Very Far) and the distance in feet. You don't need the rings on for this.
 
-  * **Very Close:** 15 ft.
+The rings start at the edge of the token, so a large creature's Melee reaches farther from its center than a small one's. A target counts as inside a ring when enough of its body is inside: 10% by default, set in **Grid Coverage Threshold**. Tiny and Small tokens are measured by their real size.
 
-  * **Close:** 30 ft.
+<p align="center"><img width="700" src="docs/threshold.webp" alt="How much of a token must be inside the ring for it to count as in range"></p>
 
-  * **Far:** 60 ft.
+<p align="center"><img width="700" src="docs/sizes.webp" alt="Rings drawn around tokens of different sizes"></p>
 
-* **Smart Hover:** Hover your mouse over any token to see exactly how far it is from your character. No ruler needed!
+While you drag a token, its rings follow the preview, so you can test a position before dropping it.
 
-* **Easy Toggle:** Turn the rings on or off quickly using a button in the Token HUD or a keyboard shortcut.
+The rings always use 5, 15, 30 and 60 ft. They do not follow range distances changed in the Daggerheart settings.
 
-* **Smart Edge Detection:** Accurate for tokens of all sizes! The system measures distance from edge-to-edge rather than center-to-center. It also checks visual coverage: a token is only considered "in range" if a specific percentage of its body (configurable) is physically inside the ring, ensuring that what you see matches the rules.
+When the GM loads the world, the module sets Daggerheart's **Show Token Distance on Highlight** to **Never**, because its hover label replaces the system's one.
 
-**Set how much of a token must be inside the circle to be considered in range.**
-<p align="center"><img width="700" src="docs/threshold.webp"></p>
+## Showing the rings
 
-**The system accounts for token size when calculating range.**
-<p align="center"><img width="700" src="docs/sizes.webp"></p>
+<p align="center"><img width="600" src="docs/preview.webp" alt="Range rings around a token, with the Token HUD button"></p>
 
-* **Mass Measurement:** Select multiple tokens and use the macro `game.modules.get("daggerheart-distances").api.massMeasurement();` to generate distance rings from the center of the group.
-<p align="center"><img width="700" src="docs/massmeasurement.webp"></p>
-
-* **Target Highlighting:** Valid targets within range rings now glow with the ring's color.
-<p align="center"><img width="700" src="docs/highlighting.webp"></p>
-
-* **Ghost Preview:** Range rings now follow the token preview while dragging to test positions.
-
-### 📡 Broadcast — Share Rings with Everyone
-
-The GM can show distance rings to **all connected players** at once. When you broadcast, the rings appear on every player's screen and disappear automatically after a configurable duration (default: 7 seconds).
-
-This is perfect for highlighting a threat's reach during combat so the whole table is on the same page — no need to describe distances verbally.
-
-**Three ways to broadcast:**
-
-* **Keyboard:** Select a token and press **`Shift+R`**
-* **Macro:** `game.modules.get("daggerheart-distances").api.toggle({ remote: true });`
-* **Hover Broadcast Mode:** Enable it in settings and every token you hover will automatically broadcast to players (see Operation Mode below)
-
-> **Note:** Only the GM can broadcast. Players pressing `Shift+R` have no effect.
-
-### 🎮 Operation Mode — How Rings Are Triggered
-
-You can change *how* rings appear by selecting an **Operation Mode** in the Module Settings:
-
-| Mode | What it does |
-|---|---|
-| **Manual** *(default)* | Rings only appear when you press `R` or click the HUD button |
-| **Hover Mode (GM)** | Rings appear automatically as the GM hovers over tokens — locally only |
-| **Hover Mode (Broadcast)** | Same as above, but each hover broadcasts the rings to all players |
-
-You can also **temporarily override** the active mode using hold-keys — useful when you're in Manual mode but want a quick broadcast without changing settings:
-
-* **Hold `Shift+H`** — activates Hover Mode (GM) while the key is held
-* **Hold `Shift+B`** — activates Hover Mode (Broadcast) while the key is held
-
-Release the key and the mode returns to normal.
-
-### 🎨 Customization
-
-* **Beautiful Themes:** Choose from pre-made color palettes like "Traffic Light", "Neon Cyberpunk", or "Warm Sunset".
-
-* **Visual Styles:** Configure the rings to have solid, dotted, or dashed lines, and adjust their thickness.
-
-* **Immersive Effects:** Enable animated gradient fills that pulse gently, or keep it simple with static colors.
-
-## ⚙️ How to Use
-
-### Toggling Rings
-
-<p align="center"><img width="600" src="docs/preview.webp"></p>
-
-You have many easy ways to show or hide the range rings around a token:
-
-1. **Token HUD:** Right-click a token to open the HUD, then click the **Circle** icon (<i class="fas fa-circle-dot"></i>).
-
-2. **Keyboard Shortcuts:**
+Right-click a token and click the circle icon in the Token HUD, or use a shortcut:
 
 | Shortcut | Action |
 |---|---|
-| `R` | Toggle rings on/off (local, just for you) |
-| `Shift+R` | Broadcast rings to all players (GM only) |
-| `M` | Mass Measurement from selected tokens |
-| `Shift+Delete` | Clear all active rings at once |
-| `Hold Shift+H` | Temporarily enable Hover Mode (GM) |
-| `Hold Shift+B` | Temporarily enable Hover Mode (Broadcast) |
+| `R` | Turn rings on or off for the hovered or selected tokens, just for you |
+| `Shift+R` | Show the rings to all players (GM only) |
+| `M` | Rings from the center of the selected tokens |
+| `Shift+Delete` | Remove all rings |
+| Hold `Shift+H` | Hover Mode (GM) while the keys are held |
+| Hold `Shift+B` | Hover Mode (Broadcast) while the keys are held |
 
-> All keybindings can be reassigned in **Foundry Settings → Configure Controls**.
+All shortcuts can be changed in **Configure Controls**.
 
-3. You can also use macros. Every call goes through the module API:
+**Operation Mode**, in the module settings, decides what makes rings appear:
+
+| Mode | What happens |
+|---|---|
+| Manual (default) | Rings appear only with `R` or the HUD button |
+| Hover Mode (GM) | Rings appear on the token the GM hovers, only on the GM's screen |
+| Hover Mode (Broadcast) | Each token the GM hovers shows its rings to all players |
+
+The hold keys switch the mode only while held, so in Manual you can hold `Shift+B` to show a few threats to the table and release it to go back.
+
+## Showing rings to the players
+
+The GM can show a token's rings on every player's screen. They disappear after 7 seconds, or the time set in **Broadcast Duration**. Use `Shift+R`, Hover Mode (Broadcast), or `toggle({ remote: true })` from the API. A player pressing `Shift+R` does nothing.
+
+`Shift+Delete` removes only the GM's rings by default. Set **Clear All Mode** to All Players to remove them from every screen.
+
+## Measuring from a group
+
+Select several tokens and press `M`. The rings are drawn from the center of the group, at the average elevation. With one token selected, `M` works like `R`.
+
+<p align="center"><img width="700" src="docs/massmeasurement.webp" alt="Rings drawn from the center of a group of selected tokens"></p>
+
+## Elevation
+
+**Calculation Mode** decides whether height counts:
+
+- Auto (3D): the difference in elevation is added to the distance. This is the default.
+- Flat (2D): elevation is ignored.
+- Both: ranges use 3D, and the hover label shows the 3D and the 2D distance.
+
+## Settings
+
+<p align="center"><img width="600" src="docs/settings.webp" alt="The module settings"></p>
+
+These are in the module settings and only the GM can change them:
+
+| Setting | Default |
+|---|---|
+| Operation Mode | Manual |
+| Clear All Mode (GM) | GM Only |
+| Broadcast Duration (Seconds) | 7 |
+| Grid Coverage Threshold | 0.10 |
+| Calculation Mode | Auto (3D) |
+
+Each player sets the look of their own rings in **Open Visual Settings**:
+
+| Setting | Options |
+|---|---|
+| Color Palette | Traffic Light (default), Inverse Traffic Light, Synthwave, True Fire |
+| Line Style | Solid (default), Dotted, Dashed |
+| Line Thickness | Normal (default), Large, Extra Large, Massive |
+| Gradient Fill Style | Static, Animated - Normal, Animated - Light (default), None |
+| Text Size | Small, Normal (default), Large |
+| Target Highlighting | On (default) or off |
+
+## Macros and API
+
+Everything the shortcuts do can also run from a macro. The module has no macro compendium: create a script macro with the call you want from [docs/API.md](docs/API.md), for example rings with elevation ignored, or a Clear All that reaches every player.
+
+The same page shows how other modules can ask which range one token is from another, with the same measurement the rings use.
+
+## Installation
+
+Install it from the Foundry VTT module browser, or use this manifest link:
 
 ```js
-const api = game.modules.get("daggerheart-distances").api;
+https://github.com/brunocalado/daggerheart-distances/releases/latest/download/module.json
 ```
 
-```js
-api.toggle();              // Toggle rings for selected/hovered token
-api.toggle({ remote: true }); // Broadcast rings to all players (GM only)
-api.massMeasurement();     // Mass Measurement from selected tokens
-api.clearAll();            // Remove all active rings (respects Clear All Mode setting)
-```
+It needs Foundry VTT v14 and the Daggerheart system 2.2.6 or later.
 
-```js
-api.toggle({mode: '2d'}); // Calculates distance ignoring elevation.
-```
+## Translations
 
-```js
-api.toggle({mode: '3d'}); // Calculates distance accounting for elevation.
-```
+To translate the module into your language:
 
-```js
-api.toggle({mode: 'both'}); // Shows both 3D and 2D distances.
-```
+1. Download the English file: [languages/en.json](https://github.com/brunocalado/daggerheart-distances/blob/main/languages/en.json)
+2. Translate the values and keep the keys unchanged.
+3. Send the file in [GitHub Issues](https://github.com/brunocalado/daggerheart-distances/issues) and say which language it is.
 
-```js
-// GM only: explicit scope override (takes precedence over the Clear All Mode setting)
-api.clearAll({ scope: 'all' });  // Remove rings for all connected players
-api.clearAll({ scope: 'self' }); // Remove rings for the GM only
-```
+## Changelog
 
-Other modules can ask Distances which range a token is in, using the same measurement as the rings. See [docs/API.md](docs/API.md).
-
-### Configuration
-
-Go to the **Module Settings** tab in Foundry VTT to customize the look and feel:
-
-<p align="center"><img width="600" src="docs/settings.webp"></p>
-
-## 🚀 Installation
-
-Install via the Foundry VTT Module browser or use this manifest link:
-
-```js
-https://raw.githubusercontent.com/brunocalado/daggerheart-distances/main/module.json
-```
-
-## 🌍 Translations
-
-Want to translate this module into your language? Here's how:
-
-1. Download the English translation file: [languages/en.json](https://github.com/brunocalado/daggerheart-distances/blob/main/languages/en.json)
-2. Translate the values (keep the keys unchanged)
-3. Submit your translation at [GitHub Issues](https://github.com/brunocalado/daggerheart-distances/issues) — attach the translated file and mention the target language
-
-## 📜 Changelog
-
-You can read the full history of changes in the [CHANGELOG](CHANGELOG.md).
+The full history of changes is in the [CHANGELOG](CHANGELOG.md).
 
 ## ⚖️ Credits and License
 
