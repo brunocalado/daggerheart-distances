@@ -1,3 +1,13 @@
+# 0.3.0
+
+- [Added] Public API in `game.modules.get("daggerheart-distances").api`: `getRange(source, target)` and `isWithinRange(source, target, rangeId)` give other modules the same range the target highlight shows, using the Daggerheart system's range ids (`melee`, `veryClose`, `close`, `far`, `veryFar`). See [docs/API.md](https://github.com/brunocalado/daggerheart-distances/blob/main/docs/API.md)
+- [Changed] The target highlight, the hover label and the API share one range decision, so they always agree
+- [Changed] **Breaking:** `window.DHDistances` is gone. Macros now call `game.modules.get("daggerheart-distances").api` with `toggle()`, `massMeasurement()` and `clearAll()` (lower camelCase)
+- [Fixed] Tokens with fractional sizes (Daggerheart's Tiny 0.5 and Small 0.8 by default) were measured as a full grid square, so their range depended on which side of the source they stood; they are now measured by their real size
+- [Removed] The Distances Macros compendium. Create a script macro with the calls in [docs/API.md](https://github.com/brunocalado/daggerheart-distances/blob/main/docs/API.md) instead
+- [Changed] Releases are now built by a GitHub workflow and published to foundryvtt.com; the manifest points at the latest GitHub release
+- [Changed] README and PT-BR README rewritten for the current module, with every setting and its default
+
 # 0.2.7
 
 - [Fixed] Token HUD button icon was off-center: the button is a `<div>` (not a `<button>`), so it never matched Foundry's core `.control-icon` centering rule (`display: flex; align-items: center; justify-content: center`); now set explicitly on `.dhd-hud-button`
