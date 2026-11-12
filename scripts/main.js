@@ -806,9 +806,7 @@ class CombatDistances {
             this.toggle();
         });
 
-        // V13: html may be HTMLElement (AppV2) or a jQuery wrapper (legacy HUD).
-        const root = html instanceof HTMLElement ? html : html[0];
-        root?.querySelector('div.left')?.appendChild(button);
+        html.querySelector('div.left')?.appendChild(button);
     }
 
     static removeRings(tokenId) {
@@ -853,25 +851,11 @@ Hooks.once('init', () => {
     CombatDistances.initialize();
 });
 
+// The system's own distance hover would sit on top of the module's label. Its Appearance setting is
+// client-scoped, so every user's client has to switch it off for itself, not only the GM's.
 Hooks.once("ready", async () => {
-    if (!game.user.isGM || !CONFIG.DH) return;
-
-    try {
-        const key = CONFIG.DH.SETTINGS.gameSettings.appearance;
-        const rawSettings = game.settings.get(CONFIG.DH.id, key);
-        const currentSettings = (typeof rawSettings.toObject === 'function')
-            ? rawSettings.toObject()
-            : { ...rawSettings };
-
-        if (currentSettings.showTokenDistance !== "never") {
-            await game.settings.set(CONFIG.DH.id, key, {
-                ...currentSettings,
-                showTokenDistance: "never"
-            });
-            console.log("Combat Distances | Configuração forçada para 'never'.");
-        }
-
-    } catch (err) {
-        console.warn("Combat Distances | Falha ao aplicar configuração:", err);
-    }
+    const key = CONFIG.DH.SETTINGS.gameSettings.appearance;
+    const appearance = game.settings.get(CONFIG.DH.id, key);
+    if (appearance.showTokenDistance === "never") return;
+    await game.settings.set(CONFIG.DH.id, key, { ...appearance.toObject(), showTokenDistance: "never" });
 });

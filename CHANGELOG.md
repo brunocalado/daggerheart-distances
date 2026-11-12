@@ -1,3 +1,8 @@
+# Unreleased
+
+- [Breaking][Changed] Requires Daggerheart 2.12.8 or later
+- [Fixed] The system's own token distance tooltip is now turned off for players too, not only the GM, so it no longer overlaps the module's hover label
+
 # 0.3.0
 
 - [Added] Public API in `game.modules.get("daggerheart-distances").api`: `getRange(source, target)` and `isWithinRange(source, target, rangeId)` give other modules the same range the target highlight shows, using the Daggerheart system's range ids (`melee`, `veryClose`, `close`, `far`, `veryFar`). See [docs/API.md](https://github.com/brunocalado/daggerheart-distances/blob/main/docs/API.md)
