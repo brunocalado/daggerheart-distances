@@ -1,4 +1,4 @@
-# Unreleased
+# 0.4.0
 
 - [Breaking][Changed] Requires Daggerheart 2.12.8 or later
 - [Fixed] The system's own token distance tooltip is now turned off for players too, not only the GM, so it no longer overlaps the module's hover label
