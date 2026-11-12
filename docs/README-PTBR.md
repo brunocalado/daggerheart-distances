@@ -31,7 +31,7 @@ Enquanto você arrasta um token, os anéis acompanham a pré-visualização, ent
 
 Os anéis usam sempre 5, 15, 30 e 60 ft. Eles não seguem as distâncias de alcance alteradas nas configurações do Daggerheart.
 
-Quando o Mestre carrega o mundo, o módulo muda a configuração **Show Token Distance on Highlight** do Daggerheart para **Never**, porque o rótulo do módulo substitui o do sistema.
+Sempre que alguém carrega o mundo, o módulo muda a configuração **Show Token Distance on Highlight** do Daggerheart para **Never** no computador dessa pessoa, porque o rótulo do módulo substitui o do sistema. O Daggerheart guarda essa configuração por usuário, então o módulo a desliga para cada jogador.
 
 ## Mostrando os anéis
 
@@ -119,7 +119,7 @@ Instale pelo navegador de módulos do Foundry VTT, ou use este link de manifesto
 https://github.com/brunocalado/daggerheart-distances/releases/latest/download/module.json
 ```
 
-Precisa do Foundry VTT v14 e do sistema Daggerheart 2.2.6 ou mais recente.
+Precisa do Foundry VTT v14 e do sistema Daggerheart 2.12.8 ou mais recente.
 
 ## Traduções
 
