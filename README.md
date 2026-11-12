@@ -31,7 +31,7 @@ While you drag a token, its rings follow the preview, so you can test a position
 
 The rings always use 5, 15, 30 and 60 ft. They do not follow range distances changed in the Daggerheart settings.
 
-When the GM loads the world, the module sets Daggerheart's **Show Token Distance on Highlight** to **Never**, because its hover label replaces the system's one.
+Each time someone loads the world, the module sets Daggerheart's **Show Token Distance on Highlight** to **Never** on their computer, because its hover label replaces the system's one. Daggerheart keeps this setting per user, so the module turns it off for every player.
 
 ## Showing the rings
 
@@ -119,7 +119,7 @@ Install it from the Foundry VTT module browser, or use this manifest link:
 https://github.com/brunocalado/daggerheart-distances/releases/latest/download/module.json
 ```
 
-It needs Foundry VTT v14 and the Daggerheart system 2.2.6 or later.
+It needs Foundry VTT v14 and the Daggerheart system 2.12.8 or later.
 
 ## Translations
 
