@@ -1,3 +1,10 @@
+/*!
+ * Daggerheart: Distances
+ * 2025 https://github.com/brunocalado
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3.
+ */
 import { MODULE_ID, DEFAULTS } from './constants.js';
 
 /**
